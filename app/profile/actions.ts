@@ -20,8 +20,12 @@ export async function updateProfile(
   const familyRole = formData.get('family_role') as string
   const occupancyStatus = formData.get('occupancy_status') as string
 
-  if (!fullName || !phone || !familyRole || !occupancyStatus) {
-    return { error: 'Nama, HP, peran keluarga, dan status hunian wajib diisi.', success: false }
+  if (!fullName || !phone || !nik || !familyRole || !occupancyStatus) {
+    return { error: 'Nama, HP, NIK, peran keluarga, dan status hunian wajib diisi.', success: false }
+  }
+
+  if (!/^\d{16}$/.test(nik)) {
+    return { error: 'NIK harus terdiri dari 16 digit angka.', success: false }
   }
 
   const supabase = await createClient()
@@ -34,17 +38,15 @@ export async function updateProfile(
     redirect('/login')
   }
 
-  if (nik) {
-    const { data: existingNik } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('nik', nik)
-      .neq('id', user.id)
-      .maybeSingle()
+  const { data: existingNik } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('nik', nik)
+    .neq('id', user.id)
+    .maybeSingle()
 
-    if (existingNik) {
-      return { error: 'NIK ini sudah terdaftar pada akun lain.', success: false }
-    }
+  if (existingNik) {
+    return { error: 'NIK ini sudah terdaftar pada akun lain.', success: false }
   }
 
   const { error } = await supabase
@@ -53,7 +55,7 @@ export async function updateProfile(
       full_name: fullName,
       phone,
       bio: bio || null,
-      nik: nik || null,
+      nik,
       family_role: familyRole,
       occupancy_status: occupancyStatus,
     })

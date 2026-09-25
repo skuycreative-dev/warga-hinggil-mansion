@@ -93,8 +93,19 @@ export default function ProfileEditForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label style={labelStyle}>NIK (opsional)</label>
-        <input type="text" name="nik" defaultValue={nik} maxLength={16} placeholder="16 digit sesuai KTP" style={inputStyle} />
+        <label style={labelStyle}>NIK (wajib, sesuai KTP)</label>
+        <input
+          type="text"
+          name="nik"
+          defaultValue={nik}
+          required
+          maxLength={16}
+          minLength={16}
+          pattern="\d{16}"
+          title="NIK harus 16 digit angka"
+          placeholder="16 digit sesuai KTP"
+          style={inputStyle}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
