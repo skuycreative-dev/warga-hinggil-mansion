@@ -1,45 +1,37 @@
 ﻿'use client'
 
-import { useActionState, useState } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createAnnouncement, type AnnouncementState } from '@/app/pengumuman/actions'
-
-const initialState: AnnouncementState = { error: '', success: false }
-
-const inputStyle: React.CSSProperties = {
-  background: '#ffffff',
-  border: '1px solid rgba(26,19,5,0.12)',
-  borderRadius: '11px',
-  padding: '11px 13px',
-  color: '#1f1a10',
-  fontSize: '13.5px',
-  fontFamily: 'inherit',
-  boxSizing: 'border-box',
-  width: '100%',
-  outline: 'none',
-}
-
-const labelStyle: React.CSSProperties = { fontSize: '11.5px', fontWeight: 700, color: '#5b543f' }
+import { createAnnouncement } from '@/app/pengumuman/actions'
 
 export default function AnnouncementForm() {
-  const [open, setOpen] = useState(false)
   const router = useRouter()
-  const [state, formAction, isPending] = useActionState(async (prev: AnnouncementState, formData: FormData) => {
-    const result = await createAnnouncement(prev, formData)
-    if (result.success) {
-      router.refresh()
+  const formRef = useRef<HTMLFormElement>(null)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+
+  function handleSubmit(formData: FormData) {
+    setError(null)
+    startTransition(async () => {
+      const result = await createAnnouncement(formData)
+      if (result?.error) {
+        setError(result.error)
+        return
+      }
+      formRef.current?.reset()
       setOpen(false)
-    }
-    return result
-  }, initialState)
+      router.refresh()
+    })
+  }
 
   if (!open) {
     return (
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-        style={{ background: '#1a1305', color: '#f5f3ee' }}
+        className="mb-5 w-full rounded-2xl px-5 py-3.5 text-sm font-bold transition"
+        style={{ background: '#1a1305', color: '#e6c98a' }}
       >
         + Buat Pengumuman Baru
       </button>
@@ -48,43 +40,49 @@ export default function AnnouncementForm() {
 
   return (
     <form
-      action={formAction}
-      className="flex flex-col gap-3 rounded-2xl px-5 py-5"
+      ref={formRef}
+      action={handleSubmit}
+      className="mb-5 flex flex-col gap-3 rounded-2xl px-5 py-5"
       style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
     >
-      <div className="flex flex-col gap-1.5">
-        <label style={labelStyle}>Judul</label>
-        <input type="text" name="title" required placeholder="Kerja Bakti Lingkungan" style={inputStyle} />
-      </div>
+      <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>Pengumuman Baru</div>
 
-      <div className="flex flex-col gap-1.5">
-        <label style={labelStyle}>Isi Pengumuman</label>
-        <textarea name="content" rows={4} required placeholder="Tuliskan detail pengumuman..." style={inputStyle} />
-      </div>
+      <input
+        name="title"
+        type="text"
+        required
+        placeholder="Judul pengumuman"
+        className="w-full rounded-xl px-4 py-2.5 text-sm font-medium outline-none"
+        style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.1)', color: '#1f1a10' }}
+      />
 
-      <label className="flex items-center gap-2 text-[12.5px] font-semibold" style={{ color: '#5b543f' }}>
-        <input type="checkbox" name="is_pinned" style={{ width: 16, height: 16 }} />
-        Sematkan di paling atas (pin)
-      </label>
+      <textarea
+        name="content"
+        required
+        rows={4}
+        placeholder="Isi pengumuman"
+        className="w-full rounded-xl px-4 py-2.5 text-sm font-medium outline-none"
+        style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.1)', color: '#1f1a10' }}
+      />
 
-      {state.error ? <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>{state.error}</p> : null}
+      {error ? <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>{error}</p> : null}
 
-      <div className="mt-1 flex gap-2.5">
+      <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-80"
-          style={{ background: '#faf7f0', color: '#1f1a10', border: '1px solid rgba(26,19,5,0.12)' }}
+          className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold"
+          style={{ background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
         >
           Batal
         </button>
         <button
           type="submit"
           disabled={isPending}
-          className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-          style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}
+          className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold"
+          style={{ background: '#1a1305', color: '#e6c98a' }}
         >
-          {isPending ? 'Mempublikasikan...' : 'Publikasikan'}
+          {isPending ? 'Mengirim...' : 'Kirim ke Semua Warga'}
         </button>
       </div>
     </form>
