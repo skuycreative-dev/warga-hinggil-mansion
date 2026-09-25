@@ -55,8 +55,17 @@ export default async function WargaProfilePage({ params }: { params: Promise<{ i
 
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
+      <div className="mx-auto w-full max-w-lg px-6 pt-4 md:px-10">
+        <Link href="/warga" className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: '#9c7a3f' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Daftar Warga
+        </Link>
+      </div>
+
       <div
-        className="w-full"
+        className="mt-3 w-full"
         style={{
           height: 128,
           background:
@@ -65,16 +74,6 @@ export default async function WargaProfilePage({ params }: { params: Promise<{ i
       />
 
       <div className="mx-auto w-full max-w-lg px-6 pb-14 md:px-10">
-        <Link
-          href="/warga"
-          className="relative z-10 mb-3 inline-flex items-center gap-1.5 text-sm font-bold"
-          style={{ color: '#f5f3ee', marginTop: -120 }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </Link>
-
         <ProfileInfoCard
           editable={false}
           profile={{

@@ -2,6 +2,7 @@
 import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import AppFooter from '@/components/AppFooter'
+import AppNavbar from '@/components/AppNavbar'
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -35,6 +36,7 @@ export default function RootLayout({
           fontFamily: 'var(--font-plus-jakarta), sans-serif',
         }}
       >
+        <AppNavbar />
         <div className="flex-1">{children}</div>
         <AppFooter />
       </body>
