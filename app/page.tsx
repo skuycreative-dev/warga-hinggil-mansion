@@ -1,4 +1,7 @@
-﻿import Image from 'next/image'
+﻿'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 const features = [
@@ -27,119 +30,150 @@ const features = [
 const facilities = ['Masjid', 'Club House', 'Jogging Track', 'Keamanan 24 Jam']
 
 export default function LandingPage() {
+  const [showDetail, setShowDetail] = useState(false)
+
   return (
-    <main
-      className="mx-auto flex w-full max-w-md flex-col"
-      style={{
-        background:
-          'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.14) 0%, rgba(10,11,15,0) 60%)',
-      }}
-    >
-      <div className="flex items-center gap-2.5 px-6 pb-2 pt-7">
-        <Image
-          src="/logo-hinggil-mansion.jpg"
-          alt="Hinggil Mansion"
-          width={34}
-          height={34}
-          className="rounded-lg object-cover"
-        />
-        <span
-          className="text-[15px] tracking-wide"
-          style={{ fontFamily: 'var(--font-fraunces), serif', color: '#e7ddc7' }}
-        >
-          HINGGIL MANSION
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-3.5 px-6 pb-2 pt-9">
-        <h1
-          className="text-[32px] font-medium leading-tight"
-          style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}
-        >
-          Komunitas Hinggil Mansion,
-          <br />
-          dalam satu genggaman.
-        </h1>
-        <p className="max-w-[320px] text-[14.5px] leading-relaxed" style={{ color: '#9a9ca8' }}>
-          Keamanan, komunikasi, dan kenyamanan seluruh warga menyatu dalam satu aplikasi.
-        </p>
-      </div>
-
-      <div className="flex gap-2.5 px-6 pt-5">
-        <Link
-          href="/login"
-          className="flex-1 rounded-xl py-3.5 text-center text-sm font-semibold"
-          style={{
-            background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
-            color: '#1a1305',
-            boxShadow: '0 8px 20px -8px rgba(205,161,90,0.55)',
-          }}
-        >
-          Masuk
-        </Link>
-        <Link
-          href="/register"
-          className="flex-1 rounded-xl py-3.5 text-center text-sm font-semibold"
-          style={{ border: '1px solid rgba(212,175,106,0.4)', color: '#e7ddc7' }}
-        >
-          Daftar Akun
-        </Link>
-      </div>
-
-      <div className="px-6 pt-9">
-        <div
-          className="mb-3 text-[11.5px] uppercase tracking-widest"
-          style={{ color: '#6d6f7a' }}
-        >
-          Fitur Warga
-        </div>
-        <div className="grid grid-cols-2 gap-2.5">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="flex flex-col gap-2.5 rounded-2xl p-4"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <div
-                className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px]"
-                style={{ background: 'rgba(212,175,106,0.12)' }}
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#d4af6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={f.path} />
-                </svg>
-              </div>
-              <div className="text-[13px] font-semibold" style={{ color: '#f0ede4' }}>
-                {f.title}
-              </div>
-              <div className="text-[11.5px] leading-snug" style={{ color: '#8a8c96' }}>
-                {f.desc}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="px-6 pt-8">
-        <div
-          className="mb-2.5 text-[11.5px] uppercase tracking-widest"
-          style={{ color: '#6d6f7a' }}
-        >
-          Fasilitas
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {facilities.map((f) => (
+    <main className="flex w-full flex-col">
+      <section
+        className="w-full"
+        style={{
+          background:
+            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
+        }}
+      >
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-14 pt-8 text-center md:px-10 md:pb-20 md:pt-12">
+          <div className="mb-8 flex items-center gap-3 self-start md:self-center">
+            <Image
+              src="/logo-hinggil-mansion.jpg"
+              alt="Hinggil Mansion"
+              width={40}
+              height={40}
+              className="rounded-lg object-cover md:h-11 md:w-11"
+            />
             <span
-              key={f}
-              className="rounded-full px-3 py-1.5 text-[11.5px]"
-              style={{ border: '1px solid rgba(212,175,106,0.25)', color: '#d8cfb4' }}
+              className="text-base font-bold tracking-wide md:text-lg"
+              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}
             >
-              {f}
+              HINGGIL MANSION
             </span>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className="pb-10" />
+          <h1
+            className="max-w-3xl text-[34px] font-bold leading-[1.15] md:text-[56px]"
+            style={{ fontFamily: 'var(--font-fraunces), serif', color: '#ffffff' }}
+          >
+            Komunitas Hinggil Mansion, dalam satu genggaman.
+          </h1>
+          <p
+            className="mt-5 max-w-xl text-base font-medium leading-relaxed md:text-lg"
+            style={{ color: '#c7c9d2' }}
+          >
+            Keamanan, komunikasi, dan kenyamanan seluruh warga menyatu dalam satu aplikasi.
+          </p>
+
+          <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link
+              href="/login"
+              className="rounded-xl px-10 py-4 text-center text-base font-bold sm:min-w-[168px]"
+              style={{
+                background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+                color: '#1a1305',
+                boxShadow: '0 10px 26px -10px rgba(205,161,90,0.6)',
+              }}
+            >
+              Masuk
+            </Link>
+            <Link
+              href="/register"
+              className="rounded-xl px-10 py-4 text-center text-base font-bold sm:min-w-[168px]"
+              style={{ border: '2px solid rgba(230,201,138,0.5)', color: '#f2e8d0' }}
+            >
+              Daftar Akun
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full" style={{ background: '#faf7f0' }}>
+        <div className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
+          <div className="mb-7 flex flex-col items-center gap-3 text-center md:mb-9">
+            <span
+              className="text-xs font-bold uppercase tracking-widest md:text-sm"
+              style={{ color: '#9c7a3f' }}
+            >
+              Fitur Warga
+            </span>
+            <h2
+              className="text-2xl font-bold md:text-4xl"
+              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}
+            >
+              Semua kebutuhan warga, satu aplikasi
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center md:py-8"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl md:h-14 md:w-14"
+                  style={{ background: '#1a1305' }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={f.path} />
+                  </svg>
+                </div>
+                <div className="text-[15px] font-bold md:text-base" style={{ color: '#1f1a10' }}>
+                  {f.title}
+                </div>
+                {showDetail ? (
+                  <div className="text-[13px] font-medium leading-snug md:text-sm" style={{ color: '#5b543f' }}>
+                    {f.desc}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex justify-center md:mt-8">
+            <button
+              type="button"
+              onClick={() => setShowDetail((v) => !v)}
+              className="rounded-full px-7 py-3 text-sm font-bold md:text-base"
+              style={{ border: '2px solid #1a1305', color: '#1a1305', background: 'transparent' }}
+            >
+              {showDetail ? 'Sembunyikan Detail' : 'Lihat Detail Semua Fitur'}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full" style={{ background: '#faf7f0', borderTop: '1px solid rgba(26,19,5,0.06)' }}>
+        <div className="mx-auto w-full max-w-5xl px-6 pb-16 pt-2 md:px-10 md:pb-24">
+          <div className="mb-5 text-center">
+            <span
+              className="text-xs font-bold uppercase tracking-widest md:text-sm"
+              style={{ color: '#9c7a3f' }}
+            >
+              Fasilitas
+            </span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2.5 md:gap-3">
+            {facilities.map((f) => (
+              <span
+                key={f}
+                className="rounded-full px-5 py-2.5 text-sm font-bold md:text-base"
+                style={{ border: '2px solid #1a1305', color: '#1a1305' }}
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
