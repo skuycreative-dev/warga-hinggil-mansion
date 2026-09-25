@@ -40,9 +40,13 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, avatar_url, house:houses(nomor_rumah)')
+    .select('full_name, role, avatar_url, house_id, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
+
+  if (!profile?.house_id) {
+    redirect('/lengkapi-profil')
+  }
 
   const { data: announcements } = await supabase
     .from('announcements')
@@ -50,7 +54,7 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(3)
 
-  const firstName = profile?.full_name?.split(' ')[0] ?? 'Warga'
+  const displayName = profile?.full_name ?? 'Warga'
   const houseLabel = (profile as any)?.house?.nomor_rumah
 
   return (
@@ -94,7 +98,7 @@ export default async function DashboardPage() {
             className="text-2xl font-bold md:text-3xl"
             style={{ fontFamily: 'var(--font-fraunces), serif', color: '#ffffff' }}
           >
-            Halo, {firstName}
+            Halo, {displayName}
           </h1>
           <p className="mt-1.5 text-sm font-medium md:text-base" style={{ color: '#c7c9d2' }}>
             {houseLabel ? `Rumah ${houseLabel}` : 'Selamat datang kembali'}

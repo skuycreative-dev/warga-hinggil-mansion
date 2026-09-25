@@ -18,8 +18,9 @@ export async function registerUser(
   const nik = (formData.get('nik') as string)?.trim()
   const nomorRumah = (formData.get('nomor_rumah') as string)?.trim()
   const familyRole = formData.get('family_role') as string
+  const occupancyStatus = formData.get('occupancy_status') as string
 
-  if (!fullName || !email || !password || !phone || !nik || !nomorRumah || !familyRole) {
+  if (!fullName || !email || !password || !phone || !nik || !nomorRumah || !familyRole || !occupancyStatus) {
     return { error: 'Semua field wajib diisi.', success: false }
   }
 
@@ -103,6 +104,7 @@ export async function registerUser(
       nik,
       house_id: houseId,
       family_role: familyRole,
+      occupancy_status: occupancyStatus,
       is_house_owner: isHouseOwner,
     })
     .eq('id', userId)
