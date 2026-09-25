@@ -2,16 +2,20 @@
 
 export default function AppFooter() {
   return (
-    <footer className="mt-auto border-t bg-muted/30 px-4 py-4 text-center text-xs text-muted-foreground">
+    <footer
+      className="mt-auto px-4 py-5 text-center text-xs"
+      style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: '#6d6f7a' }}
+    >
       <div className="flex items-center justify-center gap-2">
         <span>Dikembangkan oleh</span>
         <Image
           src="/logo-skuy-creative.png"
           alt="SKUY Creative Agency"
-          width={20}
-          height={20}
+          width={16}
+          height={16}
+          className="rounded"
         />
-        <span className="font-medium">SKUY Creative Agency</span>
+        <span style={{ color: '#9a9ca8', fontWeight: 600 }}>SKUY Creative Agency</span>
       </div>
     </footer>
   )
