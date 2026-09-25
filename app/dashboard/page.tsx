@@ -28,6 +28,21 @@ const menu = [
     path: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 19h2v2h-2z',
   },
   {
+    title: 'Anggaran & Iuran',
+    href: '/anggaran',
+    path: 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+  },
+  {
+    title: 'Polling Warga',
+    href: '/polling',
+    path: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+  },
+  {
+    title: 'Katalog Tukang',
+    href: '/tukang',
+    path: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+  },
+  {
     title: 'Profil Saya',
     href: '/profile',
     path: 'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 21c1.5-4 5-6 8-6s6.5 2 8 6',
@@ -65,6 +80,8 @@ export default async function DashboardPage() {
   const houseLabel = (profile as any)?.house?.nomor_rumah
   const isSecurity = profile?.role === 'security' || profile?.role === 'superadmin'
   const isPaguyuban = profile?.role === 'paguyuban' || profile?.role === 'superadmin'
+  const isManajemen = profile?.role === 'manajemen' || profile?.role === 'superadmin'
+  const canSeeRumahKosong = isSecurity || isPaguyuban
 
   return (
     <main className="flex w-full flex-col">
@@ -150,6 +167,21 @@ export default async function DashboardPage() {
               </Link>
             ))}
 
+            {canSeeRumahKosong ? (
+              <Link
+                href="/rumah-kosong"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Rumah Kosong</div>
+              </Link>
+            ) : null}
+
             {isSecurity ? (
               <Link
                 href="/keamanan/scan-tamu"
@@ -180,6 +212,21 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Moderasi Forum</div>
+              </Link>
+            ) : null}
+
+            {isManajemen ? (
+              <Link
+                href="/tukang/kelola"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m9 12 2 2 4-4M21 12c0 4.5-3.5 8.5-9 10-5.5-1.5-9-5.5-9-10V5l9-3 9 3v7Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Tukang</div>
               </Link>
             ) : null}
           </div>
