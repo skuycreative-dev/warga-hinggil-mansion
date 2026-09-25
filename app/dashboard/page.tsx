@@ -9,6 +9,7 @@ const menu = [
     title: 'Tombol Darurat',
     href: '/darurat',
     path: 'M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z',
+    danger: true,
   },
   {
     title: 'Forum Warga',
@@ -117,17 +118,20 @@ export default async function DashboardPage() {
                 key={m.title}
                 href={m.href}
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
-                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+                style={{
+                  background: '#ffffff',
+                  border: m.danger ? '1px solid rgba(179,57,47,0.25)' : '1px solid rgba(26,19,5,0.08)',
+                }}
               >
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: '#1a1305' }}
+                  style={{ background: m.danger ? '#b3392f' : '#1a1305' }}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={m.danger ? '#ffffff' : '#e6c98a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d={m.path} />
                   </svg>
                 </div>
-                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>
+                <div className="text-[13.5px] font-bold" style={{ color: m.danger ? '#b3392f' : '#1f1a10' }}>
                   {m.title}
                 </div>
               </Link>
