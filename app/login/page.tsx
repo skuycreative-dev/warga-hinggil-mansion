@@ -78,7 +78,12 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label style={labelStyle}>Password</label>
+            <div className="flex items-center justify-between">
+              <label style={labelStyle}>Password</label>
+              <Link href="/lupa-password" style={{ fontSize: '12px', color: '#e6c98a', fontWeight: 600 }}>
+                Lupa Password?
+              </Link>
+            </div>
             <input type="password" name="password" placeholder="••••••••" required style={inputStyle} />
           </div>
 

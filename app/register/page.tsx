@@ -1,11 +1,12 @@
 ﻿'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { registerUser } from './actions'
+import { registerUser, type RegisterState } from './actions'
 
-const initialState = { error: '' }
+const initialState: RegisterState = { error: '', success: false }
 
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
@@ -26,6 +27,11 @@ const selectStyle: React.CSSProperties = {
   WebkitAppearance: 'none',
 }
 
+const optionStyle: React.CSSProperties = {
+  color: '#1a1305',
+  background: '#ffffff',
+}
+
 const labelStyle: React.CSSProperties = {
   fontSize: '11.5px',
   color: '#b9b2a0',
@@ -33,6 +39,18 @@ const labelStyle: React.CSSProperties = {
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(registerUser, initialState)
+  const router = useRouter()
+  const [countdown, setCountdown] = useState(3)
+
+  useEffect(() => {
+    if (!state.success) return
+    if (countdown <= 0) {
+      router.push('/login')
+      return
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [state.success, countdown, router])
 
   return (
     <main
@@ -42,6 +60,49 @@ export default function RegisterPage() {
           'radial-gradient(120% 50% at 50% 0%, rgba(212,175,106,0.10) 0%, rgba(10,11,15,0) 55%)',
       }}
     >
+      {state.success ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          style={{ background: 'rgba(10,11,15,0.82)' }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl px-7 py-8 text-center"
+            style={{ background: '#141620', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+              style={{ background: 'rgba(212,175,106,0.15)' }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h2
+              className="text-xl font-bold"
+              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}
+            >
+              Pendaftaran Berhasil
+            </h2>
+            <p className="mt-2 text-sm font-medium" style={{ color: '#9a9ca8' }}>
+              Akun kamu sudah dibuat. Silakan masuk menggunakan email dan password kamu.
+            </p>
+            <p className="mt-4 text-xs font-semibold" style={{ color: '#6d6f7a' }}>
+              Mengarahkan ke halaman Masuk dalam {countdown} detik...
+            </p>
+            <Link
+              href="/login"
+              className="mt-5 inline-block w-full rounded-xl py-3 text-sm font-bold"
+              style={{
+                background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+                color: '#1a1305',
+              }}
+            >
+              Masuk Sekarang
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       <div className="px-6 pt-6">
         <Link
           href="/"
@@ -107,14 +168,14 @@ export default function RegisterPage() {
           <div className="flex flex-col gap-1.5">
             <label style={labelStyle}>Peran dalam Keluarga</label>
             <select name="family_role" defaultValue="anggota_keluarga" required style={selectStyle}>
-              <option value="kepala_keluarga">Kepala Keluarga</option>
-              <option value="anggota_keluarga">Anggota Keluarga</option>
-              <option value="asisten_rumah_tangga">Asisten Rumah Tangga</option>
-              <option value="lainnya">Lainnya</option>
+              <option value="kepala_keluarga" style={optionStyle}>Kepala Keluarga</option>
+              <option value="anggota_keluarga" style={optionStyle}>Anggota Keluarga</option>
+              <option value="asisten_rumah_tangga" style={optionStyle}>Asisten Rumah Tangga</option>
+              <option value="lainnya" style={optionStyle}>Lainnya</option>
             </select>
           </div>
 
-          {state?.error ? (
+          {state.error ? (
             <p className="text-[12.5px]" style={{ color: '#e08a8a' }}>
               {state.error}
             </p>
