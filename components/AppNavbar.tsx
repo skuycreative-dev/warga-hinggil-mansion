@@ -22,11 +22,13 @@ const roleLinks = [
   { title: 'Dashboard Security', href: '/security', roles: ['security', 'superadmin'] },
   { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu', roles: ['security', 'superadmin'] },
   { title: 'Status Rumah Kosong', href: '/rumah-kosong', roles: ['security', 'paguyuban', 'superadmin'] },
+  { title: 'Dashboard Paguyuban', href: '/paguyuban', roles: ['paguyuban', 'superadmin'] },
   { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum', roles: ['paguyuban', 'superadmin'] },
   { title: 'Dashboard Manajemen', href: '/manajemen', roles: ['manajemen', 'superadmin'] },
   { title: 'Kelola Katalog Tukang', href: '/tukang/kelola', roles: ['manajemen', 'superadmin'] },
   { title: 'Kelola Staff', href: '/paguyuban/kelola-staff', roles: ['paguyuban', 'superadmin'] },
   { title: 'Kelola Admin', href: '/superadmin', roles: ['superadmin'] },
+  { title: 'Error Logs (IT Support)', href: '/it-support', roles: ['it_support', 'superadmin'] },
 ]
 
 const quickIcons = [

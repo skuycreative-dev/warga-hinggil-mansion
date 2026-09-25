@@ -98,6 +98,7 @@ export default async function DashboardPage() {
   const isSecurity = profile?.role === 'security' || profile?.role === 'superadmin'
   const isPaguyuban = profile?.role === 'paguyuban' || profile?.role === 'superadmin'
   const isManajemen = profile?.role === 'manajemen' || profile?.role === 'superadmin'
+  const isItSupport = profile?.role === 'it_support' || profile?.role === 'superadmin'
   const isSuperadmin = profile?.role === 'superadmin'
   const canSeeRumahKosong = isSecurity || isPaguyuban
 
@@ -236,6 +237,24 @@ export default async function DashboardPage() {
 
             {isPaguyuban ? (
               <Link
+                href="/paguyuban"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Dashboard Paguyuban</div>
+              </Link>
+            ) : null}
+
+            {isPaguyuban ? (
+              <Link
                 href="/paguyuban/moderasi-forum"
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
@@ -296,6 +315,21 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Staff</div>
+              </Link>
+            ) : null}
+
+            {isItSupport ? (
+              <Link
+                href="/it-support"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Error Logs</div>
               </Link>
             ) : null}
 
