@@ -145,6 +145,21 @@ export default function RegisterPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <label style={labelStyle}>NIK (Nomor KTP)</label>
+            <input
+              type="text"
+              name="nik"
+              inputMode="numeric"
+              placeholder="16 digit sesuai KTP"
+              maxLength={16}
+              pattern="\d{16}"
+              title="NIK harus 16 digit angka"
+              required
+              style={inputStyle}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <label style={labelStyle}>Email</label>
             <input type="email" name="email" placeholder="nama@email.com" required style={inputStyle} />
           </div>

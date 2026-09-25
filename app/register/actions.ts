@@ -15,14 +15,29 @@ export async function registerUser(
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const phone = formData.get('phone') as string
+  const nik = (formData.get('nik') as string)?.trim()
   const nomorRumah = (formData.get('nomor_rumah') as string)?.trim()
   const familyRole = formData.get('family_role') as string
 
-  if (!fullName || !email || !password || !phone || !nomorRumah || !familyRole) {
+  if (!fullName || !email || !password || !phone || !nik || !nomorRumah || !familyRole) {
     return { error: 'Semua field wajib diisi.', success: false }
   }
 
+  if (!/^\d{16}$/.test(nik)) {
+    return { error: 'NIK harus 16 digit angka sesuai KTP.', success: false }
+  }
+
   const supabase = await createClient()
+
+  const { data: existingNik } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('nik', nik)
+    .maybeSingle()
+
+  if (existingNik) {
+    return { error: 'NIK ini sudah terdaftar. Setiap warga hanya boleh mendaftar satu akun.', success: false }
+  }
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
@@ -36,10 +51,6 @@ export async function registerUser(
 
   const userId = signUpData.user.id
 
-  // PENTING: kalau "Confirm Email" aktif di Supabase, signUp() TIDAK
-  // langsung memberi sesi login. Tanpa sesi, penyimpanan profil di
-  // bawah akan gagal diam-diam (ditolak RLS, tanpa error). Jadi kita
-  // pastikan dulu sesi aktif sebelum lanjut.
   if (!signUpData.session) {
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
@@ -89,6 +100,7 @@ export async function registerUser(
     .from('profiles')
     .update({
       phone,
+      nik,
       house_id: houseId,
       family_role: familyRole,
       is_house_owner: isHouseOwner,
@@ -97,13 +109,16 @@ export async function registerUser(
     .select('id')
 
   if (profileError) {
+    if (profileError.code === '23505') {
+      return { error: 'NIK ini sudah terdaftar oleh akun lain.', success: false }
+    }
     return { error: `Gagal menyimpan profil: ${profileError.message}`, success: false }
   }
 
   if (!updatedProfile || updatedProfile.length === 0) {
     return {
       error:
-        'Akun dibuat tapi data profil (HP/rumah/peran) gagal tersimpan karena sesi belum aktif. Hubungi admin untuk memperbaiki data ini secara manual.',
+        'Akun dibuat tapi data profil gagal tersimpan karena sesi belum aktif. Hubungi admin untuk memperbaiki data ini secara manual.',
       success: false,
     }
   }
