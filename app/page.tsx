@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import AppHeader from '@/components/AppHeader'
 
 const features = [
   {
@@ -27,7 +28,12 @@ const features = [
   },
 ]
 
-const facilities = ['Masjid', 'Club House', 'Jogging Track', 'Keamanan 24 Jam']
+const facilities = [
+  { title: 'Masjid', desc: 'Fasilitas ibadah di dalam kawasan, dekat dari setiap unit rumah.' },
+  { title: 'Club House', desc: 'Ruang bersama untuk bersantai dan berkumpul warga.' },
+  { title: 'Jogging Track', desc: 'Jalur jogging teduh mengelilingi kawasan.' },
+  { title: 'Keamanan 24 Jam', desc: 'One gate system dengan pos satpam, menjaga privasi seluruh penghuni.' },
+]
 
 export default function LandingPage() {
   const [showDetail, setShowDetail] = useState(false)
@@ -41,23 +47,8 @@ export default function LandingPage() {
             'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
         }}
       >
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-14 pt-8 text-center md:px-10 md:pb-20 md:pt-12">
-          <div className="mb-8 flex items-center gap-3 self-start md:self-center">
-            <Image
-              src="/logo-hinggil-mansion.jpg"
-              alt="Hinggil Mansion"
-              width={40}
-              height={40}
-              className="rounded-lg object-cover md:h-11 md:w-11"
-            />
-            <span
-              className="text-base font-bold tracking-wide md:text-lg"
-              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}
-            >
-              HINGGIL MANSION
-            </span>
-          </div>
-
+        <AppHeader />
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-14 pt-10 text-center md:px-10 md:pb-20 md:pt-16">
           <h1
             className="max-w-3xl text-[34px] font-bold leading-[1.15] md:text-[56px]"
             style={{ fontFamily: 'var(--font-fraunces), serif', color: '#ffffff' }}
@@ -152,25 +143,96 @@ export default function LandingPage() {
       </section>
 
       <section className="w-full" style={{ background: '#faf7f0', borderTop: '1px solid rgba(26,19,5,0.06)' }}>
-        <div className="mx-auto w-full max-w-5xl px-6 pb-16 pt-2 md:px-10 md:pb-24">
-          <div className="mb-5 text-center">
+        <div className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
+          <div className="mb-7 text-center md:mb-9">
             <span
               className="text-xs font-bold uppercase tracking-widest md:text-sm"
               style={{ color: '#9c7a3f' }}
             >
-              Fasilitas
+              Fasilitas Kawasan
             </span>
+            <h2
+              className="mt-2 text-2xl font-bold md:text-4xl"
+              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}
+            >
+              Nyaman untuk seluruh keluarga
+            </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-2.5 md:gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
             {facilities.map((f) => (
-              <span
-                key={f}
-                className="rounded-full px-5 py-2.5 text-sm font-bold md:text-base"
-                style={{ border: '2px solid #1a1305', color: '#1a1305' }}
+              <div
+                key={f.title}
+                className="rounded-2xl px-5 py-5 md:px-6 md:py-6"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                {f}
-              </span>
+                <div className="text-base font-bold md:text-lg" style={{ color: '#1f1a10' }}>
+                  {f.title}
+                </div>
+                <div className="mt-1.5 text-sm font-medium leading-relaxed md:text-base" style={{ color: '#5b543f' }}>
+                  {f.desc}
+                </div>
+              </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full" style={{ background: '#0a0b0f' }}>
+        <div className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
+          <div className="mb-6 text-center md:mb-8">
+            <span
+              className="text-xs font-bold uppercase tracking-widest md:text-sm"
+              style={{ color: '#d4af6a' }}
+            >
+              Lokasi
+            </span>
+            <h2
+              className="mt-2 text-2xl font-bold md:text-4xl"
+              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}
+            >
+              Bantul, Daerah Istimewa Yogyakarta
+            </h2>
+          </div>
+          <div
+            className="mx-auto flex max-w-2xl flex-col gap-4 rounded-2xl px-6 py-6 md:px-8 md:py-8"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="flex justify-between gap-4 border-b pb-3.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <span className="text-sm font-bold md:text-base" style={{ color: '#c7c9d2' }}>Alamat Klaster</span>
+              <span className="text-right text-sm font-semibold md:text-base" style={{ color: '#f5f3ee' }}>
+                Bangen, Bangunjiwo, Kec. Kasihan, Kabupaten Bantul, D.I. Yogyakarta 55184
+              </span>
+            </div>
+            <div className="flex justify-between gap-4" style={{ }}>
+              <span className="text-sm font-bold md:text-base" style={{ color: '#c7c9d2' }}>Akses Utama</span>
+              <span className="text-right text-sm font-semibold md:text-base" style={{ color: '#f5f3ee' }}>
+                Terhubung ke jalur utama Bantul - Kota Yogyakarta
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full" style={{ background: '#faf7f0', borderTop: '1px solid rgba(26,19,5,0.06)' }}>
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3 px-6 py-10 text-center md:px-10">
+          <p className="text-sm font-semibold md:text-base" style={{ color: '#5b543f' }}>
+            Butuh informasi lebih lanjut?
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/faq"
+              className="rounded-full px-6 py-2.5 text-sm font-bold md:text-base"
+              style={{ border: '2px solid #1a1305', color: '#1a1305' }}
+            >
+              Lihat FAQ
+            </Link>
+            <Link
+              href="/syarat-ketentuan"
+              className="rounded-full px-6 py-2.5 text-sm font-bold md:text-base"
+              style={{ border: '2px solid #1a1305', color: '#1a1305' }}
+            >
+              Syarat &amp; Ketentuan
+            </Link>
           </div>
         </div>
       </section>
