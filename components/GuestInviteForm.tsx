@@ -1,12 +1,11 @@
 ﻿'use client'
 
-import { useActionState, useEffect, useRef } from 'react'
-import { createGuestInvite, type GuestInviteState } from '@/app/qr-tamu/actions'
-
-const initialState: GuestInviteState = { error: '', success: false }
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createGuestVisit } from '@/app/qr-tamu/actions'
 
 const inputStyle: React.CSSProperties = {
-  background: '#faf7f0',
+  background: '#ffffff',
   border: '1px solid rgba(26,19,5,0.12)',
   borderRadius: '11px',
   padding: '11px 13px',
@@ -18,76 +17,121 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-const labelStyle: React.CSSProperties = {
-  fontSize: '11.5px',
-  fontWeight: 700,
-  color: '#5b543f',
-}
+const labelStyle: React.CSSProperties = { fontSize: '11.5px', fontWeight: 700, color: '#5b543f' }
+
+const PURPOSE_OPTIONS = [
+  { value: 'keluarga', label: 'Keluarga / Kerabat' },
+  { value: 'kurir', label: 'Kurir / Ojek Online' },
+  { value: 'tukang', label: 'Tukang / Jasa' },
+  { value: 'delivery', label: 'Delivery / Pengantaran' },
+  { value: 'lainnya', label: 'Lainnya' },
+]
 
 export default function GuestInviteForm() {
-  const [state, formAction, isPending] = useActionState(createGuestInvite, initialState)
-  const formRef = useRef<HTMLFormElement>(null)
+  const [open, setOpen] = useState(false)
+  const [error, setError] = useState('')
+  const [isPending, setIsPending] = useState(false)
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null)
+  const router = useRouter()
 
-  useEffect(() => {
-    if (!isPending && state.success) {
-      formRef.current?.reset()
+  async function handleSubmit(formData: FormData) {
+    setIsPending(true)
+    setError('')
+    const result = await createGuestVisit({ error: '', success: false }, formData)
+    setIsPending(false)
+    if (result.success) {
+      setGeneratedCode(result.code ?? null)
+      router.refresh()
+    } else {
+      setError(result.error)
     }
-  }, [isPending, state.success])
+  }
+
+  if (generatedCode) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: '#1a1305' }}>
+        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Kode Tamu</span>
+        <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#e6c98a' }}>
+          {generatedCode}
+        </span>
+        <p className="text-[12.5px] font-medium" style={{ color: '#c7c9d2' }}>
+          Berikan kode ini ke tamu. Tunjukkan ke Security saat tiba di gerbang.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setGeneratedCode(null)
+            setOpen(false)
+          }}
+          className="mt-1 rounded-xl px-5 py-2.5 text-sm font-bold"
+          style={{ background: '#e6c98a', color: '#1a1305' }}
+        >
+          Selesai
+        </button>
+      </div>
+    )
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
+        style={{ background: '#1a1305', color: '#f5f3ee' }}
+      >
+        + Undang Tamu Baru
+      </button>
+    )
+  }
 
   return (
     <form
-      ref={formRef}
-      action={formAction}
-      className="flex flex-col gap-3 rounded-2xl px-5 py-5 md:px-6 md:py-6"
+      action={handleSubmit}
+      className="flex flex-col gap-3 rounded-2xl px-5 py-5"
       style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
     >
       <div className="flex flex-col gap-1.5">
         <label style={labelStyle}>Nama Tamu</label>
-        <input type="text" name="guest_name" placeholder="Nama lengkap tamu" required style={inputStyle} />
-      </div>
-
-      <div className="flex gap-2.5">
-        <div className="flex flex-1 flex-col gap-1.5">
-          <label style={labelStyle}>Nomor HP (opsional)</label>
-          <input type="text" name="guest_phone" placeholder="08xx" style={inputStyle} />
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5">
-          <label style={labelStyle}>Tanggal Kunjungan</label>
-          <input type="date" name="visit_date" required style={inputStyle} />
-        </div>
+        <input type="text" name="guest_name" required style={inputStyle} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label style={labelStyle}>Keperluan (opsional)</label>
-        <input type="text" name="purpose" placeholder="Contoh: kunjungan keluarga" style={inputStyle} />
+        <label style={labelStyle}>Nomor HP Tamu (opsional)</label>
+        <input type="tel" name="guest_phone" style={inputStyle} />
       </div>
 
-      {state.error ? (
-        <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>
-          {state.error}
-        </p>
-      ) : null}
+      <div className="flex flex-col gap-1.5">
+        <label style={labelStyle}>Keperluan</label>
+        <select name="purpose" required style={inputStyle}>
+          {PURPOSE_OPTIONS.map((p) => (
+            <option key={p.value} value={p.value} style={{ color: '#1a1305' }}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {state.success ? (
-        <p className="text-[12.5px] font-semibold" style={{ color: '#2f8a4f' }}>
-          Kode QR tamu berhasil dibuat, lihat di daftar di bawah.
-        </p>
-      ) : null}
+      {error ? <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>{error}</p> : null}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="mt-1 rounded-xl py-3 text-sm font-bold"
-        style={{
-          border: 'none',
-          background: '#1a1305',
-          color: '#f5f3ee',
-          opacity: isPending ? 0.7 : 1,
-          cursor: isPending ? 'default' : 'pointer',
-        }}
-      >
-        {isPending ? 'Membuat...' : 'Buat Kode QR Tamu'}
-      </button>
+      <div className="mt-1 flex gap-2.5">
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-80"
+          style={{ background: '#faf7f0', color: '#1f1a10', border: '1px solid rgba(26,19,5,0.12)' }}
+        >
+          Batal
+        </button>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
+          style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}
+        >
+          {isPending ? 'Membuat Kode...' : 'Buat Kode Tamu'}
+        </button>
+      </div>
     </form>
   )
 }

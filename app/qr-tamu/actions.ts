@@ -1,59 +1,59 @@
 ﻿'use server'
 
-import { randomBytes } from 'crypto'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-export type GuestInviteState = {
-  error: string
-  success: boolean
+export type GuestVisitState = { error: string; success: boolean; code?: string }
+
+const PURPOSE_OPTIONS = ['keluarga', 'kurir', 'tukang', 'delivery', 'lainnya']
+
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-export async function createGuestInvite(
-  prevState: GuestInviteState,
-  formData: FormData
-): Promise<GuestInviteState> {
+export async function createGuestVisit(prevState: GuestVisitState, formData: FormData): Promise<GuestVisitState> {
   const guestName = (formData.get('guest_name') as string)?.trim()
   const guestPhone = (formData.get('guest_phone') as string)?.trim()
-  const visitDate = formData.get('visit_date') as string
-  const purpose = (formData.get('purpose') as string)?.trim()
+  const purpose = (formData.get('purpose') as string) || 'lainnya'
 
-  if (!guestName || !visitDate) {
-    return { error: 'Nama tamu dan tanggal kunjungan wajib diisi.', success: false }
+  if (!guestName) {
+    return { error: 'Nama tamu wajib diisi.', success: false }
+  }
+
+  if (!PURPOSE_OPTIONS.includes(purpose)) {
+    return { error: 'Keperluan tidak valid.', success: false }
   }
 
   const supabase = await createClient()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase.from('profiles').select('house_id').eq('id', user.id).maybeSingle()
+
+  let code = generateCode()
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data: existing } = await supabase
+      .from('guest_visits')
+      .select('id')
+      .eq('visit_code', code)
+      .eq('status', 'menunggu')
+      .maybeSingle()
+    if (!existing) break
+    code = generateCode()
   }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('house_id')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (!profile?.house_id) {
-    return { error: 'Data rumah kamu belum lengkap. Hubungi admin.', success: false }
-  }
-
-  const qrCode = randomBytes(5).toString('hex').toUpperCase()
 
   const { error } = await supabase.from('guest_visits').insert({
-    house_id: profile.house_id,
-    invited_by: user.id,
     guest_name: guestName,
     guest_phone: guestPhone || null,
-    visit_date: visitDate,
-    purpose: purpose || null,
-    status: 'pending',
-    qr_code: qrCode,
+    purpose,
+    visit_code: code,
+    status: 'menunggu',
+    invited_by: user.id,
+    house_id: profile?.house_id ?? null,
   })
 
   if (error) {
@@ -61,5 +61,17 @@ export async function createGuestInvite(
   }
 
   revalidatePath('/qr-tamu')
-  return { error: '', success: true }
+  return { error: '', success: true, code }
+}
+
+export async function cancelGuestVisit(id: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  await supabase.from('guest_visits').update({ status: 'dibatalkan' }).eq('id', id).eq('invited_by', user.id)
+  revalidatePath('/qr-tamu')
 }

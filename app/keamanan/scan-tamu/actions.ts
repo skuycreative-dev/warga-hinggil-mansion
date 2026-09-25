@@ -1,80 +1,70 @@
 ﻿'use server'
 
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-export type ScanState = {
-  error: string
-  guest: {
-    guest_name: string
-    visit_date: string
-    purpose: string | null
-    status: string
-    house_nomor: string | null
-  } | null
-}
+export type ScanState = { error: string; success: boolean }
 
-const initial: ScanState = { error: '', guest: null }
+const ALLOWED_ROLES = ['security', 'superadmin']
 
-export async function scanGuestCode(prevState: ScanState, formData: FormData): Promise<ScanState> {
-  const code = (formData.get('code') as string)?.trim().toUpperCase()
-
-  if (!code) {
-    return { error: 'Masukkan kode tamu.', guest: null }
-  }
-
+async function requireSecurity() {
   const supabase = await createClient()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+
+  if (!profile || !ALLOWED_ROLES.includes(profile.role)) {
+    return null
   }
 
-  const { data: guest, error } = await supabase
+  return { supabase, userId: user.id }
+}
+
+export async function checkInGuest(prevState: ScanState, formData: FormData): Promise<ScanState> {
+  const code = (formData.get('visit_code') as string)?.trim()
+
+  if (!code) {
+    return { error: 'Masukkan kode tamu.', success: false }
+  }
+
+  const ctx = await requireSecurity()
+  if (!ctx) return { error: 'Kamu tidak punya akses untuk fitur ini.', success: false }
+
+  const { data: visit, error: findError } = await ctx.supabase
     .from('guest_visits')
-    .select('id, guest_name, visit_date, purpose, status, house:houses(nomor_rumah)')
-    .eq('qr_code', code)
+    .select('id, status')
+    .eq('visit_code', code)
+    .eq('status', 'menunggu')
     .maybeSingle()
 
-  if (error || !guest) {
-    return { error: 'Kode tamu tidak ditemukan.', guest: null }
+  if (findError || !visit) {
+    return { error: 'Kode tidak ditemukan atau sudah digunakan.', success: false }
   }
 
-  const houseNomor = (guest as any).house?.nomor_rumah ?? null
-
-  if (guest.status === 'checked_in') {
-    return {
-      error: 'Tamu ini sudah tercatat masuk sebelumnya.',
-      guest: {
-        guest_name: guest.guest_name,
-        visit_date: guest.visit_date,
-        purpose: guest.purpose,
-        status: guest.status,
-        house_nomor: houseNomor,
-      },
-    }
-  }
-
-  const { error: updateError } = await supabase
+  const { error } = await ctx.supabase
     .from('guest_visits')
-    .update({ status: 'checked_in' })
-    .eq('id', guest.id)
+    .update({ status: 'masuk', checked_in_at: new Date().toISOString(), checked_in_by: ctx.userId })
+    .eq('id', visit.id)
 
-  if (updateError) {
-    return { error: updateError.message, guest: null }
-  }
+  if (error) return { error: error.message, success: false }
 
-  return {
-    error: '',
-    guest: {
-      guest_name: guest.guest_name,
-      visit_date: guest.visit_date,
-      purpose: guest.purpose,
-      status: 'checked_in',
-      house_nomor: houseNomor,
-    },
-  }
+  revalidatePath('/keamanan/scan-tamu')
+  return { error: '', success: true }
+}
+
+export async function checkOutGuest(id: string) {
+  const ctx = await requireSecurity()
+  if (!ctx) return
+
+  await ctx.supabase
+    .from('guest_visits')
+    .update({ status: 'keluar', checked_out_at: new Date().toISOString() })
+    .eq('id', id)
+
+  revalidatePath('/keamanan/scan-tamu')
 }
