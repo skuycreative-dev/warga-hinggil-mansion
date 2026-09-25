@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from './actions'
+import NotificationBell from '@/components/NotificationBell'
 
 const menu = [
   {
@@ -20,6 +21,11 @@ const menu = [
     title: 'Pengumuman',
     href: '/pengumuman',
     path: 'M3 11h18M3 15h18M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z',
+  },
+  {
+    title: 'QR Tamu',
+    href: '/qr-tamu',
+    path: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 19h2v2h-2z',
   },
   {
     title: 'Profil Saya',
@@ -57,6 +63,8 @@ export default async function DashboardPage() {
 
   const displayName = profile?.full_name ?? 'Warga'
   const houseLabel = (profile as any)?.house?.nomor_rumah
+  const isSecurity = profile?.role === 'security' || profile?.role === 'superadmin'
+  const isPaguyuban = profile?.role === 'paguyuban' || profile?.role === 'superadmin'
 
   return (
     <main className="flex w-full flex-col">
@@ -83,15 +91,16 @@ export default async function DashboardPage() {
               HINGGIL MANSION
             </span>
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-sm font-bold"
-              style={{ color: '#c7c9d2' }}
-            >
-              Keluar
-            </button>
-          </form>
+          <div className="flex items-center gap-4">
+            <div style={{ color: '#efe4c8' }}>
+              <NotificationBell />
+            </div>
+            <form action={signOut}>
+              <button type="submit" className="text-sm font-bold" style={{ color: '#c7c9d2' }}>
+                Keluar
+              </button>
+            </form>
+          </div>
         </div>
 
         <div className="mx-auto w-full max-w-3xl px-6 pb-10 pt-2 md:px-10 md:pb-14">
@@ -136,6 +145,39 @@ export default async function DashboardPage() {
                 </div>
               </Link>
             ))}
+
+            {isSecurity ? (
+              <Link
+                href="/keamanan/scan-tamu"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Verifikasi Tamu</div>
+              </Link>
+            ) : null}
+
+            {isPaguyuban ? (
+              <Link
+                href="/paguyuban/moderasi-forum"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Moderasi Forum</div>
+              </Link>
+            ) : null}
           </div>
 
           <div className="mt-10">

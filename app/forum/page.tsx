@@ -1,14 +1,59 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ForumPostForm from '@/components/ForumPostForm'
+import ForumFeed from '@/components/ForumFeed'
+import NotificationBell from '@/components/NotificationBell'
 
 export default async function ForumPage() {
   const supabase = await createClient()
-  const { data: posts } = await supabase
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const { data: rawPosts } = await supabase
     .from('forum_posts')
     .select('id, content, created_at, author:profiles(full_name)')
+    .eq('is_hidden', false)
     .order('created_at', { ascending: false })
     .limit(50)
+
+  const postIds = (rawPosts ?? []).map((p) => p.id)
+
+  const [{ data: likes }, { data: comments }] = await Promise.all([
+    postIds.length
+      ? supabase.from('forum_likes').select('post_id, user_id').in('post_id', postIds)
+      : Promise.resolve({ data: [] as any[] }),
+    postIds.length
+      ? supabase
+          .from('forum_comments')
+          .select('id, post_id, content, created_at, author:profiles(full_name)')
+          .in('post_id', postIds)
+          .order('created_at', { ascending: true })
+      : Promise.resolve({ data: [] as any[] }),
+  ])
+
+  const posts = (rawPosts ?? []).map((p: any) => {
+    const postLikes = (likes ?? []).filter((l: any) => l.post_id === p.id)
+    const postComments = (comments ?? [])
+      .filter((c: any) => c.post_id === p.id)
+      .map((c: any) => ({
+        id: c.id,
+        content: c.content,
+        created_at: c.created_at,
+        author_name: c.author?.full_name ?? 'Warga',
+      }))
+
+    return {
+      id: p.id,
+      content: p.content,
+      created_at: p.created_at,
+      author_name: p.author?.full_name ?? 'Warga',
+      likeCount: postLikes.length,
+      likedByMe: !!user && postLikes.some((l: any) => l.user_id === user.id),
+      comments: postComments,
+    }
+  })
 
   return (
     <main className="w-full" style={{ background: '#faf7f0' }}>
@@ -28,45 +73,19 @@ export default async function ForumPage() {
               Forum Warga
             </h1>
           </div>
-          <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
-            Beranda
-          </Link>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
+              Beranda
+            </Link>
+          </div>
         </div>
 
-        <ForumPostForm />
+        <div className="mb-6">
+          <ForumPostForm />
+        </div>
 
-        {posts && posts.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {posts.map((post: any) => (
-              <div
-                key={post.id}
-                className="rounded-2xl px-5 py-4 md:px-6 md:py-5"
-                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>
-                    {post.author?.full_name ?? 'Warga'}
-                  </span>
-                  <span className="text-[11.5px] font-semibold" style={{ color: '#9c7a3f' }}>
-                    {new Date(post.created_at).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-                <p className="mt-2 whitespace-pre-line text-sm font-medium leading-relaxed md:text-base" style={{ color: '#3a3424' }}>
-                  {post.content}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-sm font-medium" style={{ color: '#5b543f' }}>
-            Belum ada postingan. Jadilah yang pertama menulis!
-          </p>
-        )}
+        <ForumFeed posts={posts} />
       </div>
     </main>
   )
