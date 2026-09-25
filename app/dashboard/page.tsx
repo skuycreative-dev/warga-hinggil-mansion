@@ -91,12 +91,16 @@ export default async function DashboardPage() {
               HINGGIL MANSION
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div style={{ color: '#efe4c8' }}>
               <NotificationBell />
             </div>
             <form action={signOut}>
-              <button type="submit" className="text-sm font-bold" style={{ color: '#c7c9d2' }}>
+              <button
+                type="submit"
+                className="rounded-full px-4 py-2 text-sm font-bold transition hover:bg-white/10"
+                style={{ color: '#efe4c8', border: '1px solid rgba(230,201,138,0.35)' }}
+              >
                 Keluar
               </button>
             </form>
@@ -126,7 +130,7 @@ export default async function DashboardPage() {
               <Link
                 key={m.title}
                 href={m.href}
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{
                   background: '#ffffff',
                   border: m.danger ? '1px solid rgba(179,57,47,0.25)' : '1px solid rgba(26,19,5,0.08)',
@@ -149,7 +153,7 @@ export default async function DashboardPage() {
             {isSecurity ? (
               <Link
                 href="/keamanan/scan-tamu"
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
@@ -165,7 +169,7 @@ export default async function DashboardPage() {
             {isPaguyuban ? (
               <Link
                 href="/paguyuban/moderasi-forum"
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
@@ -196,7 +200,7 @@ export default async function DashboardPage() {
                   <Link
                     key={a.id}
                     href="/pengumuman"
-                    className="flex items-center justify-between rounded-2xl px-5 py-4"
+                    className="flex items-center justify-between rounded-2xl px-5 py-4 transition hover:-translate-y-0.5"
                     style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
                   >
                     <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>

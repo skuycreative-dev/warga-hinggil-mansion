@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, phone, bio, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
+    .select('full_name, phone, bio, nik, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -59,10 +59,7 @@ export default async function ProfilePage() {
             </svg>
           </Link>
 
-          <div
-            className="rounded-full"
-            style={{ width: 100, height: 100, border: '4px solid #faf7f0', overflow: 'hidden', background: '#e8e2d0' }}
-          >
+          <div style={{ width: 100 }}>
             <AvatarUploader userId={user.id} currentAvatarUrl={profile?.avatar_url ?? null} />
           </div>
         </div>
@@ -116,6 +113,7 @@ export default async function ProfilePage() {
             fullName={profile?.full_name ?? ''}
             phone={profile?.phone ?? ''}
             bio={profile?.bio ?? ''}
+            nik={profile?.nik ?? ''}
             familyRole={profile?.family_role ?? 'anggota_keluarga'}
             occupancyStatus={profile?.occupancy_status ?? 'pemilik'}
           />
