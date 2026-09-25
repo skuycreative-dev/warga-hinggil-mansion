@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import AppHeader from '@/components/AppHeader'
 
@@ -31,6 +30,8 @@ const features = [
 const facilities = [
   { title: 'Masjid', desc: 'Fasilitas ibadah di dalam kawasan, dekat dari setiap unit rumah.' },
   { title: 'Club House', desc: 'Ruang bersama untuk bersantai dan berkumpul warga.' },
+  { title: 'Bale Warga', desc: 'Pendopo komunal gaya joglo, titik kumpul warga dan penerima tamu klaster.' },
+  { title: 'Playground', desc: 'Area bermain anak yang aman, di dalam kawasan berpagar.' },
   { title: 'Jogging Track', desc: 'Jalur jogging teduh mengelilingi kawasan.' },
   { title: 'Keamanan 24 Jam', desc: 'One gate system dengan pos satpam, menjaga privasi seluruh penghuni.' },
 ]
@@ -197,16 +198,10 @@ export default function LandingPage() {
             className="mx-auto flex max-w-2xl flex-col gap-4 rounded-2xl px-6 py-6 md:px-8 md:py-8"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            <div className="flex justify-between gap-4 border-b pb-3.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="flex justify-between gap-4">
               <span className="text-sm font-bold md:text-base" style={{ color: '#c7c9d2' }}>Alamat Klaster</span>
               <span className="text-right text-sm font-semibold md:text-base" style={{ color: '#f5f3ee' }}>
                 Bangen, Bangunjiwo, Kec. Kasihan, Kabupaten Bantul, D.I. Yogyakarta 55184
-              </span>
-            </div>
-            <div className="flex justify-between gap-4" style={{ }}>
-              <span className="text-sm font-bold md:text-base" style={{ color: '#c7c9d2' }}>Akses Utama</span>
-              <span className="text-right text-sm font-semibold md:text-base" style={{ color: '#f5f3ee' }}>
-                Terhubung ke jalur utama Bantul - Kota Yogyakarta
               </span>
             </div>
           </div>

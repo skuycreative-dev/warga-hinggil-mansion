@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import AppHeader from '@/components/AppHeader'
 
 export default async function SyaratKetentuanPage() {
@@ -21,7 +22,19 @@ export default async function SyaratKetentuanPage() {
     <>
       <AppHeader />
       <main className="w-full" style={{ background: '#faf7f0' }}>
-        <div className="mx-auto w-full max-w-3xl px-6 py-14 md:px-10 md:py-20">
+        <div className="mx-auto w-full max-w-3xl px-6 pt-6 md:px-10">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-bold"
+            style={{ color: '#9c7a3f' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Kembali ke Beranda
+          </Link>
+        </div>
+        <div className="mx-auto w-full max-w-3xl px-6 pb-14 pt-6 md:px-10 md:pb-20">
           <div className="mb-8 md:mb-10">
             <span
               className="text-xs font-bold uppercase tracking-widest md:text-sm"
