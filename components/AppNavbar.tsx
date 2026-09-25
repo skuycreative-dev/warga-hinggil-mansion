@@ -22,6 +22,8 @@ const roleLinks = [
   { title: 'Status Rumah Kosong', href: '/rumah-kosong', roles: ['security', 'paguyuban', 'superadmin'] },
   { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum', roles: ['paguyuban', 'superadmin'] },
   { title: 'Kelola Katalog Tukang', href: '/tukang/kelola', roles: ['manajemen', 'superadmin'] },
+  { title: 'Kelola Staff', href: '/paguyuban/kelola-staff', roles: ['paguyuban', 'superadmin'] },
+  { title: 'Kelola Admin', href: '/superadmin', roles: ['superadmin'] },
 ]
 
 const quickIcons = [

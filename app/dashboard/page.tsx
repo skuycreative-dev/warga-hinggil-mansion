@@ -76,7 +76,9 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!profile?.house_id) {
+  // house_id hanya wajib untuk warga. Akun staff/admin (security, it_support, manajemen,
+  // paguyuban, superadmin) tidak selalu terikat ke satu rumah.
+  if (profile?.role === 'warga' && !profile?.house_id) {
     redirect('/lengkapi-profil')
   }
 
@@ -91,6 +93,7 @@ export default async function DashboardPage() {
   const isSecurity = profile?.role === 'security' || profile?.role === 'superadmin'
   const isPaguyuban = profile?.role === 'paguyuban' || profile?.role === 'superadmin'
   const isManajemen = profile?.role === 'manajemen' || profile?.role === 'superadmin'
+  const isSuperadmin = profile?.role === 'superadmin'
   const canSeeRumahKosong = isSecurity || isPaguyuban
 
   return (
@@ -237,6 +240,37 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Tukang</div>
+              </Link>
+            ) : null}
+
+            {isPaguyuban ? (
+              <Link
+                href="/paguyuban/kelola-staff"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Staff</div>
+              </Link>
+            ) : null}
+
+            {isSuperadmin ? (
+              <Link
+                href="/superadmin"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Admin</div>
               </Link>
             ) : null}
           </div>
