@@ -19,6 +19,7 @@ const sidebarLinks = [
 ]
 
 const roleLinks = [
+  { title: 'Dashboard Security', href: '/security', roles: ['security', 'superadmin'] },
   { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu', roles: ['security', 'superadmin'] },
   { title: 'Status Rumah Kosong', href: '/rumah-kosong', roles: ['security', 'paguyuban', 'superadmin'] },
   { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum', roles: ['paguyuban', 'superadmin'] },

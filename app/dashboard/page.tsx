@@ -202,6 +202,24 @@ export default async function DashboardPage() {
 
             {isSecurity ? (
               <Link
+                href="/security"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Dashboard Security</div>
+              </Link>
+            ) : null}
+
+            {isSecurity ? (
+              <Link
                 href="/keamanan/scan-tamu"
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}

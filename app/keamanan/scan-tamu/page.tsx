@@ -9,8 +9,10 @@ import GuestLogTable from '@/components/admin/GuestLogTable'
 const ALLOWED_ROLES = ['security', 'superadmin']
 
 const NAV_ITEMS = [
+  { title: 'Dashboard', href: '/security' },
   { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu' },
   { title: 'Status Rumah Kosong', href: '/rumah-kosong' },
+  { title: 'Tombol Darurat', href: '/darurat' },
 ]
 
 export default async function ScanTamuPage() {
