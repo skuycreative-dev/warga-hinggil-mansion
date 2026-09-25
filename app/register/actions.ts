@@ -36,6 +36,25 @@ export async function registerUser(
 
   const userId = signUpData.user.id
 
+  // PENTING: kalau "Confirm Email" aktif di Supabase, signUp() TIDAK
+  // langsung memberi sesi login. Tanpa sesi, penyimpanan profil di
+  // bawah akan gagal diam-diam (ditolak RLS, tanpa error). Jadi kita
+  // pastikan dulu sesi aktif sebelum lanjut.
+  if (!signUpData.session) {
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (signInError) {
+      return {
+        error:
+          'Akun berhasil dibuat, tapi belum bisa login otomatis (kemungkinan email perlu dikonfirmasi dulu). Hubungi admin untuk mengaktifkan akun kamu, atau matikan "Confirm Email" di pengaturan Supabase.',
+        success: false,
+      }
+    }
+  }
+
   let houseId: string | null = null
 
   const { data: existingHouse } = await supabase
@@ -66,7 +85,7 @@ export async function registerUser(
 
   const isHouseOwner = !count || count === 0
 
-  const { error: profileError } = await supabase
+  const { error: profileError, data: updatedProfile } = await supabase
     .from('profiles')
     .update({
       phone,
@@ -75,9 +94,18 @@ export async function registerUser(
       is_house_owner: isHouseOwner,
     })
     .eq('id', userId)
+    .select('id')
 
   if (profileError) {
     return { error: `Gagal menyimpan profil: ${profileError.message}`, success: false }
+  }
+
+  if (!updatedProfile || updatedProfile.length === 0) {
+    return {
+      error:
+        'Akun dibuat tapi data profil (HP/rumah/peran) gagal tersimpan karena sesi belum aktif. Hubungi admin untuk memperbaiki data ini secara manual.',
+      success: false,
+    }
   }
 
   return { error: '', success: true }
