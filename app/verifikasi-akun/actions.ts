@@ -1,32 +1,13 @@
 ﻿'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getMyAccess } from '@/lib/access'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 async function requireVerifier() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, staff_position')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  const isSuperadmin = profile?.role === 'superadmin'
-  const isPaguyubanVerifier = profile?.role === 'paguyuban' && profile?.staff_position !== 'bendahara'
-
-  if (!profile || (!isSuperadmin && !isPaguyubanVerifier)) {
-    return null
-  }
-
-  return { userId: user.id }
+  const access = await getMyAccess()
+  if (!access.canVerifyAccounts) return null
+  return { userId: access.userId }
 }
 
 export async function approveAccount(id: string) {
@@ -43,6 +24,8 @@ export async function approveAccount(id: string) {
         verified_by: requester.userId,
       })
       .eq('id', id)
+      .eq('role', 'warga')
+      .in('account_status', ['menunggu_verifikasi', 'ditolak'])
 
     if (error) return { error: error.message }
 
@@ -71,6 +54,8 @@ export async function rejectAccount(id: string, reason: string) {
         deactivated_reason: reason || 'Data tidak sesuai / bukan warga Hinggil Mansion.',
       })
       .eq('id', id)
+      .eq('role', 'warga')
+      .eq('account_status', 'menunggu_verifikasi')
 
     if (error) return { error: error.message }
 

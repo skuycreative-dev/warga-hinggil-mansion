@@ -1,39 +1,34 @@
 ﻿'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getMyAccess } from '@/lib/access'
 
 export type StaffAccountState = { error: string; success: boolean }
 
-const MANAGED_ROLES = ['security', 'it_support']
-const ALLOWED_CALLER_ROLES = ['paguyuban', 'superadmin']
+// Nilai pilihan di form. Sekretaris & Bendahara = role staff_paguyuban + jabatan.
+const STAFF_OPTIONS: Record<string, { role: string; staff_position: string | null }> = {
+  security: { role: 'security', staff_position: null },
+  it_support: { role: 'it_support', staff_position: null },
+  'staff_paguyuban:sekretaris': { role: 'staff_paguyuban', staff_position: 'sekretaris' },
+  'staff_paguyuban:bendahara': { role: 'staff_paguyuban', staff_position: 'bendahara' },
+}
+
+const MANAGED_ROLES = ['security', 'it_support', 'staff_paguyuban']
 
 async function requireStaffManager() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-
-  if (!profile || !ALLOWED_CALLER_ROLES.includes(profile.role)) {
-    return null
-  }
-
-  return { userId: user.id }
+  const access = await getMyAccess()
+  if (!access.canManageStaff) return null
+  return { userId: access.userId }
 }
 
 export async function createStaffAccount(prevState: StaffAccountState, formData: FormData): Promise<StaffAccountState> {
   const fullName = (formData.get('full_name') as string)?.trim()
   const email = (formData.get('email') as string)?.trim()
   const password = (formData.get('password') as string)?.trim()
-  const role = formData.get('role') as string
+  const option = STAFF_OPTIONS[(formData.get('role') as string) ?? '']
 
-  if (!fullName || !email || !password || !MANAGED_ROLES.includes(role)) {
+  if (!fullName || !email || !password || !option) {
     return { error: 'Nama, email, password, dan role wajib diisi dengan benar.', success: false }
   }
 
@@ -63,7 +58,8 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
       .from('profiles')
       .update({
         full_name: fullName,
-        role,
+        role: option.role,
+        staff_position: option.staff_position,
         account_status: 'aktif',
         verified_at: new Date().toISOString(),
         verified_by: requester.userId,
@@ -85,17 +81,27 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
   }
 }
 
-export async function updateStaffAccount(id: string, fullName: string, role: string) {
+export async function updateStaffAccount(id: string, fullName: string, roleValue: string) {
   const requester = await requireStaffManager()
   if (!requester) return { error: 'Tidak punya akses.' }
 
-  if (!MANAGED_ROLES.includes(role)) {
+  const option = STAFF_OPTIONS[roleValue]
+  if (!option) {
     return { error: 'Role tidak valid.' }
   }
 
   try {
     const admin = createAdminClient()
-    const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
+
+    const { data: target } = await admin.from('profiles').select('role').eq('id', id).maybeSingle()
+    if (!target || !MANAGED_ROLES.includes(target.role)) {
+      return { error: 'Akun ini tidak bisa diubah dari Kelola Staff.' }
+    }
+
+    const { error } = await admin
+      .from('profiles')
+      .update({ full_name: fullName, role: option.role, staff_position: option.staff_position })
+      .eq('id', id)
     if (error) return { error: error.message }
 
     revalidatePath('/paguyuban/kelola-staff')
@@ -112,6 +118,10 @@ export async function deleteStaffAccount(id: string) {
 
   try {
     const admin = createAdminClient()
+
+    const { data: target } = await admin.from('profiles').select('role').eq('id', id).maybeSingle()
+    if (!target || !MANAGED_ROLES.includes(target.role)) return
+
     await admin.auth.admin.deleteUser(id)
     revalidatePath('/paguyuban/kelola-staff')
   } catch (err) {

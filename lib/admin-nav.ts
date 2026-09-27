@@ -1,0 +1,42 @@
+﻿import type { AdminNavItem } from '@/components/admin/AdminLayout'
+import type { MyAccess } from '@/lib/access'
+
+// Menu sidebar portal admin, disesuaikan dengan role yang sedang login.
+export function adminNavFor(access: MyAccess): AdminNavItem[] {
+  if (access.isSuperadmin) {
+    return [
+      { title: 'Kelola Admin', href: '/superadmin' },
+      { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
+      { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
+      { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
+      { title: 'Dashboard Paguyuban', href: '/paguyuban' },
+      { title: 'Pengumuman', href: '/pengumuman' },
+    ]
+  }
+
+  if (access.isKetuaPaguyuban) {
+    return [
+      { title: 'Dashboard', href: '/paguyuban' },
+      { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
+      { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
+      { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
+      { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum' },
+      { title: 'Anggaran & Iuran', href: '/anggaran' },
+      { title: 'Polling Warga', href: '/polling' },
+      { title: 'Pengumuman', href: '/pengumuman' },
+    ]
+  }
+
+  if (access.isSekretaris) {
+    return [
+      { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
+      { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
+    ]
+  }
+
+  if (access.isBendahara) {
+    return [{ title: 'Anggaran & Iuran', href: '/anggaran' }]
+  }
+
+  return []
+}

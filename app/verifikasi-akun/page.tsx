@@ -1,47 +1,16 @@
 ﻿import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getMyAccess } from '@/lib/access'
+import { adminNavFor } from '@/lib/admin-nav'
 import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
 import VerifikasiAccountTable from '@/components/admin/VerifikasiAccountTable'
 import { approveAccount, rejectAccount, deleteWargaAccount } from './actions'
 
-const SUPERADMIN_NAV = [
-  { title: 'Kelola Admin', href: '/superadmin' },
-  { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
-  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
-  { title: 'Pengumuman', href: '/pengumuman' },
-]
-
-const PAGUYUBAN_NAV = [
-  { title: 'Dashboard', href: '/paguyuban' },
-  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
-  { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
-  { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum' },
-  { title: 'Anggaran & Iuran', href: '/anggaran' },
-  { title: 'Polling Warga', href: '/polling' },
-  { title: 'Pengumuman', href: '/pengumuman' },
-]
-
 export default async function VerifikasiAkunPage() {
-  const supabase = await createClient()
+  const access = await getMyAccess()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: myProfile } = await supabase
-    .from('profiles')
-    .select('role, full_name, staff_position')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  const isSuperadmin = myProfile?.role === 'superadmin'
-  const isPaguyubanVerifier = myProfile?.role === 'paguyuban' && myProfile?.staff_position !== 'bendahara'
-
-  if (!myProfile || (!isSuperadmin && !isPaguyubanVerifier)) {
+  if (!access.canVerifyAccounts) {
     return (
       <main className="flex min-h-screen items-center justify-center px-6" style={{ background: '#faf7f0' }}>
         <div className="text-center">
@@ -56,6 +25,8 @@ export default async function VerifikasiAkunPage() {
       </main>
     )
   }
+
+  const supabase = await createClient()
 
   const { data: pendingRaw } = await supabase
     .from('profiles')
@@ -78,11 +49,9 @@ export default async function VerifikasiAkunPage() {
   const pending = normalize(pendingRaw)
   const ditolak = normalize(ditolakRaw)
 
-  const navItems = isSuperadmin ? SUPERADMIN_NAV : PAGUYUBAN_NAV
-  const roleLabel = isSuperadmin ? 'Superadmin' : myProfile.staff_position === 'sekretaris' ? 'Sekretaris Paguyuban' : 'Ketua Paguyuban'
 
   return (
-    <AdminLayout portalLabel="Portal Admin" roleLabel={roleLabel} userName={myProfile.full_name ?? 'Admin'} navItems={navItems}>
+    <AdminLayout portalLabel="Portal Admin" roleLabel={access.roleLabel} userName={access.fullName} navItems={adminNavFor(access)}>
       <div className="mb-6">
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Keanggotaan</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>

@@ -2,25 +2,18 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminLayout from '@/components/admin/AdminLayout'
+import { getMyAccess } from '@/lib/access'
+import { adminNavFor } from '@/lib/admin-nav'
 import StatCard from '@/components/admin/StatCard'
 
 const ALLOWED_ROLES = ['paguyuban', 'superadmin']
-
-const NAV_ITEMS = [
-  { title: 'Dashboard', href: '/paguyuban' },
-  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
-  { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
-  { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum' },
-  { title: 'Anggaran & Iuran', href: '/anggaran' },
-  { title: 'Polling Warga', href: '/polling' },
-  { title: 'Pengumuman', href: '/pengumuman' },
-]
 
 function formatRupiah(value: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value)
 }
 
 export default async function PaguyubanDashboardPage() {
+  const access = await getMyAccess()
   const supabase = await createClient()
 
   const {
@@ -83,7 +76,7 @@ export default async function PaguyubanDashboardPage() {
   const recentTx = allTx.slice(0, 6)
 
   return (
-    <AdminLayout portalLabel="Portal Admin" roleLabel="Paguyuban" userName={myProfile.full_name ?? 'Ketua Paguyuban'} navItems={NAV_ITEMS}>
+    <AdminLayout portalLabel="Portal Admin" roleLabel="Paguyuban" userName={myProfile.full_name ?? 'Ketua Paguyuban'} navItems={adminNavFor(access)}>
       <div className="mb-6">
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Paguyuban</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>

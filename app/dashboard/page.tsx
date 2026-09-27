@@ -90,7 +90,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
+    .select('full_name, role, staff_position, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -130,6 +130,9 @@ export default async function DashboardPage() {
   const isSuperadmin = profile?.role === 'superadmin'
   const canSeeRumahKosong = isSecurity || isPaguyuban
 
+  const isSekretaris = profile?.role === 'staff_paguyuban' && profile?.staff_position === 'sekretaris'
+  const canVerifyAccounts = isSuperadmin || profile?.role === 'paguyuban' || isSekretaris
+  const canManageEmergencyContacts = canVerifyAccounts
   const isWarga = profile?.role === 'warga'
   const accountStatus = profile?.account_status ?? 'aktif'
   const isLocked = isWarga && accountStatus !== 'aktif'
@@ -418,7 +421,7 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
 
-            {isPaguyuban ? (
+            {canVerifyAccounts ? (
               <Link
                 href="/verifikasi-akun"
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
@@ -430,6 +433,21 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Verifikasi Akun</div>
+              </Link>
+            ) : null}
+
+            {canManageEmergencyContacts ? (
+              <Link
+                href="/kelola-nomor-darurat"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Nomor Darurat</div>
               </Link>
             ) : null}
 

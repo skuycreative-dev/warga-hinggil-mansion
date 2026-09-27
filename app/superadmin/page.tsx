@@ -2,6 +2,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminLayout from '@/components/admin/AdminLayout'
+import { getMyAccess } from '@/lib/access'
+import { adminNavFor } from '@/lib/admin-nav'
 import StatCard from '@/components/admin/StatCard'
 import AdminAccountPanel from '@/components/admin/AdminAccountPanel'
 import AdminAccountTable from '@/components/admin/AdminAccountTable'
@@ -12,14 +14,8 @@ const ROLE_OPTIONS = [
   { value: 'paguyuban', label: 'Admin Paguyuban' },
 ]
 
-const NAV_ITEMS = [
-  { title: 'Kelola Admin', href: '/superadmin' },
-  { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
-  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
-  { title: 'Pengumuman', href: '/pengumuman' },
-]
-
 export default async function SuperadminPage() {
+  const access = await getMyAccess()
   const supabase = await createClient()
 
   const {
@@ -65,7 +61,7 @@ export default async function SuperadminPage() {
   const manajemenCount = (accounts ?? []).filter((a) => a.role === 'manajemen').length
 
   return (
-    <AdminLayout portalLabel="Portal Admin" roleLabel="Superadmin" userName={myProfile.full_name ?? 'Superadmin'} navItems={NAV_ITEMS}>
+    <AdminLayout portalLabel="Portal Admin" roleLabel="Superadmin" userName={myProfile.full_name ?? 'Superadmin'} navItems={adminNavFor(access)}>
       <div className="mb-6">
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Superadmin</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
