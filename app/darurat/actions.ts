@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { logError } from '@/lib/log-error'
 
 export type EmergencyState = { error: string; success: boolean }
 
@@ -49,6 +50,7 @@ export async function triggerEmergency(prevState: EmergencyState, formData: Form
   })
 
   if (error) {
+    await logError('darurat: kirim alert', error.message, { emergencyType, userId: user.id })
     return { error: error.message, success: false }
   }
 

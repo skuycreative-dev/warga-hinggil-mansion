@@ -136,6 +136,8 @@ export default async function DashboardPage() {
   const canVerifyAccounts = isSuperadmin || profile?.role === 'paguyuban' || isSekretaris
   const canManageEmergencyContacts = canVerifyAccounts
   const isWarga = profile?.role === 'warga'
+  // IT Support hanya untuk log error: menu warga disembunyikan (kecuali Tombol Darurat & Profil)
+  const isItSupportRole = profile?.role === 'it_support'
   const accountStatus = profile?.account_status ?? 'aktif'
   const isLocked = isWarga && accountStatus !== 'aktif'
 
@@ -281,7 +283,7 @@ export default async function DashboardPage() {
             Menu Cepat
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {menu.map((m) => {
+            {menu.filter((m) => !isItSupportRole || UNLOCKED_WHEN_PENDING.includes(m.title)).map((m) => {
               const tileLocked = isLocked && !UNLOCKED_WHEN_PENDING.includes(m.title)
 
               if (tileLocked) {

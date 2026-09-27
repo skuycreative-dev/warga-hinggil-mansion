@@ -20,6 +20,7 @@ export type MyAccess = {
   canVerifyAccounts: boolean
   canManageEmergencyContacts: boolean
   canManageStaff: boolean
+  canCreateItSupport: boolean
   roleLabel: string
 }
 
@@ -73,6 +74,8 @@ export async function getMyAccess(): Promise<MyAccess> {
     canVerifyAccounts: isSuperadmin || isKetuaPaguyuban || isSekretaris,
     canManageEmergencyContacts: isSuperadmin || isKetuaPaguyuban || isSekretaris,
     canManageStaff: isSuperadmin || isKetuaPaguyuban,
+    // IT Support hanya dibuat/diubah/dihapus oleh Superadmin (keputusan 28 Sep 2026)
+    canCreateItSupport: isSuperadmin,
     roleLabel,
   }
 }

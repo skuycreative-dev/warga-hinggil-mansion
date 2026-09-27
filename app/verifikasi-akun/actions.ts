@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { getMyAccess, type MyAccess } from '@/lib/access'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logError } from '@/lib/log-error'
 
 async function requireVerifier() {
   const access = await getMyAccess()
@@ -60,7 +61,7 @@ export async function approveAccount(id: string, force = false): Promise<{ error
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
-    console.error('approveAccount gagal:', err)
+    await logError('verifikasi-akun: approveAccount', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -96,7 +97,7 @@ export async function rejectAccount(id: string, reason: string) {
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
-    console.error('rejectAccount gagal:', err)
+    await logError('verifikasi-akun: rejectAccount', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -117,7 +118,7 @@ export async function deleteWargaAccount(id: string) {
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
-    console.error('deleteWargaAccount gagal:', err)
+    await logError('verifikasi-akun: deleteWargaAccount', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -183,7 +184,7 @@ export async function approveChangeRequest(id: string) {
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
-    console.error('approveChangeRequest gagal:', err)
+    await logError('verifikasi-akun: approveChangeRequest', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -222,7 +223,7 @@ export async function rejectChangeRequest(id: string, note: string) {
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
-    console.error('rejectChangeRequest gagal:', err)
+    await logError('verifikasi-akun: rejectChangeRequest', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }

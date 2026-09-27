@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logError } from '@/lib/log-error'
 
 export type AdminAccountState = { error: string; success: boolean }
 
@@ -84,7 +85,7 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
     revalidatePath('/superadmin')
     return { error: '', success: true }
   } catch (err) {
-    console.error('createAdminAccount gagal:', err)
+    await logError('kelola-admin: createAdminAccount', err)
     return {
       error: 'Gagal terhubung ke server Supabase (kemungkinan SUPABASE_SERVICE_ROLE_KEY belum/salah di Vercel). Hubungi developer.',
       success: false,
@@ -108,7 +109,7 @@ export async function updateAdminAccount(id: string, fullName: string, role: str
     revalidatePath('/superadmin')
     return { error: null }
   } catch (err) {
-    console.error('updateAdminAccount gagal:', err)
+    await logError('kelola-admin: updateAdminAccount', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -122,6 +123,6 @@ export async function deleteAdminAccount(id: string) {
     await admin.auth.admin.deleteUser(id)
     revalidatePath('/superadmin')
   } catch (err) {
-    console.error('deleteAdminAccount gagal:', err)
+    await logError('kelola-admin: deleteAdminAccount', err)
   }
 }

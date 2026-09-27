@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logError } from '@/lib/log-error'
 import { getMyAccess } from '@/lib/access'
 
 export type StaffAccountState = { error: string; success: boolean }
@@ -19,8 +20,10 @@ const MANAGED_ROLES = ['security', 'it_support', 'staff_paguyuban']
 async function requireStaffManager() {
   const access = await getMyAccess()
   if (!access.canManageStaff) return null
-  return { userId: access.userId }
+  return { userId: access.userId, canCreateItSupport: access.canCreateItSupport }
 }
+
+const IT_SUPPORT_ONLY_SUPERADMIN = 'Akun IT Support hanya bisa dibuat, diubah, atau dihapus oleh Superadmin.'
 
 export async function createStaffAccount(prevState: StaffAccountState, formData: FormData): Promise<StaffAccountState> {
   const fullName = (formData.get('full_name') as string)?.trim()
@@ -39,6 +42,10 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
   const requester = await requireStaffManager()
   if (!requester) {
     return { error: 'Kamu tidak punya akses untuk fitur ini.', success: false }
+  }
+
+  if (option.role === 'it_support' && !requester.canCreateItSupport) {
+    return { error: IT_SUPPORT_ONLY_SUPERADMIN, success: false }
   }
 
   try {
@@ -73,7 +80,7 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
     revalidatePath('/paguyuban/kelola-staff')
     return { error: '', success: true }
   } catch (err) {
-    console.error('createStaffAccount gagal:', err)
+    await logError('kelola-staff: createStaffAccount', err)
     return {
       error: 'Gagal terhubung ke server Supabase (kemungkinan SUPABASE_SERVICE_ROLE_KEY belum/salah di Vercel). Hubungi developer.',
       success: false,
@@ -98,6 +105,10 @@ export async function updateStaffAccount(id: string, fullName: string, roleValue
       return { error: 'Akun ini tidak bisa diubah dari Kelola Staff.' }
     }
 
+    if ((target.role === 'it_support' || option.role === 'it_support') && !requester.canCreateItSupport) {
+      return { error: IT_SUPPORT_ONLY_SUPERADMIN }
+    }
+
     const { error } = await admin
       .from('profiles')
       .update({ full_name: fullName, role: option.role, staff_position: option.staff_position })
@@ -107,7 +118,7 @@ export async function updateStaffAccount(id: string, fullName: string, roleValue
     revalidatePath('/paguyuban/kelola-staff')
     return { error: null }
   } catch (err) {
-    console.error('updateStaffAccount gagal:', err)
+    await logError('kelola-staff: updateStaffAccount', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }
@@ -121,10 +132,11 @@ export async function deleteStaffAccount(id: string) {
 
     const { data: target } = await admin.from('profiles').select('role').eq('id', id).maybeSingle()
     if (!target || !MANAGED_ROLES.includes(target.role)) return
+    if (target.role === 'it_support' && !requester.canCreateItSupport) return
 
     await admin.auth.admin.deleteUser(id)
     revalidatePath('/paguyuban/kelola-staff')
   } catch (err) {
-    console.error('deleteStaffAccount gagal:', err)
+    await logError('kelola-staff: deleteStaffAccount', err)
   }
 }

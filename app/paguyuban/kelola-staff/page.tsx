@@ -8,12 +8,14 @@ import AdminAccountPanel from '@/components/admin/AdminAccountPanel'
 import AdminAccountTable from '@/components/admin/AdminAccountTable'
 import { createStaffAccount, updateStaffAccount, deleteStaffAccount } from './actions'
 
-const ROLE_OPTIONS = [
+const BASE_ROLE_OPTIONS = [
   { value: 'staff_paguyuban:sekretaris', label: 'Sekretaris Paguyuban' },
   { value: 'staff_paguyuban:bendahara', label: 'Bendahara Paguyuban' },
   { value: 'security', label: 'Security' },
-  { value: 'it_support', label: 'IT Support' },
 ]
+
+// IT Support hanya bisa dikelola Superadmin
+const IT_SUPPORT_OPTION = { value: 'it_support', label: 'IT Support' }
 
 export default async function KelolaStaffPage() {
   const access = await getMyAccess()
@@ -32,11 +34,14 @@ export default async function KelolaStaffPage() {
     )
   }
 
+  const ROLE_OPTIONS = access.canCreateItSupport ? [...BASE_ROLE_OPTIONS, IT_SUPPORT_OPTION] : BASE_ROLE_OPTIONS
+  const visibleRoles = access.canCreateItSupport ? ['staff_paguyuban', 'security', 'it_support'] : ['staff_paguyuban', 'security']
+
   const supabase = await createClient()
   const { data: accountsRaw } = await supabase
     .from('profiles')
     .select('id, full_name, role, staff_position, created_at')
-    .in('role', ['staff_paguyuban', 'security', 'it_support'])
+    .in('role', visibleRoles)
     .order('created_at', { ascending: false })
 
   // Tabel memakai satu nilai "role" per baris; Sekretaris/Bendahara digabung jadi "staff_paguyuban:jabatan"
@@ -59,7 +64,9 @@ export default async function KelolaStaffPage() {
           Kelola Staff
         </h1>
         <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-          Tambah, edit, atau hapus akun Sekretaris, Bendahara, Security, dan IT Support.
+          {access.canCreateItSupport
+            ? 'Tambah, edit, atau hapus akun Sekretaris, Bendahara, Security, dan IT Support.'
+            : 'Tambah, edit, atau hapus akun Sekretaris, Bendahara, dan Security. Akun IT Support dikelola Superadmin.'}
         </p>
       </div>
 
@@ -77,12 +84,14 @@ export default async function KelolaStaffPage() {
           iconBg="#a8c8f0"
           iconPath="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"
         />
-        <StatCard
-          label="IT Support"
-          value={itSupportCount}
-          iconBg="#c9b8f0"
-          iconPath="M6 4h12v10H6zM2 20h20M9 17l-1 3M15 17l1 3"
-        />
+        {access.canCreateItSupport ? (
+          <StatCard
+            label="IT Support"
+            value={itSupportCount}
+            iconBg="#c9b8f0"
+            iconPath="M6 4h12v10H6zM2 20h20M9 17l-1 3M15 17l1 3"
+          />
+        ) : null}
         <StatCard
           label="Total Staff"
           value={accounts.length}

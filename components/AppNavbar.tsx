@@ -18,7 +18,23 @@ const sidebarLinks = [
   { title: 'Katalog Tukang', href: '/tukang' },
 ]
 
+// Halaman portal admin memakai sidebar sendiri (AdminLayout), jadi navbar warga disembunyikan di sana
+const PORTAL_PREFIXES = [
+  '/superadmin',
+  '/paguyuban',
+  '/verifikasi-akun',
+  '/kelola-nomor-darurat',
+  '/manajemen',
+  '/tukang/kelola',
+  '/it-support',
+  '/security',
+  '/keamanan',
+]
+
+// Sekretaris / Bendahara ditulis "staff_paguyuban:jabatan"
 const roleLinks = [
+  { title: 'Verifikasi Akun', href: '/verifikasi-akun', roles: ['superadmin', 'paguyuban', 'staff_paguyuban:sekretaris'] },
+  { title: 'Kelola Nomor Darurat', href: '/kelola-nomor-darurat', roles: ['superadmin', 'paguyuban', 'staff_paguyuban:sekretaris'] },
   { title: 'Dashboard Security', href: '/security', roles: ['security', 'superadmin'] },
   { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu', roles: ['security', 'superadmin'] },
   { title: 'Status Rumah Kosong', href: '/rumah-kosong', roles: ['security', 'paguyuban', 'superadmin'] },
@@ -66,8 +82,9 @@ export default function AppNavbar() {
     supabase.auth.getUser().then(async ({ data }) => {
       setLoggedIn(!!data.user)
       if (data.user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
-        setRole(profile?.role ?? null)
+        const { data: profile } = await supabase.from('profiles').select('role, staff_position').eq('id', data.user.id).maybeSingle()
+        const r = profile?.role ?? null
+        setRole(r === 'staff_paguyuban' ? `staff_paguyuban:${profile?.staff_position ?? ''}` : r)
       }
     })
   }, [])
@@ -77,8 +94,13 @@ export default function AppNavbar() {
   }, [pathname])
 
   if (!loggedIn) return null
+  if (PORTAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) return null
 
   const visibleRoleLinks = roleLinks.filter((l) => role && l.roles.includes(role))
+  // IT Support hanya untuk log error (kebutuhan awal #15)
+  const isItSupport = role === 'it_support'
+  const visibleSidebarLinks = isItSupport ? sidebarLinks.filter((l) => l.href === '/dashboard') : sidebarLinks
+  const visibleQuickIcons = isItSupport ? quickIcons.filter((q) => q.href === '/darurat' || q.href === '/profile') : quickIcons
 
   return (
     <>
@@ -104,7 +126,7 @@ export default function AppNavbar() {
           </Link>
 
           <div className="flex flex-shrink-0 items-center gap-1">
-            {quickIcons.map((item) => {
+            {visibleQuickIcons.map((item) => {
               const active = pathname === item.href
               return (
                 <Link
@@ -173,7 +195,7 @@ export default function AppNavbar() {
             </div>
 
             <nav className="flex flex-col gap-0.5 px-3 py-3">
-              {sidebarLinks.map((l) => {
+              {visibleSidebarLinks.map((l) => {
                 const active = pathname === l.href
                 return (
                   <Link
