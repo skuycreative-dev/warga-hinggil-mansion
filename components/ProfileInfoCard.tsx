@@ -10,6 +10,7 @@ const occupancyLabel: Record<string, string> = {
 const familyRoleLabel: Record<string, string> = {
   kepala_keluarga: 'Kepala Keluarga',
   anggota_keluarga: 'Anggota Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
   asisten_rumah_tangga: 'Asisten Rumah Tangga',
   lainnya: 'Lainnya',
 }

@@ -41,6 +41,7 @@ export default function HouseholdFields({ houses }: { houses: HouseOption[] }) {
         <label style={labelStyle}>Peran dalam Keluarga</label>
         <select name="family_role" value={familyRole} onChange={(e) => setFamilyRole(e.target.value)} required style={selectStyle}>
           <option value="kepala_keluarga" style={optionStyle}>Kepala Keluarga</option>
+          <option value="ibu_rumah_tangga" style={optionStyle}>Ibu Rumah Tangga</option>
           <option value="anggota_keluarga" style={optionStyle}>Anggota Keluarga</option>
           <option value="asisten_rumah_tangga" style={optionStyle}>Asisten Rumah Tangga</option>
           <option value="lainnya" style={optionStyle}>Lainnya</option>

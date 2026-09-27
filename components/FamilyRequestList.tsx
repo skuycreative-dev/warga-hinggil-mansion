@@ -13,6 +13,7 @@ type FamilyRequest = {
 
 const FAMILY_ROLE_LABEL: Record<string, string> = {
   anggota_keluarga: 'Anggota Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
   asisten_rumah_tangga: 'Asisten Rumah Tangga',
   lainnya: 'Lainnya',
 }

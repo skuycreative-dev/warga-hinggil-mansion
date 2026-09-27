@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import NotificationBell from '@/components/NotificationBell'
 import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
+import LiveClock from '@/components/LiveClock'
 
 const sidebarLinks = [
   { title: 'Beranda', href: '/dashboard' },
@@ -18,6 +19,7 @@ const sidebarLinks = [
   { title: 'Polling Warga', href: '/polling' },
   { title: 'Katalog Tukang', href: '/tukang' },
   { title: 'Rumah Kosong', href: '/rumah-kosong' },
+  { title: 'Catatan & Kalender Keluarga', href: '/keluarga' },
 ]
 
 // Halaman portal admin memakai sidebar sendiri (AdminLayout), jadi navbar warga disembunyikan di sana
@@ -75,6 +77,7 @@ const quickIcons = [
 export default function AppNavbar() {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [isHouseholdManager, setIsHouseholdManager] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
@@ -83,7 +86,17 @@ export default function AppNavbar() {
     supabase.auth.getUser().then(async ({ data }) => {
       setLoggedIn(!!data.user)
       if (data.user) {
-        const { data: profile } = await supabase.from('profiles').select('role, staff_position').eq('id', data.user.id).maybeSingle()
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, staff_position, family_role, family_status, account_status')
+          .eq('id', data.user.id)
+          .maybeSingle()
+        setIsHouseholdManager(
+          profile?.role === 'warga' &&
+            profile?.account_status === 'aktif' &&
+            (profile?.family_role === 'kepala_keluarga' ||
+              (profile?.family_role === 'ibu_rumah_tangga' && profile?.family_status === 'dikonfirmasi'))
+        )
         const r = profile?.role ?? null
         setRole(r === 'staff_paguyuban' ? `staff_paguyuban:${profile?.staff_position ?? ''}` : r)
       }
@@ -100,7 +113,8 @@ export default function AppNavbar() {
   const visibleRoleLinks = roleLinks.filter((l) => role && l.roles.includes(role))
   // IT Support hanya untuk log error (kebutuhan awal #15)
   const isItSupport = role === 'it_support'
-  const visibleSidebarLinks = isItSupport ? sidebarLinks.filter((l) => l.href === '/dashboard') : sidebarLinks
+  const baseSidebarLinks = isHouseholdManager ? [...sidebarLinks, { title: 'Keuangan Rumah Tangga', href: '/keuangan-rumah' }] : sidebarLinks
+  const visibleSidebarLinks = isItSupport ? sidebarLinks.filter((l) => l.href === '/dashboard') : baseSidebarLinks
   const visibleQuickIcons = isItSupport ? quickIcons.filter((q) => q.href === '/darurat' || q.href === '/profile') : quickIcons
 
   return (
@@ -123,9 +137,12 @@ export default function AppNavbar() {
             </svg>
           </button>
 
-          <Link href="/dashboard" className="mr-auto flex flex-shrink-0 items-center gap-2">
-            <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={24} height={24} className="rounded-md object-cover" />
-          </Link>
+          <div className="mr-auto flex min-w-0 items-center gap-2.5">
+            <Link href="/dashboard" className="flex flex-shrink-0 items-center">
+              <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={24} height={24} className="rounded-md object-cover" />
+            </Link>
+            <LiveClock variant="dark" />
+          </div>
 
           <div className="flex flex-shrink-0 items-center gap-1">
             {visibleQuickIcons.map((item) => {

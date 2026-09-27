@@ -3,11 +3,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>
 
-export const FAMILY_ROLES = ['kepala_keluarga', 'anggota_keluarga', 'asisten_rumah_tangga', 'lainnya']
+export const FAMILY_ROLES = ['kepala_keluarga', 'ibu_rumah_tangga', 'anggota_keluarga', 'asisten_rumah_tangga', 'lainnya']
 export const OCCUPANCY_STATUSES = ['pemilik', 'penyewa', 'sementara']
 
 const FAMILY_ROLE_LABEL: Record<string, string> = {
   anggota_keluarga: 'Anggota Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
   asisten_rumah_tangga: 'Asisten Rumah Tangga',
   lainnya: 'Penghuni',
 }

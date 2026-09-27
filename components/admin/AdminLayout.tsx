@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
 import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
+import LiveClock from '@/components/LiveClock'
 
 export type AdminNavItem = { title: string; href: string }
 
@@ -91,13 +92,6 @@ export default function AdminLayout({
     setMenuOpen(false)
   }, [pathname])
 
-  const today = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-
   return (
     <div className="flex min-h-screen w-full" style={{ background: '#f2f1ec' }}>
       <EmergencyAlertWatcher />
@@ -159,13 +153,18 @@ export default function AdminLayout({
               </svg>
             </button>
             <div className="min-w-0">
-              <div className="truncate text-[11.5px] font-semibold capitalize" style={{ color: '#9c7a3f' }}>{today}</div>
               <div className="truncate text-lg font-bold md:text-xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
                 Halo, {userName}
               </div>
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
+            <div className="hidden sm:block">
+              <LiveClock variant="light" full />
+            </div>
+            <div className="sm:hidden">
+              <LiveClock variant="light" />
+            </div>
             <div style={{ color: '#1f1a10' }}>
               <NotificationBell />
             </div>

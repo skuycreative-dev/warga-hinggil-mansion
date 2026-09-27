@@ -177,6 +177,13 @@ export default async function DashboardPage() {
   }))
   const familyStatus = profile?.family_status ?? null
 
+  // Fitur khusus keluarga dalam 1 rumah
+  const isHouseholdMember =
+    isWarga && accountStatus === 'aktif' && !!profile?.house_id && (!familyStatus || familyStatus === 'dikonfirmasi')
+  const isHouseholdManager =
+    isHouseholdMember &&
+    (profile?.family_role === 'kepala_keluarga' || (profile?.family_role === 'ibu_rumah_tangga' && familyStatus === 'dikonfirmasi'))
+
   return (
     <main className="flex w-full flex-col">
       <section
@@ -351,6 +358,38 @@ export default async function DashboardPage() {
                 </Link>
               )
             })}
+
+            {isHouseholdMember ? (
+              <Link
+                href="/keluarga"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="17" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18M8 14h3M8 17h6" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Catatan & Kalender Keluarga</div>
+              </Link>
+            ) : null}
+
+            {isHouseholdManager ? (
+              <Link
+                href="/keuangan-rumah"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5" />
+                    <path d="M12 11v6M14 12.2c-.4-.6-1.1-.9-2-.9-1.1 0-2 .6-2 1.4 0 1.9 4 1 4 2.9 0 .8-.9 1.4-2 1.4-.9 0-1.6-.3-2-.9" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Keuangan Rumah Tangga</div>
+              </Link>
+            ) : null}
 
             {isSecurity ? (
               <Link

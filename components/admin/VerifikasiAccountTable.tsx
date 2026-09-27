@@ -24,6 +24,7 @@ const FAMILY_STATUS_LABEL: Record<string, { text: string; color: string; bg: str
 const FAMILY_ROLE_LABEL: Record<string, string> = {
   kepala_keluarga: 'Kepala Keluarga',
   anggota_keluarga: 'Anggota Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
   asisten_rumah_tangga: 'Asisten Rumah Tangga',
   lainnya: 'Lainnya',
 }

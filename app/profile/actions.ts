@@ -10,7 +10,9 @@ export type UpdateProfileState = {
   message?: string
 }
 
-const FAMILY_ROLES = ['kepala_keluarga', 'anggota_keluarga', 'asisten_rumah_tangga', 'lainnya']
+const FAMILY_ROLES = ['kepala_keluarga', 'ibu_rumah_tangga', 'anggota_keluarga', 'asisten_rumah_tangga', 'lainnya']
+// Peran yang membuka akses khusus rumah (mis. Keuangan Rumah Tangga): hanya lewat Pengurus setelah terverifikasi
+const PROTECTED_FAMILY_ROLES = ['kepala_keluarga', 'ibu_rumah_tangga']
 const OCCUPANCY = ['pemilik', 'penyewa', 'sementara']
 
 // Aturan (keputusan 27 Sep 2026):
@@ -57,9 +59,9 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
 
   if (familyRole && familyRole !== current.family_role) {
     if (!FAMILY_ROLES.includes(familyRole)) return { error: 'Peran keluarga tidak valid.', success: false }
-    const touchesKepala = familyRole === 'kepala_keluarga' || current.family_role === 'kepala_keluarga'
-    if (touchesKepala && !inCompletion) {
-      return { error: 'Status Kepala Keluarga hanya bisa diubah dengan persetujuan Pengurus.', success: false }
+    const touchesProtected = PROTECTED_FAMILY_ROLES.includes(familyRole) || PROTECTED_FAMILY_ROLES.includes(current.family_role ?? '')
+    if (touchesProtected && !inCompletion) {
+      return { error: 'Status Kepala Keluarga / Ibu Rumah Tangga hanya bisa diubah dengan persetujuan Pengurus.', success: false }
     }
     update.family_role = familyRole
   }

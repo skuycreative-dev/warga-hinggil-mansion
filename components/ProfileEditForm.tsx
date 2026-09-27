@@ -38,6 +38,7 @@ const hintStyle: React.CSSProperties = { fontSize: '11px', fontWeight: 500, colo
 const FAMILY_ROLE_LABEL: Record<string, string> = {
   kepala_keluarga: 'Kepala Keluarga',
   anggota_keluarga: 'Anggota Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
   asisten_rumah_tangga: 'Asisten Rumah Tangga',
   lainnya: 'Lainnya',
 }
@@ -96,7 +97,8 @@ export default function ProfileEditForm({
 
   const pendingName = pendingRequests.find((r) => r.field === 'full_name')
   const pendingOccupancy = pendingRequests.find((r) => r.field === 'occupancy_status')
-  const isKepala = familyRole === 'kepala_keluarga'
+  // Kepala Keluarga & Ibu Rumah Tangga membuka akses khusus rumah, jadi dikunci setelah terverifikasi
+  const isProtectedRole = familyRole === 'kepala_keluarga' || familyRole === 'ibu_rumah_tangga'
 
   function handleCancel(id: string) {
     startCancel(async () => {
@@ -217,17 +219,17 @@ export default function ProfileEditForm({
 
         <div className="flex flex-col gap-1.5">
           <label style={labelStyle}>Peran dalam Keluarga</label>
-          {!inCompletion && isKepala ? (
+          {!inCompletion && isProtectedRole ? (
             <>
-              <input type="text" value="Kepala Keluarga" readOnly style={readOnlyStyle} />
+              <input type="text" value={FAMILY_ROLE_LABEL[familyRole] ?? familyRole} readOnly style={readOnlyStyle} />
               <input type="hidden" name="family_role" value={familyRole} />
-              <span style={hintStyle}>Status Kepala Keluarga hanya bisa diubah Pengurus.</span>
+              <span style={hintStyle}>Peran ini hanya bisa diubah Pengurus.</span>
             </>
           ) : (
             <div style={{ position: 'relative' }}>
               <select name="family_role" defaultValue={familyRole} required style={selectStyle}>
                 {Object.entries(FAMILY_ROLE_LABEL)
-                  .filter(([value]) => inCompletion || value !== 'kepala_keluarga')
+                  .filter(([value]) => inCompletion || (value !== 'kepala_keluarga' && value !== 'ibu_rumah_tangga'))
                   .map(([value, label]) => (
                     <option key={value} value={value} style={{ color: '#1a1305', background: '#ffffff' }}>
                       {label}
