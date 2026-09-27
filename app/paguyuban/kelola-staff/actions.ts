@@ -46,29 +46,37 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
     return { error: 'Kamu tidak punya akses untuk fitur ini.', success: false }
   }
 
-  const admin = createAdminClient()
+  try {
+    const admin = createAdminClient()
 
-  const { data: created, error: createError } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    })
 
-  if (createError || !created.user) {
-    return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+    if (createError || !created.user) {
+      return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+    }
+
+    const { error: profileError } = await admin
+      .from('profiles')
+      .update({ full_name: fullName, role })
+      .eq('id', created.user.id)
+
+    if (profileError) {
+      return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
+    }
+
+    revalidatePath('/paguyuban/kelola-staff')
+    return { error: '', success: true }
+  } catch (err) {
+    console.error('createStaffAccount gagal:', err)
+    return {
+      error: 'Gagal terhubung ke server Supabase (kemungkinan SUPABASE_SERVICE_ROLE_KEY belum/salah di Vercel). Hubungi developer.',
+      success: false,
+    }
   }
-
-  const { error: profileError } = await admin
-    .from('profiles')
-    .update({ full_name: fullName, role })
-    .eq('id', created.user.id)
-
-  if (profileError) {
-    return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
-  }
-
-  revalidatePath('/paguyuban/kelola-staff')
-  return { error: '', success: true }
 }
 
 export async function updateStaffAccount(id: string, fullName: string, role: string) {
@@ -79,19 +87,28 @@ export async function updateStaffAccount(id: string, fullName: string, role: str
     return { error: 'Role tidak valid.' }
   }
 
-  const admin = createAdminClient()
-  const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
-  if (error) return { error: error.message }
+  try {
+    const admin = createAdminClient()
+    const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
+    if (error) return { error: error.message }
 
-  revalidatePath('/paguyuban/kelola-staff')
-  return { error: null }
+    revalidatePath('/paguyuban/kelola-staff')
+    return { error: null }
+  } catch (err) {
+    console.error('updateStaffAccount gagal:', err)
+    return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
+  }
 }
 
 export async function deleteStaffAccount(id: string) {
   const requester = await requireStaffManager()
   if (!requester) return
 
-  const admin = createAdminClient()
-  await admin.auth.admin.deleteUser(id)
-  revalidatePath('/paguyuban/kelola-staff')
+  try {
+    const admin = createAdminClient()
+    await admin.auth.admin.deleteUser(id)
+    revalidatePath('/paguyuban/kelola-staff')
+  } catch (err) {
+    console.error('deleteStaffAccount gagal:', err)
+  }
 }

@@ -53,33 +53,40 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
     return { error: 'Kamu tidak punya akses untuk fitur ini.', success: false }
   }
 
-  const admin = createAdminClient()
+  try {
+    const admin = createAdminClient()
 
-  const { data: created, error: createError } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    })
 
-  if (createError || !created.user) {
-    return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+    if (createError || !created.user) {
+      return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+    }
+
+    const { error: profileError } = await admin
+      .from('profiles')
+      .update({ full_name: fullName, role })
+      .eq('id', created.user.id)
+
+    if (profileError) {
+      return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
+    }
+
+    revalidatePath('/superadmin')
+    return { error: '', success: true }
+  } catch (err) {
+    console.error('createAdminAccount gagal:', err)
+    return {
+      error: 'Gagal terhubung ke server Supabase (kemungkinan SUPABASE_SERVICE_ROLE_KEY belum/salah di Vercel). Hubungi developer.',
+      success: false,
+    }
   }
-
-  const { error: profileError } = await admin
-    .from('profiles')
-    .update({ full_name: fullName, role })
-    .eq('id', created.user.id)
-
-  if (profileError) {
-    return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
-  }
-
-  revalidatePath('/superadmin')
-  return { error: '', success: true }
 }
 
 export async function updateAdminAccount(id: string, fullName: string, role: string) {
-  const admin = createAdminClient()
   const requester = await requireSuperadmin()
   if (!requester) return { error: 'Tidak punya akses.' }
 
@@ -87,18 +94,28 @@ export async function updateAdminAccount(id: string, fullName: string, role: str
     return { error: 'Role tidak valid.' }
   }
 
-  const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
-  if (error) return { error: error.message }
+  try {
+    const admin = createAdminClient()
+    const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
+    if (error) return { error: error.message }
 
-  revalidatePath('/superadmin')
-  return { error: null }
+    revalidatePath('/superadmin')
+    return { error: null }
+  } catch (err) {
+    console.error('updateAdminAccount gagal:', err)
+    return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
+  }
 }
 
 export async function deleteAdminAccount(id: string) {
   const requester = await requireSuperadmin()
   if (!requester) return
 
-  const admin = createAdminClient()
-  await admin.auth.admin.deleteUser(id)
-  revalidatePath('/superadmin')
+  try {
+    const admin = createAdminClient()
+    await admin.auth.admin.deleteUser(id)
+    revalidatePath('/superadmin')
+  } catch (err) {
+    console.error('deleteAdminAccount gagal:', err)
+  }
 }
