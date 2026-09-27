@@ -19,17 +19,22 @@ export default async function DaruratPage() {
 
   const { data: alertsRaw } = await supabase
     .from('emergency_alerts')
-    .select('id, message, status, created_at, created_by, house:houses(nomor_rumah), creator:created_by(full_name)')
+    .select('id, message, status, emergency_type, created_at, reporter_id, house:houses(nomor_rumah), reporter:reporter_id(full_name)')
+    .in('status', ['aktif', 'ditangani'])
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(30)
 
   const alerts = (alertsRaw ?? []).map((a: any) => ({
     ...a,
     house: Array.isArray(a.house) ? a.house[0] : a.house,
-    creator: Array.isArray(a.creator) ? a.creator[0] : a.creator,
+    reporter: Array.isArray(a.reporter) ? a.reporter[0] : a.reporter,
   }))
 
-  const activeAlerts = alerts.filter((a) => a.status === 'aktif')
+  const { data: contacts } = await supabase
+    .from('emergency_contacts')
+    .select('id, name, phone, description')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
 
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
@@ -41,13 +46,13 @@ export default async function DaruratPage() {
               Tombol Darurat
             </h1>
             <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-              Tekan tombol untuk mengirim alert ke Security dan Pengurus secara langsung.
+              Alert langsung terkirim ke seluruh warga, Security, dan Pengurus, lengkap dengan nama dan nomor rumah kamu.
             </p>
           </div>
           <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
 
-        <EmergencyPanel alerts={alerts} canResolve={canResolve} currentUserId={user.id} />
+        <EmergencyPanel alerts={alerts} canResolve={canResolve} currentUserId={user.id} contacts={contacts ?? []} />
       </div>
     </main>
   )

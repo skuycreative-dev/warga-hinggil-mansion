@@ -67,6 +67,16 @@ const menu = [
 // Menu yang tetap bisa dipakai walau akun warga belum diverifikasi Pengurus
 const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya']
 
+const EMERGENCY_LABEL: Record<string, string> = {
+  kebakaran: 'Kebakaran',
+  maling: 'Maling',
+  perampokan: 'Perampokan',
+  kekerasan: 'Kekerasan',
+  medis: 'Darurat Medis',
+  bencana: 'Bencana Alam',
+  lainnya: 'Darurat',
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -95,6 +105,21 @@ export default async function DashboardPage() {
     .select('id, title, created_at')
     .order('created_at', { ascending: false })
     .limit(3)
+
+  const sejak24Jam = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const { data: daruratRaw } = await supabase
+    .from('emergency_alerts')
+    .select('id, emergency_type, status, created_at, house:houses(nomor_rumah), reporter:reporter_id(full_name)')
+    .in('status', ['aktif', 'ditangani'])
+    .gte('created_at', sejak24Jam)
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  const daruratAktif = (daruratRaw ?? []).map((a: any) => ({
+    ...a,
+    house: Array.isArray(a.house) ? a.house[0] : a.house,
+    reporter: Array.isArray(a.reporter) ? a.reporter[0] : a.reporter,
+  }))
 
   const displayName = profile?.full_name ?? 'Warga'
   const houseLabel = (profile as any)?.house?.nomor_rumah
@@ -165,6 +190,30 @@ export default async function DashboardPage() {
 
       <section className="w-full" style={{ background: '#faf7f0' }}>
         <div className="mx-auto w-full max-w-3xl px-6 py-10 md:px-10 md:py-14">
+          {daruratAktif.length > 0 ? (
+            <Link
+              href="/darurat"
+              className="mb-6 block rounded-2xl px-5 py-4"
+              style={{ background: '#b3392f', boxShadow: '0 10px 26px rgba(179,57,47,0.3)' }}
+            >
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                Darurat Aktif di Perumahan
+              </div>
+              <div className="mt-2 flex flex-col gap-1.5">
+                {daruratAktif.map((a: any) => (
+                  <div key={a.id} className="text-sm font-bold text-white">
+                    {(EMERGENCY_LABEL[a.emergency_type] ?? 'Darurat').toUpperCase()} · {a.reporter?.full_name ?? 'Warga'}
+                    {a.house?.nomor_rumah ? ` · Rumah ${a.house.nomor_rumah}` : ''}
+                    <span className="ml-1.5 text-[11.5px] font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                      {a.status === 'ditangani' ? '(sedang ditangani)' : '(menunggu respon)'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[12px] font-bold" style={{ color: 'rgba(255,255,255,0.9)' }}>Lihat detail →</div>
+            </Link>
+          ) : null}
+
           {isLocked ? (
             <div
               className="mb-6 rounded-2xl px-5 py-4"
