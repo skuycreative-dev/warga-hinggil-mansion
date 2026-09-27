@@ -18,12 +18,28 @@ async function notify(admin: AdminClient, userId: string, title: string, body: s
   if (error) console.error('notifikasi gagal:', error.message)
 }
 
-export async function approveAccount(id: string) {
+// force = true: Pengurus tetap menyetujui walau Kepala Keluarga belum/tidak mengonfirmasi
+// (misalnya Kepala Keluarga tidak memakai aplikasi). Pengurus sudah diberi peringatan di layar.
+export async function approveAccount(id: string, force = false): Promise<{ error: string | null; needsForce?: boolean }> {
   const requester = await requireVerifier()
   if (!requester) return { error: 'Kamu tidak punya akses untuk menyetujui akun.' }
 
   try {
     const admin = createAdminClient()
+
+    const { data: target } = await admin.from('profiles').select('family_role, family_status').eq('id', id).maybeSingle()
+    const needsKepala =
+      !!target && target.family_role !== 'kepala_keluarga' && !!target.family_status && target.family_status !== 'dikonfirmasi'
+
+    if (needsKepala && !force) {
+      return {
+        error:
+          target?.family_status === 'ditolak_kepala'
+            ? 'Kepala Keluarga rumah ini MENOLAK orang ini sebagai penghuni.'
+            : 'Kepala Keluarga rumah ini BELUM mengonfirmasi orang ini sebagai penghuni.',
+        needsForce: true,
+      }
+    }
     const { data, error } = await admin
       .from('profiles')
       .update({

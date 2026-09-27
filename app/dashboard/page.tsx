@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { signOut } from './actions'
 import NotificationBell from '@/components/NotificationBell'
 import { displayName as nameOf } from '@/lib/display-name'
+import FamilyRequestList from '@/components/FamilyRequestList'
 
 const menu = [
   {
@@ -91,7 +92,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, nickname, role, staff_position, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
+    .select('full_name, nickname, role, staff_position, avatar_url, house_id, account_status, deactivated_reason, family_role, family_status, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -137,6 +138,24 @@ export default async function DashboardPage() {
   const isWarga = profile?.role === 'warga'
   const accountStatus = profile?.account_status ?? 'aktif'
   const isLocked = isWarga && accountStatus !== 'aktif'
+
+  // Kepala Keluarga: daftar orang yang memilih rumahnya saat mendaftar (verifikasi tahap 1)
+  const isKepalaKeluarga = profile?.family_role === 'kepala_keluarga' && !!profile?.house_id
+  const { data: familyRequestsRaw } = isKepalaKeluarga
+    ? await supabase
+        .from('profiles')
+        .select('id, full_name, nickname, family_role, created_at')
+        .eq('house_id', profile!.house_id)
+        .eq('family_status', 'menunggu_kepala')
+        .order('created_at', { ascending: true })
+    : { data: [] as any[] }
+  const familyRequests = (familyRequestsRaw ?? []).map((r: any) => ({
+    id: r.id as string,
+    name: nameOf(r),
+    family_role: (r.family_role ?? null) as string | null,
+    created_at: r.created_at as string,
+  }))
+  const familyStatus = profile?.family_status ?? null
 
   return (
     <main className="flex w-full flex-col">
@@ -218,6 +237,8 @@ export default async function DashboardPage() {
             </Link>
           ) : null}
 
+          <FamilyRequestList requests={familyRequests} houseLabel={houseLabel ?? null} canConfirm={accountStatus === 'aktif'} />
+
           {isLocked ? (
             <div
               className="mb-6 rounded-2xl px-5 py-4"
@@ -239,11 +260,17 @@ export default async function DashboardPage() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
-                    Akun kamu sedang menunggu verifikasi Pengurus.
+                  <p className="text-sm font-bold" style={{ color: familyStatus === 'ditolak_kepala' ? '#b3392f' : '#9c7a3f' }}>
+                    {familyStatus === 'menunggu_kepala'
+                      ? `Menunggu konfirmasi Kepala Keluarga${houseLabel ? ` Rumah ${houseLabel}` : ''}, lalu verifikasi Pengurus.`
+                      : familyStatus === 'ditolak_kepala'
+                        ? 'Kepala Keluarga belum mengonfirmasi kamu sebagai penghuni rumah ini.'
+                        : 'Akun kamu sedang menunggu verifikasi Pengurus.'}
                   </p>
                   <p className="mt-1 text-[13px] font-medium" style={{ color: '#5b543f' }}>
-                    Semua fitur akan terbuka otomatis setelah disetujui. Tombol Darurat dan Profil Saya tetap bisa dipakai sekarang.
+                    {familyStatus === 'ditolak_kepala'
+                      ? 'Hubungi Pengurus Paguyuban untuk memperbaiki data rumahmu. Tombol Darurat dan Profil Saya tetap bisa dipakai.'
+                      : 'Semua fitur akan terbuka otomatis setelah disetujui. Tombol Darurat dan Profil Saya tetap bisa dipakai sekarang.'}
                   </p>
                 </>
               )}

@@ -11,7 +11,14 @@ type Account = {
   family_role: string | null
   occupancy_status: string | null
   created_at: string
+  family_status?: string | null
   house?: { nomor_rumah: string } | null
+}
+
+const FAMILY_STATUS_LABEL: Record<string, { text: string; color: string; bg: string }> = {
+  menunggu_kepala: { text: 'Menunggu Kepala Keluarga', color: '#9c7a3f', bg: 'rgba(212,175,106,0.16)' },
+  dikonfirmasi: { text: 'Dikonfirmasi Kepala Keluarga', color: '#2f6b4f', bg: 'rgba(47,107,79,0.12)' },
+  ditolak_kepala: { text: 'Ditolak Kepala Keluarga', color: '#b3392f', bg: 'rgba(179,57,47,0.1)' },
 }
 
 const FAMILY_ROLE_LABEL: Record<string, string> = {
@@ -30,7 +37,7 @@ export default function VerifikasiAccountTable({
 }: {
   accounts: Account[]
   mode: 'pending' | 'ditolak'
-  approveAction?: (id: string) => Promise<{ error: string | null }>
+  approveAction?: (id: string, force?: boolean) => Promise<{ error: string | null; needsForce?: boolean }>
   rejectAction?: (id: string, reason: string) => Promise<{ error: string | null }>
   deleteAction?: (id: string) => Promise<{ error: string | null }>
 }) {
@@ -43,7 +50,14 @@ export default function VerifikasiAccountTable({
     if (!confirm(`Setujui akun ${a.full_name}? Semua fitur akan langsung terbuka untuk akun ini.`)) return
     setBusyId(a.id)
     startTransition(async () => {
-      const result = await approveAction(a.id)
+      let result = await approveAction(a.id, false)
+      if (result.needsForce) {
+        if (confirm(`${result.error}\n\nTetap setujui akun ${a.full_name}? Pastikan kamu sudah mengecek langsung bahwa orang ini benar penghuni rumah tersebut.`)) {
+          result = await approveAction(a.id, true)
+        } else {
+          result = { error: null }
+        }
+      }
       if (result.error) alert(result.error)
       router.refresh()
       setBusyId(null)
@@ -110,6 +124,14 @@ export default function VerifikasiAccountTable({
                   <div className="text-[11.5px] font-medium" style={{ color: '#5b543f' }}>
                     {a.family_role ? (FAMILY_ROLE_LABEL[a.family_role] ?? a.family_role) : '-'}
                   </div>
+                  {a.family_status && FAMILY_STATUS_LABEL[a.family_status] ? (
+                    <span
+                      className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold"
+                      style={{ background: FAMILY_STATUS_LABEL[a.family_status].bg, color: FAMILY_STATUS_LABEL[a.family_status].color }}
+                    >
+                      {FAMILY_STATUS_LABEL[a.family_status].text}
+                    </span>
+                  ) : null}
                 </td>
                 <td className="px-5 py-3.5 text-[13px] font-medium" style={{ color: '#5b543f' }}>
                   {a.nik ?? '-'}

@@ -31,14 +31,14 @@ export default async function VerifikasiAkunPage() {
 
   const { data: pendingRaw } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, nik, family_role, occupancy_status, created_at, house:houses(nomor_rumah)')
+    .select('id, full_name, phone, nik, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
     .eq('role', 'warga')
     .eq('account_status', 'menunggu_verifikasi')
     .order('created_at', { ascending: true })
 
   const { data: ditolakRaw } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, nik, family_role, occupancy_status, created_at, house:houses(nomor_rumah)')
+    .select('id, full_name, phone, nik, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
     .eq('role', 'warga')
     .eq('account_status', 'ditolak')
     .order('created_at', { ascending: false })
@@ -72,7 +72,7 @@ export default async function VerifikasiAkunPage() {
           Verifikasi Akun Warga
         </h1>
         <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-          Akun warga baru bisa login dan lihat dashboard, tapi semua fitur terkunci sampai disetujui di sini.
+          Akun warga baru bisa login dan lihat dashboard, tapi semua fitur terkunci sampai disetujui di sini. Anggota keluarga, ART, dan penghuni lain sebaiknya dikonfirmasi Kepala Keluarga rumahnya dulu (tahap 1).
         </p>
       </div>
 
