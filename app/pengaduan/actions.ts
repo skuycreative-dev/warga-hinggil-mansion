@@ -8,7 +8,7 @@ export type ComplaintState = { error: string; success: boolean }
 
 const ADMIN_ROLES = ['manajemen', 'paguyuban', 'security', 'superadmin']
 const CATEGORY_OPTIONS = ['kebersihan', 'keamanan', 'fasilitas', 'lainnya']
-const STATUS_OPTIONS = ['baru', 'diproses', 'selesai']
+const STATUS_OPTIONS = ['diterima', 'diproses', 'selesai']
 
 export async function createComplaint(prevState: ComplaintState, formData: FormData): Promise<ComplaintState> {
   const title = (formData.get('title') as string)?.trim()
@@ -38,7 +38,7 @@ export async function createComplaint(prevState: ComplaintState, formData: FormD
     category,
     created_by: user.id,
     house_id: profile?.house_id ?? null,
-    status: 'baru',
+    status: 'diterima',
   })
 
   if (error) {

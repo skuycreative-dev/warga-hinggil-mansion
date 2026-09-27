@@ -58,7 +58,7 @@ export default async function ManajemenDashboardPage() {
     creator: Array.isArray(c.creator) ? c.creator[0] : c.creator,
   }))
 
-  const pengaduanBaru = complaints.filter((c) => c.status === 'baru').length
+  const pengaduanBaru = complaints.filter((c) => c.status === 'diterima').length
   const pengaduanDiproses = complaints.filter((c) => c.status === 'diproses').length
 
   return (

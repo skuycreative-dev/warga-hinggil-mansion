@@ -1,0 +1,544 @@
+section,obj,detail
+KOLOM,ai_chat_messages.content,text NOT NULL
+KOLOM,ai_chat_messages.created_at,timestamp with time zone DEFAULT now()
+KOLOM,ai_chat_messages.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,ai_chat_messages.role,chat_role NOT NULL
+KOLOM,ai_chat_messages.user_id,uuid NOT NULL
+KOLOM,announcements.content,text NOT NULL
+KOLOM,announcements.created_at,timestamp with time zone DEFAULT now()
+KOLOM,announcements.created_by,uuid NOT NULL
+KOLOM,announcements.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,announcements.image_url,text
+KOLOM,announcements.is_pinned,boolean DEFAULT false
+KOLOM,announcements.title,text NOT NULL
+KOLOM,app_pages.content,text NOT NULL
+KOLOM,app_pages.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,app_pages.slug,text NOT NULL
+KOLOM,app_pages.title,text NOT NULL
+KOLOM,app_pages.updated_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,chat_messages.content,text NOT NULL
+KOLOM,chat_messages.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,chat_messages.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,chat_messages.is_read,boolean NOT NULL DEFAULT false
+KOLOM,chat_messages.receiver_id,uuid NOT NULL
+KOLOM,chat_messages.sender_id,uuid NOT NULL
+KOLOM,complaints.category,text NOT NULL DEFAULT 'lainnya'::text
+KOLOM,complaints.created_at,timestamp with time zone DEFAULT now()
+KOLOM,complaints.created_by,uuid DEFAULT auth.uid()
+KOLOM,complaints.description,text NOT NULL
+KOLOM,complaints.handled_by,uuid
+KOLOM,complaints.house_id,uuid
+KOLOM,complaints.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,complaints.photo_url,text
+KOLOM,complaints.reporter_id,uuid NOT NULL
+KOLOM,complaints.status,complaint_status DEFAULT 'diterima'::complaint_status
+KOLOM,complaints.status_updated_at,timestamp with time zone
+KOLOM,complaints.status_updated_by,uuid
+KOLOM,complaints.title,text NOT NULL
+KOLOM,complaints.updated_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,emergency_alerts.created_at,timestamp with time zone DEFAULT now()
+KOLOM,emergency_alerts.created_by,uuid DEFAULT auth.uid()
+KOLOM,emergency_alerts.emergency_type,emergency_type NOT NULL
+KOLOM,emergency_alerts.handled_by,uuid
+KOLOM,emergency_alerts.house_id,uuid
+KOLOM,emergency_alerts.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,emergency_alerts.message,text
+KOLOM,emergency_alerts.reporter_id,uuid NOT NULL
+KOLOM,emergency_alerts.resolved_at,timestamp with time zone
+KOLOM,emergency_alerts.resolved_by,uuid
+KOLOM,emergency_alerts.status,emergency_status DEFAULT 'aktif'::emergency_status
+KOLOM,emergency_contacts.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,emergency_contacts.description,text
+KOLOM,emergency_contacts.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,emergency_contacts.is_active,boolean NOT NULL DEFAULT true
+KOLOM,emergency_contacts.name,text NOT NULL
+KOLOM,emergency_contacts.phone,text NOT NULL
+KOLOM,emergency_contacts.sort_order,integer NOT NULL DEFAULT 0
+KOLOM,error_logs.context,text
+KOLOM,error_logs.created_at,timestamp with time zone DEFAULT now()
+KOLOM,error_logs.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,error_logs.level,text NOT NULL DEFAULT 'error'::text
+KOLOM,error_logs.message,text NOT NULL
+KOLOM,error_logs.module,text NOT NULL DEFAULT 'app'::text
+KOLOM,error_logs.resolved,boolean DEFAULT false
+KOLOM,error_logs.resolved_at,timestamp with time zone
+KOLOM,error_logs.resolved_by,uuid
+KOLOM,error_logs.severity,log_severity DEFAULT 'error'::log_severity
+KOLOM,error_logs.source,text
+KOLOM,error_logs.stack_trace,text
+KOLOM,faq_items.answer,text NOT NULL
+KOLOM,faq_items.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,faq_items.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,faq_items.is_active,boolean NOT NULL DEFAULT true
+KOLOM,faq_items.question,text NOT NULL
+KOLOM,faq_items.sort_order,integer NOT NULL DEFAULT 0
+KOLOM,faq_items.updated_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,forum_comments.author_id,uuid NOT NULL
+KOLOM,forum_comments.content,text NOT NULL
+KOLOM,forum_comments.created_at,timestamp with time zone DEFAULT now()
+KOLOM,forum_comments.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,forum_comments.post_id,uuid NOT NULL
+KOLOM,forum_likes.created_at,timestamp with time zone DEFAULT now()
+KOLOM,forum_likes.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,forum_likes.post_id,uuid NOT NULL
+KOLOM,forum_likes.user_id,uuid NOT NULL
+KOLOM,forum_posts.author_id,uuid NOT NULL
+KOLOM,forum_posts.content,text NOT NULL
+KOLOM,forum_posts.created_at,timestamp with time zone DEFAULT now()
+KOLOM,forum_posts.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,forum_posts.image_url,text
+KOLOM,forum_posts.is_hidden,boolean NOT NULL DEFAULT false
+KOLOM,forum_posts.report_count,integer NOT NULL DEFAULT 0
+KOLOM,forum_reports.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,forum_reports.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,forum_reports.post_id,uuid NOT NULL
+KOLOM,forum_reports.reason,text
+KOLOM,forum_reports.reporter_id,uuid NOT NULL
+KOLOM,friendships.addressee_id,uuid NOT NULL
+KOLOM,friendships.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,friendships.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,friendships.requester_id,uuid NOT NULL
+KOLOM,friendships.status,text NOT NULL DEFAULT 'pending'::text
+KOLOM,friendships.updated_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,guest_visits.checked_in_at,timestamp with time zone
+KOLOM,guest_visits.checked_in_by,uuid
+KOLOM,guest_visits.checked_out_at,timestamp with time zone
+KOLOM,guest_visits.checked_out_by,uuid
+KOLOM,guest_visits.created_at,timestamp with time zone DEFAULT now()
+KOLOM,guest_visits.guest_name,text NOT NULL
+KOLOM,guest_visits.guest_phone,text
+KOLOM,guest_visits.house_id,uuid NOT NULL
+KOLOM,guest_visits.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,guest_visits.invited_by,uuid NOT NULL
+KOLOM,guest_visits.purpose,text NOT NULL DEFAULT 'lainnya'::text
+KOLOM,guest_visits.qr_code_token,"text NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'::text)"
+KOLOM,guest_visits.scheduled_at,timestamp with time zone
+KOLOM,guest_visits.status,guest_status DEFAULT 'menunggu'::guest_status
+KOLOM,guest_visits.visit_code,text NOT NULL DEFAULT '000000'::text
+KOLOM,guest_visits.visit_purpose,text
+KOLOM,houses.blok,text
+KOLOM,houses.created_at,timestamp with time zone DEFAULT now()
+KOLOM,houses.empty_since,timestamp with time zone
+KOLOM,houses.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,houses.is_empty_flagged,boolean DEFAULT false
+KOLOM,houses.nomor_rumah,text NOT NULL
+KOLOM,houses.occupancy_status,occupancy_status DEFAULT 'kosong'::occupancy_status
+KOLOM,iuran_payment_status.amount_due,numeric NOT NULL DEFAULT 0
+KOLOM,iuran_payment_status.amount_paid,numeric NOT NULL DEFAULT 0
+KOLOM,iuran_payment_status.created_at,timestamp with time zone DEFAULT now()
+KOLOM,iuran_payment_status.house_id,uuid NOT NULL
+KOLOM,iuran_payment_status.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,iuran_payment_status.paid_at,timestamp with time zone
+KOLOM,iuran_payment_status.period,text NOT NULL
+KOLOM,iuran_payment_status.status,text
+KOLOM,iuran_transactions.amount,numeric NOT NULL
+KOLOM,iuran_transactions.category,text
+KOLOM,iuran_transactions.created_at,timestamp with time zone DEFAULT now()
+KOLOM,iuran_transactions.created_by,uuid NOT NULL
+KOLOM,iuran_transactions.description,text
+KOLOM,iuran_transactions.house_id,uuid
+KOLOM,iuran_transactions.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,iuran_transactions.proof_url,text
+KOLOM,iuran_transactions.transaction_date,date NOT NULL DEFAULT CURRENT_DATE
+KOLOM,iuran_transactions.type,transaction_type NOT NULL
+KOLOM,notifications.body,text
+KOLOM,notifications.created_at,timestamp with time zone NOT NULL DEFAULT now()
+KOLOM,notifications.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,notifications.is_read,boolean NOT NULL DEFAULT false
+KOLOM,notifications.link,text
+KOLOM,notifications.title,text NOT NULL
+KOLOM,notifications.type,text NOT NULL
+KOLOM,notifications.user_id,uuid NOT NULL
+KOLOM,poll_options.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,poll_options.option_text,text NOT NULL
+KOLOM,poll_options.poll_id,uuid NOT NULL
+KOLOM,poll_votes.created_at,timestamp with time zone DEFAULT now()
+KOLOM,poll_votes.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,poll_votes.option_id,uuid NOT NULL
+KOLOM,poll_votes.poll_id,uuid NOT NULL
+KOLOM,poll_votes.voter_id,uuid NOT NULL
+KOLOM,polls.closes_at,timestamp with time zone
+KOLOM,polls.created_at,timestamp with time zone DEFAULT now()
+KOLOM,polls.created_by,uuid NOT NULL
+KOLOM,polls.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,polls.is_active,boolean DEFAULT true
+KOLOM,polls.question,text NOT NULL
+KOLOM,profiles.account_status,account_status DEFAULT 'aktif'::account_status
+KOLOM,profiles.avatar_url,text
+KOLOM,profiles.bio,text
+KOLOM,profiles.created_at,timestamp with time zone DEFAULT now()
+KOLOM,profiles.deactivated_at,timestamp with time zone
+KOLOM,profiles.deactivated_by,uuid
+KOLOM,profiles.deactivated_reason,text
+KOLOM,profiles.family_role,family_role DEFAULT 'anggota_keluarga'::family_role
+KOLOM,profiles.forum_points,integer DEFAULT 0
+KOLOM,profiles.full_name,text NOT NULL
+KOLOM,profiles.house_id,uuid
+KOLOM,profiles.id,uuid NOT NULL
+KOLOM,profiles.is_house_owner,boolean DEFAULT false
+KOLOM,profiles.nik,text
+KOLOM,profiles.occupancy_status,text
+KOLOM,profiles.phone,text
+KOLOM,profiles.role,user_role NOT NULL DEFAULT 'warga'::user_role
+KOLOM,tukang_catalog.approved_at,timestamp with time zone
+KOLOM,tukang_catalog.approved_by,uuid
+KOLOM,tukang_catalog.created_at,timestamp with time zone DEFAULT now()
+KOLOM,tukang_catalog.description,text
+KOLOM,tukang_catalog.id,uuid NOT NULL DEFAULT gen_random_uuid()
+KOLOM,tukang_catalog.name,text NOT NULL
+KOLOM,tukang_catalog.phone,text
+KOLOM,tukang_catalog.photo_url,text
+KOLOM,tukang_catalog.service_type,text NOT NULL
+KOLOM,tukang_catalog.status,tukang_status DEFAULT 'pending'::tukang_status
+KOLOM,tukang_catalog.submitted_by,uuid NOT NULL
+ENUM,account_status,"aktif, nonaktif_tunggakan, nonaktif_lainnya"
+ENUM,chat_role,"user, assistant"
+ENUM,complaint_status,"diterima, diproses, selesai"
+ENUM,emergency_status,"aktif, ditangani, selesai"
+ENUM,emergency_type,"kebakaran, maling, perampokan, kekerasan, lainnya, bencana"
+ENUM,family_role,"kepala_keluarga, anggota_keluarga, asisten_rumah_tangga, lainnya"
+ENUM,guest_status,"menunggu, masuk, keluar, expired"
+ENUM,log_severity,"info, warning, error, critical"
+ENUM,occupancy_status,"pemilik, penyewa, sementara, kosong"
+ENUM,transaction_type,"pemasukan, pengeluaran"
+ENUM,tukang_status,"pending, approved, rejected"
+ENUM,user_role,"warga, security, manajemen, paguyuban, it_support, superadmin"
+CONSTRAINT,ai_chat_messages / ai_chat_messages_pkey,PRIMARY KEY (id)
+CONSTRAINT,ai_chat_messages / ai_chat_messages_user_id_fkey,FOREIGN KEY (user_id) REFERENCES profiles(id)
+CONSTRAINT,announcements / announcements_created_by_fkey,FOREIGN KEY (created_by) REFERENCES profiles(id)
+CONSTRAINT,announcements / announcements_pkey,PRIMARY KEY (id)
+CONSTRAINT,app_pages / app_pages_pkey,PRIMARY KEY (id)
+CONSTRAINT,app_pages / app_pages_slug_key,UNIQUE (slug)
+CONSTRAINT,chat_messages / chat_messages_pkey,PRIMARY KEY (id)
+CONSTRAINT,chat_messages / chat_messages_receiver_id_fkey,FOREIGN KEY (receiver_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,chat_messages / chat_messages_sender_id_fkey,FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,complaints / complaints_created_by_fkey,FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL
+CONSTRAINT,complaints / complaints_handled_by_fkey,FOREIGN KEY (handled_by) REFERENCES profiles(id) ON DELETE SET NULL
+CONSTRAINT,complaints / complaints_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,complaints / complaints_pkey,PRIMARY KEY (id)
+CONSTRAINT,complaints / complaints_reporter_id_fkey,FOREIGN KEY (reporter_id) REFERENCES profiles(id)
+CONSTRAINT,complaints / complaints_status_updated_by_fkey,FOREIGN KEY (status_updated_by) REFERENCES profiles(id)
+CONSTRAINT,emergency_alerts / emergency_alerts_created_by_fkey,FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL
+CONSTRAINT,emergency_alerts / emergency_alerts_handled_by_fkey,FOREIGN KEY (handled_by) REFERENCES profiles(id)
+CONSTRAINT,emergency_alerts / emergency_alerts_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,emergency_alerts / emergency_alerts_pkey,PRIMARY KEY (id)
+CONSTRAINT,emergency_alerts / emergency_alerts_reporter_id_fkey,FOREIGN KEY (reporter_id) REFERENCES profiles(id)
+CONSTRAINT,emergency_alerts / emergency_alerts_resolved_by_fkey,FOREIGN KEY (resolved_by) REFERENCES profiles(id) ON DELETE SET NULL
+CONSTRAINT,emergency_contacts / emergency_contacts_pkey,PRIMARY KEY (id)
+CONSTRAINT,error_logs / error_logs_pkey,PRIMARY KEY (id)
+CONSTRAINT,error_logs / error_logs_resolved_by_fkey,FOREIGN KEY (resolved_by) REFERENCES profiles(id) ON DELETE SET NULL
+CONSTRAINT,faq_items / faq_items_pkey,PRIMARY KEY (id)
+CONSTRAINT,forum_comments / forum_comments_author_id_fkey,FOREIGN KEY (author_id) REFERENCES profiles(id)
+CONSTRAINT,forum_comments / forum_comments_pkey,PRIMARY KEY (id)
+CONSTRAINT,forum_comments / forum_comments_post_id_fkey,FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE
+CONSTRAINT,forum_likes / forum_likes_pkey,PRIMARY KEY (id)
+CONSTRAINT,forum_likes / forum_likes_post_id_fkey,FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE
+CONSTRAINT,forum_likes / forum_likes_post_id_user_id_key,"UNIQUE (post_id, user_id)"
+CONSTRAINT,forum_likes / forum_likes_user_id_fkey,FOREIGN KEY (user_id) REFERENCES profiles(id)
+CONSTRAINT,forum_posts / forum_posts_author_id_fkey,FOREIGN KEY (author_id) REFERENCES profiles(id)
+CONSTRAINT,forum_posts / forum_posts_pkey,PRIMARY KEY (id)
+CONSTRAINT,forum_reports / forum_reports_pkey,PRIMARY KEY (id)
+CONSTRAINT,forum_reports / forum_reports_post_id_fkey,FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE
+CONSTRAINT,forum_reports / forum_reports_post_id_reporter_id_key,"UNIQUE (post_id, reporter_id)"
+CONSTRAINT,forum_reports / forum_reports_reporter_id_fkey,FOREIGN KEY (reporter_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,friendships / friendships_addressee_id_fkey,FOREIGN KEY (addressee_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,friendships / friendships_check,CHECK ((requester_id <> addressee_id))
+CONSTRAINT,friendships / friendships_pkey,PRIMARY KEY (id)
+CONSTRAINT,friendships / friendships_requester_id_fkey,FOREIGN KEY (requester_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,friendships / friendships_status_check,"CHECK ((status = ANY (ARRAY['pending'::text, 'accepted'::text, 'rejected'::text])))"
+CONSTRAINT,guest_visits / guest_visits_checked_in_by_fkey,FOREIGN KEY (checked_in_by) REFERENCES profiles(id)
+CONSTRAINT,guest_visits / guest_visits_checked_out_by_fkey,FOREIGN KEY (checked_out_by) REFERENCES profiles(id)
+CONSTRAINT,guest_visits / guest_visits_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,guest_visits / guest_visits_invited_by_fkey,FOREIGN KEY (invited_by) REFERENCES profiles(id)
+CONSTRAINT,guest_visits / guest_visits_pkey,PRIMARY KEY (id)
+CONSTRAINT,guest_visits / guest_visits_qr_code_token_key,UNIQUE (qr_code_token)
+CONSTRAINT,houses / houses_nomor_rumah_key,UNIQUE (nomor_rumah)
+CONSTRAINT,houses / houses_pkey,PRIMARY KEY (id)
+CONSTRAINT,iuran_payment_status / iuran_payment_status_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,iuran_payment_status / iuran_payment_status_house_id_period_key,"UNIQUE (house_id, period)"
+CONSTRAINT,iuran_payment_status / iuran_payment_status_pkey,PRIMARY KEY (id)
+CONSTRAINT,iuran_transactions / iuran_transactions_created_by_fkey,FOREIGN KEY (created_by) REFERENCES profiles(id)
+CONSTRAINT,iuran_transactions / iuran_transactions_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,iuran_transactions / iuran_transactions_pkey,PRIMARY KEY (id)
+CONSTRAINT,notifications / notifications_pkey,PRIMARY KEY (id)
+CONSTRAINT,notifications / notifications_user_id_fkey,FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
+CONSTRAINT,poll_options / poll_options_pkey,PRIMARY KEY (id)
+CONSTRAINT,poll_options / poll_options_poll_id_fkey,FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE
+CONSTRAINT,poll_votes / poll_votes_option_id_fkey,FOREIGN KEY (option_id) REFERENCES poll_options(id) ON DELETE CASCADE
+CONSTRAINT,poll_votes / poll_votes_pkey,PRIMARY KEY (id)
+CONSTRAINT,poll_votes / poll_votes_poll_id_fkey,FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE
+CONSTRAINT,poll_votes / poll_votes_poll_id_voter_id_key,"UNIQUE (poll_id, voter_id)"
+CONSTRAINT,poll_votes / poll_votes_voter_id_fkey,FOREIGN KEY (voter_id) REFERENCES profiles(id)
+CONSTRAINT,polls / polls_created_by_fkey,FOREIGN KEY (created_by) REFERENCES profiles(id)
+CONSTRAINT,polls / polls_pkey,PRIMARY KEY (id)
+CONSTRAINT,profiles / profiles_deactivated_by_fkey,FOREIGN KEY (deactivated_by) REFERENCES profiles(id)
+CONSTRAINT,profiles / profiles_house_id_fkey,FOREIGN KEY (house_id) REFERENCES houses(id)
+CONSTRAINT,profiles / profiles_id_fkey,FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
+CONSTRAINT,profiles / profiles_pkey,PRIMARY KEY (id)
+CONSTRAINT,tukang_catalog / tukang_catalog_approved_by_fkey,FOREIGN KEY (approved_by) REFERENCES profiles(id)
+CONSTRAINT,tukang_catalog / tukang_catalog_pkey,PRIMARY KEY (id)
+CONSTRAINT,tukang_catalog / tukang_catalog_submitted_by_fkey,FOREIGN KEY (submitted_by) REFERENCES profiles(id)
+RLS_AKTIF,ai_chat_messages,ON
+RLS_AKTIF,announcements,ON
+RLS_AKTIF,app_pages,ON
+RLS_AKTIF,chat_messages,ON
+RLS_AKTIF,complaints,ON
+RLS_AKTIF,emergency_alerts,ON
+RLS_AKTIF,emergency_contacts,ON
+RLS_AKTIF,error_logs,ON
+RLS_AKTIF,faq_items,ON
+RLS_AKTIF,forum_comments,ON
+RLS_AKTIF,forum_likes,ON
+RLS_AKTIF,forum_posts,ON
+RLS_AKTIF,forum_reports,ON
+RLS_AKTIF,friendships,ON
+RLS_AKTIF,guest_visits,ON
+RLS_AKTIF,houses,ON
+RLS_AKTIF,iuran_payment_status,ON
+RLS_AKTIF,iuran_transactions,ON
+RLS_AKTIF,notifications,ON
+RLS_AKTIF,poll_options,ON
+RLS_AKTIF,poll_votes,ON
+RLS_AKTIF,polls,ON
+RLS_AKTIF,profiles,ON
+RLS_AKTIF,tukang_catalog,ON
+POLICY,public.ai_chat_messages / ai_chat_insert_own,INSERT | roles=public | using=- | check=(user_id = auth.uid())
+POLICY,public.ai_chat_messages / ai_chat_select_own,SELECT | roles=public | using=(user_id = auth.uid()) | check=-
+POLICY,public.announcements / announcements_delete_admin,"DELETE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.announcements / announcements_insert_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role]))"
+POLICY,public.announcements / announcements_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.announcements / announcements_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'security'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.announcements / announcements_write_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'security'::user_role, 'superadmin'::user_role]))"
+POLICY,public.app_pages / app_pages_admin_all,"ALL | roles=public | using=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role])) | check=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role]))"
+POLICY,public.app_pages / app_pages_select_all,SELECT | roles=public | using=true | check=-
+POLICY,public.chat_messages / chat_insert_friends_only,"INSERT | roles=public | using=- | check=((sender_id = auth.uid()) AND are_friends(sender_id, receiver_id))"
+POLICY,public.chat_messages / chat_select_own,SELECT | roles=public | using=((sender_id = auth.uid()) OR (receiver_id = auth.uid())) | check=-
+POLICY,public.chat_messages / chat_update_receiver,UPDATE | roles=public | using=(receiver_id = auth.uid()) | check=-
+POLICY,public.complaints / complaints_delete_admin,"DELETE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.complaints / complaints_insert_own,INSERT | roles=public | using=- | check=(created_by = auth.uid())
+POLICY,public.complaints / complaints_select_admin,"SELECT | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.complaints / complaints_select_own,SELECT | roles=public | using=(reporter_id = auth.uid()) | check=-
+POLICY,public.complaints / complaints_select_own_or_admin,"SELECT | roles=public | using=((created_by = auth.uid()) OR (my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'security'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.complaints / complaints_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'security'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.emergency_alerts / emergency_alerts_insert_own,INSERT | roles=public | using=- | check=(created_by = auth.uid())
+POLICY,public.emergency_alerts / emergency_alerts_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.emergency_alerts / emergency_alerts_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['security'::user_role, 'paguyuban'::user_role, 'manajemen'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.emergency_alerts / emergency_insert_own,INSERT | roles=public | using=- | check=(reporter_id = auth.uid())
+POLICY,public.emergency_alerts / emergency_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.emergency_alerts / emergency_update_handler,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['security'::user_role, 'manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.emergency_contacts / emergency_contacts_admin_all,"ALL | roles=public | using=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role])) | check=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role]))"
+POLICY,public.emergency_contacts / emergency_contacts_select_active,SELECT | roles=public | using=(is_active = true) | check=-
+POLICY,public.error_logs / error_logs_insert_it,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['it_support'::user_role, 'superadmin'::user_role]))"
+POLICY,public.error_logs / error_logs_insert_system,INSERT | roles=public | using=- | check=true
+POLICY,public.error_logs / error_logs_select_it,"SELECT | roles=public | using=(my_role() = ANY (ARRAY['it_support'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.error_logs / error_logs_update_it,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['it_support'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.faq_items / faq_items_admin_all,"ALL | roles=public | using=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role])) | check=(my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role]))"
+POLICY,public.faq_items / faq_items_select_active,SELECT | roles=public | using=(is_active = true) | check=-
+POLICY,public.forum_comments / forum_comments_insert_own,INSERT | roles=public | using=- | check=(author_id = auth.uid())
+POLICY,public.forum_comments / forum_comments_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.forum_likes / forum_likes_delete_own,DELETE | roles=public | using=(user_id = auth.uid()) | check=-
+POLICY,public.forum_likes / forum_likes_insert_own,INSERT | roles=public | using=- | check=(user_id = auth.uid())
+POLICY,public.forum_likes / forum_likes_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.forum_posts / forum_posts_delete_own,"DELETE | roles=public | using=((author_id = auth.uid()) OR (my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.forum_posts / forum_posts_insert_own,INSERT | roles=public | using=- | check=(author_id = auth.uid())
+POLICY,public.forum_posts / forum_posts_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.forum_reports / forum_reports_insert_own,INSERT | roles=public | using=- | check=(reporter_id = auth.uid())
+POLICY,public.forum_reports / forum_reports_select_admin,"SELECT | roles=public | using=((my_role() = ANY (ARRAY['superadmin'::user_role, 'manajemen'::user_role, 'paguyuban'::user_role])) OR (reporter_id = auth.uid())) | check=-"
+POLICY,public.friendships / friendships_delete_involved,DELETE | roles=public | using=((requester_id = auth.uid()) OR (addressee_id = auth.uid())) | check=-
+POLICY,public.friendships / friendships_insert_own,INSERT | roles=public | using=- | check=(requester_id = auth.uid())
+POLICY,public.friendships / friendships_select_own,SELECT | roles=public | using=((requester_id = auth.uid()) OR (addressee_id = auth.uid())) | check=-
+POLICY,public.friendships / friendships_update_involved,UPDATE | roles=public | using=((requester_id = auth.uid()) OR (addressee_id = auth.uid())) | check=-
+POLICY,public.guest_visits / guest_insert_own,INSERT | roles=public | using=- | check=(invited_by = auth.uid())
+POLICY,public.guest_visits / guest_select_own,"SELECT | roles=public | using=((invited_by = auth.uid()) OR (my_role() = ANY (ARRAY['security'::user_role, 'manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.guest_visits / guest_update_security,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['security'::user_role, 'manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.guest_visits / guest_visits_insert_own,INSERT | roles=public | using=- | check=(invited_by = auth.uid())
+POLICY,public.guest_visits / guest_visits_select,"SELECT | roles=public | using=((invited_by = auth.uid()) OR (my_role() = ANY (ARRAY['security'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.guest_visits / guest_visits_update,"UPDATE | roles=public | using=((invited_by = auth.uid()) OR (my_role() = ANY (ARRAY['security'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.houses / houses_insert_authenticated,INSERT | roles=public | using=- | check=(auth.uid() IS NOT NULL)
+POLICY,public.houses / houses_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.houses / houses_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.houses / houses_update_owner,"UPDATE | roles=public | using=((id = my_house_id()) AND (EXISTS ( SELECT 1
+   FROM profiles
+  WHERE ((profiles.id = auth.uid()) AND (profiles.is_house_owner = true))))) | check=-"
+POLICY,public.iuran_payment_status / iuran_status_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.iuran_payment_status / iuran_status_write_admin,"ALL | roles=public | using=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'manajemen'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.iuran_transactions / iuran_delete_admin,"DELETE | roles=public | using=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.iuran_transactions / iuran_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.iuran_transactions / iuran_tx_insert_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'manajemen'::user_role, 'superadmin'::user_role]))"
+POLICY,public.iuran_transactions / iuran_tx_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.iuran_transactions / iuran_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.iuran_transactions / iuran_write_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role]))"
+POLICY,public.notifications / notifications_select_own,SELECT | roles=public | using=(user_id = auth.uid()) | check=-
+POLICY,public.notifications / notifications_update_own,UPDATE | roles=public | using=(user_id = auth.uid()) | check=(user_id = auth.uid())
+POLICY,public.poll_options / poll_options_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.poll_options / poll_options_write_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role]))"
+POLICY,public.poll_votes / poll_votes_insert_own,INSERT | roles=public | using=- | check=(voter_id = auth.uid())
+POLICY,public.poll_votes / poll_votes_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.polls / polls_insert_paguyuban,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role]))"
+POLICY,public.polls / polls_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.polls / polls_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.polls / polls_write_admin,"INSERT | roles=public | using=- | check=(my_role() = ANY (ARRAY['paguyuban'::user_role, 'superadmin'::user_role]))"
+POLICY,public.profiles / profiles_select_all,SELECT | roles=public | using=(auth.uid() IS NOT NULL) | check=-
+POLICY,public.profiles / profiles_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,public.profiles / profiles_update_own,UPDATE | roles=public | using=(auth.uid() = id) | check=-
+POLICY,public.tukang_catalog / tukang_insert_own,INSERT | roles=public | using=- | check=(submitted_by = auth.uid())
+POLICY,public.tukang_catalog / tukang_select_approved,"SELECT | roles=public | using=((status = 'approved'::tukang_status) OR (submitted_by = auth.uid()) OR (my_role() = ANY (ARRAY['manajemen'::user_role, 'paguyuban'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.tukang_catalog / tukang_select_approved_or_own,"SELECT | roles=public | using=((status = 'approved'::tukang_status) OR (submitted_by = auth.uid()) OR (my_role() = ANY (ARRAY['manajemen'::user_role, 'superadmin'::user_role]))) | check=-"
+POLICY,public.tukang_catalog / tukang_update_admin,"UPDATE | roles=public | using=(my_role() = ANY (ARRAY['manajemen'::user_role, 'superadmin'::user_role])) | check=-"
+POLICY,storage.objects / avatar_delete_own,DELETE | roles=public | using=((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)) | check=-
+POLICY,storage.objects / avatar_public_read,SELECT | roles=public | using=(bucket_id = 'avatars'::text) | check=-
+POLICY,storage.objects / avatar_update_own,UPDATE | roles=public | using=((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)) | check=-
+POLICY,storage.objects / avatar_upload_own,INSERT | roles=public | using=- | check=((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text))
+TRIGGER,announcements / announcement_after_insert,CREATE TRIGGER announcement_after_insert AFTER INSERT ON public.announcements FOR EACH ROW EXECUTE FUNCTION notify_on_announcement()
+TRIGGER,auth.users / on_auth_user_created,CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user()
+TRIGGER,chat_messages / chat_message_after_insert,CREATE TRIGGER chat_message_after_insert AFTER INSERT ON public.chat_messages FOR EACH ROW EXECUTE FUNCTION notify_on_chat_message()
+TRIGGER,emergency_alerts / emergency_after_insert,CREATE TRIGGER emergency_after_insert AFTER INSERT ON public.emergency_alerts FOR EACH ROW EXECUTE FUNCTION notify_on_emergency()
+TRIGGER,forum_comments / on_forum_comment_created,CREATE TRIGGER on_forum_comment_created AFTER INSERT ON public.forum_comments FOR EACH ROW EXECUTE FUNCTION add_forum_points()
+TRIGGER,forum_posts / on_forum_post_created,CREATE TRIGGER on_forum_post_created AFTER INSERT ON public.forum_posts FOR EACH ROW EXECUTE FUNCTION add_forum_points()
+TRIGGER,forum_reports / forum_report_after_insert,CREATE TRIGGER forum_report_after_insert AFTER INSERT ON public.forum_reports FOR EACH ROW EXECUTE FUNCTION handle_forum_report()
+TRIGGER,friendships / friendship_after_insert,CREATE TRIGGER friendship_after_insert AFTER INSERT ON public.friendships FOR EACH ROW EXECUTE FUNCTION notify_on_friend_request()
+TRIGGER,polls / poll_after_insert,CREATE TRIGGER poll_after_insert AFTER INSERT ON public.polls FOR EACH ROW EXECUTE FUNCTION notify_on_poll()
+FUNCTION,add_forum_points,"CREATE OR REPLACE FUNCTION public.add_forum_points()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  update profiles set forum_points = forum_points + 5 where id = new.author_id;
+  return new;
+end;
+$function$
+"
+FUNCTION,are_friends,"CREATE OR REPLACE FUNCTION public.are_friends(a uuid, b uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+  select exists (
+    select 1 from friendships
+    where status = 'accepted'
+      and ((requester_id = a and addressee_id = b) or (requester_id = b and addressee_id = a))
+  )
+$function$
+"
+FUNCTION,handle_forum_report,"CREATE OR REPLACE FUNCTION public.handle_forum_report()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  update forum_posts
+  set report_count = report_count + 1,
+      is_hidden = case when report_count + 1 >= 5 then true else is_hidden end
+  where id = new.post_id;
+  return new;
+end;
+$function$
+"
+FUNCTION,handle_new_user,"CREATE OR REPLACE FUNCTION public.handle_new_user()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  insert into public.profiles (id, full_name, role)
+  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', new.email), 'warga');
+  return new;
+end;
+$function$
+"
+FUNCTION,my_house_id,"CREATE OR REPLACE FUNCTION public.my_house_id()
+ RETURNS uuid
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+  select house_id from profiles where id = auth.uid();
+$function$
+"
+FUNCTION,my_role,"CREATE OR REPLACE FUNCTION public.my_role()
+ RETURNS user_role
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+AS $function$
+  select role from profiles where id = auth.uid();
+$function$
+"
+FUNCTION,notify_on_announcement,"CREATE OR REPLACE FUNCTION public.notify_on_announcement()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  insert into notifications (user_id, type, title, body, link)
+  select id, 'pengumuman', 'Pengumuman Baru: ' || new.title, left(coalesce(new.content, ''), 140), '/pengumuman'
+  from profiles;
+  return new;
+end;
+$function$
+"
+FUNCTION,notify_on_chat_message,"CREATE OR REPLACE FUNCTION public.notify_on_chat_message()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  insert into notifications (user_id, type, title, body, link)
+  values (
+    new.receiver_id,
+    'pesan',
+    'Pesan Baru',
+    left(new.content, 100),
+    '/chat/' || new.sender_id::text
+  );
+  return new;
+end;
+$function$
+"
+FUNCTION,notify_on_emergency,"CREATE OR REPLACE FUNCTION public.notify_on_emergency()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  insert into notifications (user_id, type, title, body, link)
+  select id, 'darurat', 'Laporan Darurat Baru', 'Ada laporan darurat di lingkungan, cek detailnya.', '/darurat'
+  from profiles
+  where id != new.reported_by;
+  return new;
+end;
+$function$
+"
+FUNCTION,notify_on_friend_request,"CREATE OR REPLACE FUNCTION public.notify_on_friend_request()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  if new.status = 'pending' then
+    insert into notifications (user_id, type, title, body, link)
+    select
+      new.addressee_id,
+      'pertemanan',
+      'Permintaan Pertemanan Baru',
+      coalesce((select full_name from profiles where id = new.requester_id), 'Warga') || ' ingin berteman denganmu',
+      '/warga/' || new.requester_id::text;
+  end if;
+  return new;
+end;
+$function$
+"
+FUNCTION,notify_on_poll,"CREATE OR REPLACE FUNCTION public.notify_on_poll()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  insert into notifications (user_id, type, title, body, link)
+  select id, 'polling', 'Polling Baru: ' || new.title, 'Ada polling warga baru, yuk ikut vote.', '/polling'
+  from profiles;
+  return new;
+end;
+$function$
+"
+JUMLAH_AKUN,superadmin / aktif,1
+JUMLAH_AKUN,warga / aktif,2

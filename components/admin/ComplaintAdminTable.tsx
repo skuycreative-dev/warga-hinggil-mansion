@@ -15,7 +15,7 @@ type Complaint = {
   creator?: { full_name: string } | null
 }
 
-const STATUS_OPTIONS = ['baru', 'diproses', 'selesai']
+const STATUS_OPTIONS = ['diterima', 'diproses', 'selesai']
 
 const CATEGORY_LABEL: Record<string, string> = {
   kebersihan: 'Kebersihan',
@@ -76,7 +76,7 @@ export default function ComplaintAdminTable({ complaints }: { complaints: Compla
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s} style={{ color: '#1a1305' }}>
-                  {s === 'baru' ? 'Baru' : s === 'diproses' ? 'Diproses' : 'Selesai'}
+                  {s === 'diterima' ? 'Diterima' : s === 'diproses' ? 'Diproses' : 'Selesai'}
                 </option>
               ))}
             </select>

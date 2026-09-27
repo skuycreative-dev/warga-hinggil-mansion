@@ -8,7 +8,7 @@
 }
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  baru: { bg: 'rgba(179,57,47,0.12)', text: '#b3392f', label: 'Baru' },
+  diterima: { bg: 'rgba(179,57,47,0.12)', text: '#b3392f', label: 'Diterima' },
   diproses: { bg: 'rgba(212,175,106,0.18)', text: '#9c7a3f', label: 'Diproses' },
   selesai: { bg: 'rgba(74,140,110,0.16)', text: '#2f6b4f', label: 'Selesai' },
 }
@@ -21,7 +21,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 }
 
 export default function ComplaintItem({ item }: { item: Complaint }) {
-  const statusStyle = STATUS_STYLE[item.status] ?? STATUS_STYLE.baru
+  const statusStyle = STATUS_STYLE[item.status] ?? STATUS_STYLE.diterima
 
   return (
     <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
