@@ -23,7 +23,7 @@ async function requireSuperadmin() {
     return null
   }
 
-  return supabase
+  return { userId: user.id }
 }
 
 export async function createAdminAccount(prevState: AdminAccountState, formData: FormData): Promise<AdminAccountState> {
@@ -68,7 +68,13 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
 
     const { error: profileError } = await admin
       .from('profiles')
-      .update({ full_name: fullName, role })
+      .update({
+        full_name: fullName,
+        role,
+        account_status: 'aktif',
+        verified_at: new Date().toISOString(),
+        verified_by: user.id,
+      })
       .eq('id', created.user.id)
 
     if (profileError) {

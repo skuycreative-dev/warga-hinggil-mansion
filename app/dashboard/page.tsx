@@ -64,6 +64,9 @@ const menu = [
   },
 ]
 
+// Menu yang tetap bisa dipakai walau akun warga belum diverifikasi Pengurus
+const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya']
+
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -77,7 +80,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, avatar_url, house_id, house:houses(nomor_rumah)')
+    .select('full_name, role, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -101,6 +104,10 @@ export default async function DashboardPage() {
   const isItSupport = profile?.role === 'it_support' || profile?.role === 'superadmin'
   const isSuperadmin = profile?.role === 'superadmin'
   const canSeeRumahKosong = isSecurity || isPaguyuban
+
+  const isWarga = profile?.role === 'warga'
+  const accountStatus = profile?.account_status ?? 'aktif'
+  const isLocked = isWarga && accountStatus !== 'aktif'
 
   return (
     <main className="flex w-full flex-col">
@@ -158,33 +165,92 @@ export default async function DashboardPage() {
 
       <section className="w-full" style={{ background: '#faf7f0' }}>
         <div className="mx-auto w-full max-w-3xl px-6 py-10 md:px-10 md:py-14">
+          {isLocked ? (
+            <div
+              className="mb-6 rounded-2xl px-5 py-4"
+              style={{
+                background: accountStatus === 'ditolak' ? 'rgba(179,57,47,0.08)' : 'rgba(212,175,106,0.14)',
+                border: accountStatus === 'ditolak' ? '1px solid rgba(179,57,47,0.3)' : '1px solid rgba(212,175,106,0.4)',
+              }}
+            >
+              {accountStatus === 'ditolak' ? (
+                <>
+                  <p className="text-sm font-bold" style={{ color: '#b3392f' }}>
+                    Pendaftaran kamu belum bisa disetujui.
+                  </p>
+                  <p className="mt-1 text-[13px] font-medium" style={{ color: '#5b543f' }}>
+                    {profile?.deactivated_reason
+                      ? `Alasan: ${profile.deactivated_reason}`
+                      : 'Hubungi Pengurus Paguyuban untuk informasi lebih lanjut atau daftar ulang.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
+                    Akun kamu sedang menunggu verifikasi Pengurus.
+                  </p>
+                  <p className="mt-1 text-[13px] font-medium" style={{ color: '#5b543f' }}>
+                    Semua fitur akan terbuka otomatis setelah disetujui. Tombol Darurat dan Profil Saya tetap bisa dipakai sekarang.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : null}
+
           <div className="mb-4 text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>
             Menu Cepat
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {menu.map((m) => (
-              <Link
-                key={m.title}
-                href={m.href}
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
-                style={{
-                  background: '#ffffff',
-                  border: m.danger ? '1px solid rgba(179,57,47,0.25)' : '1px solid rgba(26,19,5,0.08)',
-                }}
-              >
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: m.danger ? '#b3392f' : '#1a1305' }}
+            {menu.map((m) => {
+              const tileLocked = isLocked && !UNLOCKED_WHEN_PENDING.includes(m.title)
+
+              if (tileLocked) {
+                return (
+                  <div
+                    key={m.title}
+                    className="relative flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center opacity-45"
+                    style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={m.path} />
+                      </svg>
+                    </div>
+                    <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>{m.title}</div>
+                    <div className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full" style={{ background: '#1a1305' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="4" y="10" width="16" height="10" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                      </svg>
+                    </div>
+                  </div>
+                )
+              }
+
+              return (
+                <Link
+                  key={m.title}
+                  href={m.href}
+                  className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                  style={{
+                    background: '#ffffff',
+                    border: m.danger ? '1px solid rgba(179,57,47,0.25)' : '1px solid rgba(26,19,5,0.08)',
+                  }}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={m.danger ? '#ffffff' : '#e6c98a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d={m.path} />
-                  </svg>
-                </div>
-                <div className="text-[13.5px] font-bold" style={{ color: m.danger ? '#b3392f' : '#1f1a10' }}>
-                  {m.title}
-                </div>
-              </Link>
-            ))}
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-xl"
+                    style={{ background: m.danger ? '#b3392f' : '#1a1305' }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={m.danger ? '#ffffff' : '#e6c98a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d={m.path} />
+                    </svg>
+                  </div>
+                  <div className="text-[13.5px] font-bold" style={{ color: m.danger ? '#b3392f' : '#1f1a10' }}>
+                    {m.title}
+                  </div>
+                </Link>
+              )
+            })}
 
             {canSeeRumahKosong ? (
               <Link
@@ -300,6 +366,21 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Tukang</div>
+              </Link>
+            ) : null}
+
+            {isPaguyuban ? (
+              <Link
+                href="/verifikasi-akun"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Verifikasi Akun</div>
               </Link>
             ) : null}
 

@@ -8,6 +8,7 @@ const ALLOWED_ROLES = ['paguyuban', 'superadmin']
 
 const NAV_ITEMS = [
   { title: 'Dashboard', href: '/paguyuban' },
+  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
   { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
   { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum' },
   { title: 'Anggaran & Iuran', href: '/anggaran' },
@@ -73,6 +74,12 @@ export default async function PaguyubanDashboardPage() {
     .select('id', { count: 'exact', head: true })
     .eq('is_active', true)
 
+  const { count: menungguVerifikasi } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('role', 'warga')
+    .eq('account_status', 'menunggu_verifikasi')
+
   const recentTx = allTx.slice(0, 6)
 
   return (
@@ -112,6 +119,13 @@ export default async function PaguyubanDashboardPage() {
           caption="Terpantau security"
           iconBg="#e6c98a"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
+        />
+        <StatCard
+          label="Menunggu Verifikasi"
+          value={menungguVerifikasi ?? 0}
+          caption="Warga baru"
+          iconBg="#c9b8f0"
+          iconPath="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
       </div>
 

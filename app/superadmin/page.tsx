@@ -15,6 +15,7 @@ const ROLE_OPTIONS = [
 const NAV_ITEMS = [
   { title: 'Kelola Admin', href: '/superadmin' },
   { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
+  { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
   { title: 'Pengumuman', href: '/pengumuman' },
 ]
 
@@ -54,6 +55,12 @@ export default async function SuperadminPage() {
     .select('id', { count: 'exact', head: true })
     .eq('role', 'warga')
 
+  const { count: menungguVerifikasi } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('role', 'warga')
+    .eq('account_status', 'menunggu_verifikasi')
+
   const paguyubanCount = (accounts ?? []).filter((a) => a.role === 'paguyuban').length
   const manajemenCount = (accounts ?? []).filter((a) => a.role === 'manajemen').length
 
@@ -73,9 +80,16 @@ export default async function SuperadminPage() {
         <StatCard
           label="Total Warga"
           value={wargaCount ?? 0}
-          caption="Akun aktif"
+          caption="Semua status"
           iconBg="#e6c98a"
           iconPath="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+        />
+        <StatCard
+          label="Menunggu Verifikasi"
+          value={menungguVerifikasi ?? 0}
+          caption="Warga baru"
+          iconBg="#f2b8b0"
+          iconPath="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
         <StatCard
           label="Admin Paguyuban"
@@ -88,12 +102,6 @@ export default async function SuperadminPage() {
           value={manajemenCount}
           iconBg="#a8d8c8"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
-        />
-        <StatCard
-          label="Total Admin"
-          value={(accounts ?? []).length}
-          iconBg="#f2b8b0"
-          iconPath="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"
         />
       </div>
 

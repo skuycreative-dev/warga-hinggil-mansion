@@ -24,7 +24,7 @@ async function requireStaffManager() {
     return null
   }
 
-  return supabase
+  return { userId: user.id }
 }
 
 export async function createStaffAccount(prevState: StaffAccountState, formData: FormData): Promise<StaffAccountState> {
@@ -61,7 +61,13 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
 
     const { error: profileError } = await admin
       .from('profiles')
-      .update({ full_name: fullName, role })
+      .update({
+        full_name: fullName,
+        role,
+        account_status: 'aktif',
+        verified_at: new Date().toISOString(),
+        verified_by: requester.userId,
+      })
       .eq('id', created.user.id)
 
     if (profileError) {
