@@ -57,10 +57,13 @@ export default async function PaguyubanDashboardPage() {
   const pemasukanBulanIni = bulanIniTx.filter((t) => t.type === 'pemasukan').reduce((sum, t) => sum + Number(t.amount), 0)
   const pengeluaranBulanIni = bulanIniTx.filter((t) => t.type === 'pengeluaran').reduce((sum, t) => sum + Number(t.amount), 0)
 
+  const hariIni = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date())
   const { count: rumahKosong } = await supabase
-    .from('houses')
+    .from('house_absences')
     .select('id', { count: 'exact', head: true })
-    .eq('is_empty_flagged', true)
+    .eq('status', 'aktif')
+    .lte('start_date', hariIni)
+    .gte('end_date', hariIni)
 
   const { count: pollingAktif } = await supabase
     .from('polls')
@@ -109,7 +112,7 @@ export default async function PaguyubanDashboardPage() {
         <StatCard
           label="Rumah Kosong"
           value={rumahKosong ?? 0}
-          caption="Terpantau security"
+          caption="Diaktifkan warga"
           iconBg="#e6c98a"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
         />

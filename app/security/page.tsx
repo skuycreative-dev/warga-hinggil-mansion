@@ -55,10 +55,14 @@ export default async function SecurityDashboardPage() {
     .select('id', { count: 'exact', head: true })
     .eq('status', 'masuk')
 
+  // Rumah kosong sekarang diaktifkan warga sendiri (tabel house_absences)
+  const hariIni = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date())
   const { count: rumahKosong } = await supabase
-    .from('houses')
+    .from('house_absences')
     .select('id', { count: 'exact', head: true })
-    .eq('is_empty_flagged', true)
+    .eq('status', 'aktif')
+    .lte('start_date', hariIni)
+    .gte('end_date', hariIni)
 
   const { count: alertAktif } = await supabase
     .from('emergency_alerts')
@@ -72,12 +76,20 @@ export default async function SecurityDashboardPage() {
     .select('id', { count: 'exact', head: true })
     .gte('created_at', startOfMonth)
 
-  const { data: rumahKosongList } = await supabase
-    .from('houses')
-    .select('id, nomor_rumah, empty_since')
-    .eq('is_empty_flagged', true)
-    .order('empty_since', { ascending: true })
+  const { data: rumahKosongRaw } = await supabase
+    .from('house_absences')
+    .select('id, start_date, end_date, house:houses(nomor_rumah)')
+    .eq('status', 'aktif')
+    .lte('start_date', hariIni)
+    .gte('end_date', hariIni)
+    .order('end_date', { ascending: true })
     .limit(6)
+
+  const rumahKosongList = (rumahKosongRaw ?? []).map((a: any) => ({
+    id: a.id as string,
+    nomor_rumah: ((Array.isArray(a.house) ? a.house[0] : a.house)?.nomor_rumah ?? '-') as string,
+    end_date: a.end_date as string,
+  }))
 
   return (
     <AdminLayout portalLabel="Portal Admin" roleLabel="Security" userName={myProfile.full_name ?? 'Security'} navItems={NAV_ITEMS}>
@@ -136,18 +148,16 @@ export default async function SecurityDashboardPage() {
           <div className="flex flex-col gap-2.5">
             {rumahKosongList && rumahKosongList.length > 0 ? (
               rumahKosongList.map((h) => {
-                const days = h.empty_since
-                  ? Math.max(0, Math.floor((Date.now() - new Date(h.empty_since).getTime()) / (1000 * 60 * 60 * 24)))
-                  : 0
+                const days = Math.max(0, Math.ceil((Date.parse(`${h.end_date}T23:59:59+07:00`) - Date.now()) / (1000 * 60 * 60 * 24)))
                 return (
                   <div key={h.id} className="rounded-2xl px-4 py-3" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
                     <div className="flex items-center justify-between">
                       <span className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>{h.nomor_rumah}</span>
                       <span
                         className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                        style={{ background: days >= 7 ? 'rgba(179,57,47,0.12)' : 'rgba(212,175,106,0.16)', color: days >= 7 ? '#b3392f' : '#9c7a3f' }}
+                        style={{ background: 'rgba(179,57,47,0.12)', color: '#b3392f' }}
                       >
-                        {days} HARI
+                        {days} HARI LAGI
                       </span>
                     </div>
                   </div>

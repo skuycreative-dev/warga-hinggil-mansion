@@ -60,6 +60,11 @@ const menu = [
     path: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
   },
   {
+    title: 'Rumah Kosong',
+    href: '/rumah-kosong',
+    path: 'M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z',
+  },
+  {
     title: 'Profil Saya',
     href: '/profile',
     path: 'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 21c1.5-4 5-6 8-6s6.5 2 8 6',
@@ -102,6 +107,20 @@ export default async function DashboardPage() {
     redirect('/lengkapi-profil')
   }
 
+  // Polling aktif ditampilkan di dashboard (kebutuhan #10)
+  const { data: pollsRaw } = await supabase
+    .from('polls')
+    .select('id, title, closes_at')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(5)
+  const openPolls = (pollsRaw ?? []).filter((p) => !p.closes_at || new Date(p.closes_at).getTime() > Date.now()).slice(0, 2)
+  const { data: myVotes } =
+    openPolls.length > 0
+      ? await supabase.from('poll_votes').select('poll_id').eq('voter_id', user.id).in('poll_id', openPolls.map((p) => p.id))
+      : { data: [] as { poll_id: string }[] }
+  const votedPollIds = new Set((myVotes ?? []).map((v) => v.poll_id))
+
   const { data: announcements } = await supabase
     .from('announcements')
     .select('id, title, created_at')
@@ -130,7 +149,6 @@ export default async function DashboardPage() {
   const isManajemen = profile?.role === 'manajemen' || profile?.role === 'superadmin'
   const isItSupport = profile?.role === 'it_support' || profile?.role === 'superadmin'
   const isSuperadmin = profile?.role === 'superadmin'
-  const canSeeRumahKosong = isSecurity || isPaguyuban
 
   const isSekretaris = profile?.role === 'staff_paguyuban' && profile?.staff_position === 'sekretaris'
   const canVerifyAccounts = isSuperadmin || profile?.role === 'paguyuban' || isSekretaris
@@ -334,21 +352,6 @@ export default async function DashboardPage() {
               )
             })}
 
-            {canSeeRumahKosong ? (
-              <Link
-                href="/rumah-kosong"
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
-                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />
-                  </svg>
-                </div>
-                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Rumah Kosong</div>
-              </Link>
-            ) : null}
-
             {isSecurity ? (
               <Link
                 href="/security"
@@ -527,6 +530,47 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
           </div>
+
+          {openPolls.length > 0 && !isLocked && !isItSupportRole ? (
+            <div className="mt-10">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>
+                  Polling Warga
+                </span>
+                <Link href="/polling" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
+                  Lihat Semua
+                </Link>
+              </div>
+              <div className="flex flex-col gap-2.5">
+                {openPolls.map((p) => {
+                  const voted = votedPollIds.has(p.id)
+                  return (
+                    <Link
+                      key={p.id}
+                      href="/polling"
+                      className="flex items-center justify-between gap-3 rounded-2xl px-5 py-4 transition hover:-translate-y-0.5"
+                      style={{ background: '#ffffff', border: voted ? '1px solid rgba(26,19,5,0.08)' : '1px solid rgba(212,175,106,0.45)' }}
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{p.title}</div>
+                        {p.closes_at ? (
+                          <div className="text-[11.5px] font-semibold" style={{ color: '#9c7a3f' }}>
+                            Ditutup {new Date(p.closes_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          </div>
+                        ) : null}
+                      </div>
+                      <span
+                        className="flex-shrink-0 rounded-full px-3 py-1 text-[11.5px] font-bold"
+                        style={voted ? { background: 'rgba(47,138,79,0.12)', color: '#2f8a4f' } : { background: '#1a1305', color: '#e6c98a' }}
+                      >
+                        {voted ? 'Sudah memilih' : 'Pilih sekarang'}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-10">
             <div className="mb-4 flex items-center justify-between">

@@ -90,4 +90,4 @@ const PORTAL_RULES: { prefix: string; roles: string[] }[] = [
 
 // Fitur warga: terkunci untuk warga yang belum diverifikasi, dan untuk IT Support.
 // Tombol Darurat (/darurat) dan Profil (/profile) sengaja TIDAK ada di sini.
-const WARGA_FEATURES = ['/forum', '/warga', '/chat', '/pengumuman', '/pengaduan', '/qr-tamu', '/anggaran', '/polling', '/tukang']
+const WARGA_FEATURES = ['/forum', '/warga', '/chat', '/pengumuman', '/pengaduan', '/qr-tamu', '/anggaran', '/polling', '/tukang', '/rumah-kosong']

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import NotificationBell from '@/components/NotificationBell'
+import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
 
 const sidebarLinks = [
   { title: 'Beranda', href: '/dashboard' },
@@ -16,6 +17,7 @@ const sidebarLinks = [
   { title: 'Anggaran & Iuran', href: '/anggaran' },
   { title: 'Polling Warga', href: '/polling' },
   { title: 'Katalog Tukang', href: '/tukang' },
+  { title: 'Rumah Kosong', href: '/rumah-kosong' },
 ]
 
 // Halaman portal admin memakai sidebar sendiri (AdminLayout), jadi navbar warga disembunyikan di sana
@@ -37,7 +39,6 @@ const roleLinks = [
   { title: 'Kelola Nomor Darurat', href: '/kelola-nomor-darurat', roles: ['superadmin', 'paguyuban', 'staff_paguyuban:sekretaris'] },
   { title: 'Dashboard Security', href: '/security', roles: ['security', 'superadmin'] },
   { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu', roles: ['security', 'superadmin'] },
-  { title: 'Status Rumah Kosong', href: '/rumah-kosong', roles: ['security', 'paguyuban', 'superadmin'] },
   { title: 'Dashboard Paguyuban', href: '/paguyuban', roles: ['paguyuban', 'superadmin'] },
   { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum', roles: ['paguyuban', 'superadmin'] },
   { title: 'Dashboard Manajemen', href: '/manajemen', roles: ['manajemen', 'superadmin'] },
@@ -104,6 +105,7 @@ export default function AppNavbar() {
 
   return (
     <>
+      <EmergencyAlertWatcher />
       <div
         className="sticky top-0 z-40 w-full"
         style={{ background: '#0a0b0f', borderBottom: '1px solid rgba(230,201,138,0.15)' }}
