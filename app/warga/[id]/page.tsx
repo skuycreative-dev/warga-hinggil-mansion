@@ -22,7 +22,7 @@ export default async function WargaProfilePage({ params }: { params: Promise<{ i
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, bio, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
+    .select('full_name, nickname, bio, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
     .eq('id', id)
     .maybeSingle()
 
@@ -53,6 +53,14 @@ export default async function WargaProfilePage({ params }: { params: Promise<{ i
 
   const houseLabel = (profile as any)?.house?.nomor_rumah ?? null
 
+  // Hanya terisi kalau kalian berteman dan status belum lewat 24 jam (dijaga database)
+  const { data: status } = await supabase
+    .from('profile_statuses')
+    .select('content')
+    .eq('user_id', id)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle()
+
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
       <div className="mx-auto w-full max-w-lg px-6 pt-4 md:px-10">
@@ -79,6 +87,8 @@ export default async function WargaProfilePage({ params }: { params: Promise<{ i
           profile={{
             userId: id,
             fullName: profile.full_name ?? 'Warga',
+            nickname: profile.nickname ?? null,
+            statusText: status?.content ?? null,
             phone: null,
             bio: profile.bio ?? null,
             avatarUrl: profile.avatar_url ?? null,

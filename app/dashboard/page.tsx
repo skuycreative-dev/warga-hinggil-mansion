@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from './actions'
 import NotificationBell from '@/components/NotificationBell'
+import { displayName as nameOf } from '@/lib/display-name'
 
 const menu = [
   {
@@ -90,7 +91,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, staff_position, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
+    .select('full_name, nickname, role, staff_position, avatar_url, house_id, account_status, deactivated_reason, house:houses(nomor_rumah)')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -109,7 +110,7 @@ export default async function DashboardPage() {
   const sejak24Jam = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { data: daruratRaw } = await supabase
     .from('emergency_alerts')
-    .select('id, emergency_type, status, created_at, house:houses(nomor_rumah), reporter:reporter_id(full_name)')
+    .select('id, emergency_type, status, created_at, house:houses(nomor_rumah), reporter:reporter_id(full_name, nickname)')
     .in('status', ['aktif', 'ditangani'])
     .gte('created_at', sejak24Jam)
     .order('created_at', { ascending: false })
@@ -118,10 +119,10 @@ export default async function DashboardPage() {
   const daruratAktif = (daruratRaw ?? []).map((a: any) => ({
     ...a,
     house: Array.isArray(a.house) ? a.house[0] : a.house,
-    reporter: Array.isArray(a.reporter) ? a.reporter[0] : a.reporter,
+    reporterName: nameOf(Array.isArray(a.reporter) ? a.reporter[0] : a.reporter),
   }))
 
-  const displayName = profile?.full_name ?? 'Warga'
+  const displayName = nameOf(profile)
   const houseLabel = (profile as any)?.house?.nomor_rumah
   const isSecurity = profile?.role === 'security' || profile?.role === 'superadmin'
   const isPaguyuban = profile?.role === 'paguyuban' || profile?.role === 'superadmin'
@@ -205,7 +206,7 @@ export default async function DashboardPage() {
               <div className="mt-2 flex flex-col gap-1.5">
                 {daruratAktif.map((a: any) => (
                   <div key={a.id} className="text-sm font-bold text-white">
-                    {(EMERGENCY_LABEL[a.emergency_type] ?? 'Darurat').toUpperCase()} · {a.reporter?.full_name ?? 'Warga'}
+                    {(EMERGENCY_LABEL[a.emergency_type] ?? 'Darurat').toUpperCase()} · {a.reporterName}
                     {a.house?.nomor_rumah ? ` · Rumah ${a.house.nomor_rumah}` : ''}
                     <span className="ml-1.5 text-[11.5px] font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>
                       {a.status === 'ditangani' ? '(sedang ditangani)' : '(menunggu respon)'}

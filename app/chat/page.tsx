@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { displayName } from '@/lib/display-name'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
@@ -15,14 +16,14 @@ export default async function ChatListPage() {
 
   const { data: friendships } = await supabase
     .from('friendships')
-    .select('id, requester_id, addressee_id, requester:profiles!friendships_requester_id_fkey(id, full_name, avatar_url), addressee:profiles!friendships_addressee_id_fkey(id, full_name, avatar_url)')
+    .select('id, requester_id, addressee_id, requester:profiles!friendships_requester_id_fkey(id, full_name, nickname, avatar_url), addressee:profiles!friendships_addressee_id_fkey(id, full_name, nickname, avatar_url)')
     .eq('status', 'accepted')
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
 
   const friends = (friendships ?? []).map((f: any) => {
     const isRequester = f.requester_id === user.id
     const friend = isRequester ? f.addressee : f.requester
-    return { id: friend.id, full_name: friend.full_name, avatar_url: friend.avatar_url }
+    return { id: friend.id, full_name: displayName(friend), avatar_url: friend.avatar_url }
   })
 
   let lastMessages: Record<string, { content: string; created_at: string; is_mine: boolean }> = {}

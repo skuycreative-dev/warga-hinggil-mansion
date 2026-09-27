@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { displayName } from '@/lib/display-name'
 import ForumPostForm from '@/components/ForumPostForm'
 import ForumFeed from '@/components/ForumFeed'
 import NotificationBell from '@/components/NotificationBell'
@@ -13,7 +14,7 @@ export default async function ForumPage() {
 
   const { data: rawPosts } = await supabase
     .from('forum_posts')
-    .select('id, content, created_at, author:profiles(full_name)')
+    .select('id, content, created_at, author:profiles(full_name, nickname)')
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -27,7 +28,7 @@ export default async function ForumPage() {
     postIds.length
       ? supabase
           .from('forum_comments')
-          .select('id, post_id, content, created_at, author:profiles(full_name)')
+          .select('id, post_id, content, created_at, author:profiles(full_name, nickname)')
           .in('post_id', postIds)
           .order('created_at', { ascending: true })
       : Promise.resolve({ data: [] as any[] }),
@@ -41,14 +42,14 @@ export default async function ForumPage() {
         id: c.id,
         content: c.content,
         created_at: c.created_at,
-        author_name: c.author?.full_name ?? 'Warga',
+        author_name: displayName(c.author),
       }))
 
     return {
       id: p.id,
       content: p.content,
       created_at: p.created_at,
-      author_name: p.author?.full_name ?? 'Warga',
+      author_name: displayName(p.author),
       likeCount: postLikes.length,
       likedByMe: !!user && postLikes.some((l: any) => l.user_id === user.id),
       comments: postComments,

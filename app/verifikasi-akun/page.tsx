@@ -5,7 +5,8 @@ import { adminNavFor } from '@/lib/admin-nav'
 import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
 import VerifikasiAccountTable from '@/components/admin/VerifikasiAccountTable'
-import { approveAccount, rejectAccount, deleteWargaAccount } from './actions'
+import ChangeRequestTable from '@/components/admin/ChangeRequestTable'
+import { approveAccount, rejectAccount, deleteWargaAccount, approveChangeRequest, rejectChangeRequest } from './actions'
 
 export default async function VerifikasiAkunPage() {
   const access = await getMyAccess()
@@ -49,6 +50,19 @@ export default async function VerifikasiAkunPage() {
   const pending = normalize(pendingRaw)
   const ditolak = normalize(ditolakRaw)
 
+  const { data: requestsRaw } = await supabase
+    .from('profile_change_requests')
+    .select('id, field, old_value, new_value, created_at, requester:profiles!profile_change_requests_user_id_fkey(full_name, nickname, house:houses(nomor_rumah))')
+    .eq('status', 'menunggu')
+    .order('created_at', { ascending: true })
+
+  const requests = (requestsRaw ?? []).map((r: any) => {
+    const requester = Array.isArray(r.requester) ? r.requester[0] : r.requester
+    return {
+      ...r,
+      requester: requester ? { ...requester, house: Array.isArray(requester.house) ? requester.house[0] : requester.house } : null,
+    }
+  })
 
   return (
     <AdminLayout portalLabel="Portal Admin" roleLabel={access.roleLabel} userName={access.fullName} navItems={adminNavFor(access)}>
@@ -70,6 +84,12 @@ export default async function VerifikasiAkunPage() {
           iconPath="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
         <StatCard
+          label="Pengajuan Ubah Data"
+          value={requests.length}
+          iconBg="#c9b8f0"
+          iconPath="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"
+        />
+        <StatCard
           label="Ditolak"
           value={ditolak.length}
           iconBg="#f2b8b0"
@@ -82,6 +102,18 @@ export default async function VerifikasiAkunPage() {
           Menunggu Verifikasi ({pending.length})
         </div>
         <VerifikasiAccountTable accounts={pending} mode="pending" approveAction={approveAccount} rejectAction={rejectAccount} />
+      </div>
+
+      <div className="mb-9">
+        <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
+          Pengajuan Perubahan Data ({requests.length})
+        </div>
+        <ChangeRequestTable
+          requests={requests}
+          canReviewFullName={access.isSuperadmin || access.isKetuaPaguyuban}
+          approveAction={approveChangeRequest}
+          rejectAction={rejectChangeRequest}
+        />
       </div>
 
       <div>

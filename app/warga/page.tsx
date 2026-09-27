@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { displayName } from '@/lib/display-name'
 
 export default async function WargaDirectoryPage() {
   const supabase = await createClient()
@@ -15,17 +16,24 @@ export default async function WargaDirectoryPage() {
 
   const userId = user.id
 
-  const [{ data: allProfiles }, { data: myFriendships }] = await Promise.all([
+  const [{ data: allProfilesRaw }, { data: myFriendships }, { data: statuses }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, family_role, house:houses(nomor_rumah)')
-      .neq('id', userId)
-      .order('full_name', { ascending: true }),
+      .select('id, full_name, nickname, avatar_url, family_role, house:houses(nomor_rumah)')
+      .neq('id', userId),
     supabase
       .from('friendships')
       .select('id, requester_id, addressee_id, status')
       .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
+    // Database hanya mengembalikan status milik teman yang belum lewat 24 jam
+    supabase.from('profile_statuses').select('user_id, content').gt('expires_at', new Date().toISOString()),
   ])
+
+  const statusByUser = new Map((statuses ?? []).map((s) => [s.user_id as string, s.content as string]))
+
+  const allProfiles = (allProfilesRaw ?? [])
+    .map((p: any) => ({ ...p, name: displayName(p) }))
+    .sort((a: any, b: any) => a.name.localeCompare(b.name, 'id'))
 
   const pendingReceived = (myFriendships ?? []).filter((f) => f.status === 'pending' && f.addressee_id === userId)
 
@@ -62,8 +70,9 @@ export default async function WargaDirectoryPage() {
         ) : null}
 
         <div className="flex flex-col gap-2.5">
-          {(allProfiles ?? []).map((p: any) => {
+          {allProfiles.map((p: any) => {
             const label = friendLabel(p.id)
+            const status = statusByUser.get(p.id)
             return (
               <Link
                 key={p.id}
@@ -77,16 +86,24 @@ export default async function WargaDirectoryPage() {
                 >
                   {p.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.avatar_url} alt={p.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={p.avatar_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <span className="text-sm font-bold" style={{ color: '#9c7a3f' }}>{(p.full_name ?? '?').charAt(0).toUpperCase()}</span>
+                    <span className="text-sm font-bold" style={{ color: '#9c7a3f' }}>{p.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{p.full_name ?? 'Warga'}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{p.name}</div>
                   <div className="text-[11.5px] font-medium" style={{ color: '#9c7a3f' }}>
                     {p.house?.nomor_rumah ? `Rumah ${p.house.nomor_rumah}` : 'Belum ada rumah'}
                   </div>
+                  {status ? (
+                    <div
+                      className="mt-1 inline-block max-w-full truncate rounded-xl rounded-tl-sm px-2.5 py-1 text-[12px] font-semibold"
+                      style={{ background: 'rgba(212,175,106,0.16)', color: '#3a3424' }}
+                    >
+                      {status}
+                    </div>
+                  ) : null}
                 </div>
                 {label ? (
                   <span

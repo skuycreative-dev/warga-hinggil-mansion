@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ProfileEditForm from '@/components/ProfileEditForm'
 import ProfileInfoCard from '@/components/ProfileInfoCard'
+import StatusEditor from '@/components/StatusEditor'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -15,13 +16,23 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, phone, bio, nik, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
-    .eq('id', user.id)
-    .maybeSingle()
+  const [{ data: profile }, { data: status }, { data: pendingRequests }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, nickname, phone, bio, nik, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
+      .eq('id', user.id)
+      .maybeSingle(),
+    supabase.from('profile_statuses').select('content, expires_at').eq('user_id', user.id).maybeSingle(),
+    supabase
+      .from('profile_change_requests')
+      .select('id, field, new_value')
+      .eq('user_id', user.id)
+      .eq('status', 'menunggu'),
+  ])
 
   const houseLabel = (profile as any)?.house?.nomor_rumah ?? null
+  const inCompletion = !profile?.nik || profile?.account_status === 'menunggu_verifikasi'
+  const activeStatus = status && new Date(status.expires_at).getTime() > Date.now() ? status : null
 
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
@@ -49,6 +60,8 @@ export default async function ProfilePage() {
           profile={{
             userId: user.id,
             fullName: profile?.full_name ?? 'Warga',
+            nickname: profile?.nickname ?? null,
+            statusText: activeStatus?.content ?? null,
             phone: profile?.phone ?? null,
             bio: profile?.bio ?? null,
             avatarUrl: profile?.avatar_url ?? null,
@@ -59,14 +72,19 @@ export default async function ProfilePage() {
             houseLabel,
           }}
         >
+          <StatusEditor current={activeStatus} />
+
           <div className="mt-6">
             <ProfileEditForm
               fullName={profile?.full_name ?? ''}
+              nickname={profile?.nickname ?? ''}
               phone={profile?.phone ?? ''}
               bio={profile?.bio ?? ''}
               nik={profile?.nik ?? ''}
               familyRole={profile?.family_role ?? 'anggota_keluarga'}
               occupancyStatus={profile?.occupancy_status ?? 'pemilik'}
+              inCompletion={inCompletion}
+              pendingRequests={pendingRequests ?? []}
             />
           </div>
         </ProfileInfoCard>

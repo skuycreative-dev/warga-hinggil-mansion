@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EmergencyPanel from '@/components/EmergencyPanel'
+import { displayName } from '@/lib/display-name'
 
 const RESOLVER_ROLES = ['security', 'paguyuban', 'manajemen', 'superadmin']
 
@@ -19,7 +20,7 @@ export default async function DaruratPage() {
 
   const { data: alertsRaw } = await supabase
     .from('emergency_alerts')
-    .select('id, message, status, emergency_type, created_at, reporter_id, house:houses(nomor_rumah), reporter:reporter_id(full_name)')
+    .select('id, message, status, emergency_type, created_at, reporter_id, house:houses(nomor_rumah), reporter:reporter_id(full_name, nickname)')
     .in('status', ['aktif', 'ditangani'])
     .order('created_at', { ascending: false })
     .limit(30)
@@ -27,7 +28,7 @@ export default async function DaruratPage() {
   const alerts = (alertsRaw ?? []).map((a: any) => ({
     ...a,
     house: Array.isArray(a.house) ? a.house[0] : a.house,
-    reporter: Array.isArray(a.reporter) ? a.reporter[0] : a.reporter,
+    reporter: { full_name: displayName(Array.isArray(a.reporter) ? a.reporter[0] : a.reporter) },
   }))
 
   const { data: contacts } = await supabase

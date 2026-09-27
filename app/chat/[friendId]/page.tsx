@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { displayName } from '@/lib/display-name'
 import ChatThread from '@/components/ChatThread'
 
 export default async function ChatThreadPage({ params }: { params: Promise<{ friendId: string }> }) {
@@ -24,7 +25,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ fri
 
   const { data: friendProfile } = await supabase
     .from('profiles')
-    .select('full_name, avatar_url')
+    .select('full_name, nickname, avatar_url')
     .eq('id', friendId)
     .maybeSingle()
 
@@ -32,13 +33,15 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ fri
     notFound()
   }
 
+  const friendName = displayName(friendProfile)
+
   if (!friendship) {
     return (
       <main className="flex min-h-screen w-full items-center justify-center px-6" style={{ background: '#faf7f0' }}>
         <div className="text-center">
           <p className="text-lg font-bold" style={{ color: '#1f1a10' }}>Belum Berteman</p>
           <p className="mt-2 text-sm font-medium" style={{ color: '#5b543f' }}>
-            Kamu harus berteman dulu dengan {friendProfile.full_name} untuk bisa chat.
+            Kamu harus berteman dulu dengan {friendName} untuk bisa chat.
           </p>
           <Link href={`/warga/${friendId}`} className="mt-4 inline-block text-sm font-bold" style={{ color: '#9c7a3f' }}>
             Lihat Profil
@@ -62,18 +65,18 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ fri
         >
           {friendProfile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={friendProfile.avatar_url} alt={friendProfile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={friendProfile.avatar_url} alt={friendName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span className="text-sm font-bold" style={{ color: '#9c7a3f' }}>{(friendProfile.full_name ?? '?').charAt(0).toUpperCase()}</span>
+            <span className="text-sm font-bold" style={{ color: '#9c7a3f' }}>{friendName.charAt(0).toUpperCase()}</span>
           )}
         </div>
         <span className="text-sm font-bold" style={{ color: '#efe4c8', fontFamily: 'var(--font-fraunces), serif' }}>
-          {friendProfile.full_name}
+          {friendName}
         </span>
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <ChatThread myId={user.id} friendId={friendId} friendName={friendProfile.full_name ?? 'Warga'} />
+        <ChatThread myId={user.id} friendId={friendId} friendName={friendName} />
       </div>
     </main>
   )
