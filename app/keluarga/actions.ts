@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { getMyHousehold } from '@/lib/household-access'
 import { logError } from '@/lib/log-error'
@@ -69,7 +70,7 @@ export async function saveFamilyItem(id: string | null, input: FamilyItemInput):
       .eq('id', id)
       .eq('created_by', ctx.userId)
       .select('id')
-    if (error) return { error: error.message, success: false }
+    if (error) return { error: publicError(error), success: false }
     if (!data || data.length === 0) return { error: 'Hanya pembuat yang bisa mengubah catatan/event ini.', success: false }
   } else {
     const { error } = await ctx.supabase.from('family_items').insert({ ...row, house_id: ctx.houseId, created_by: ctx.userId })
@@ -88,7 +89,7 @@ export async function deleteFamilyItem(id: string) {
   if (!ctx.isMember) return { error: 'Tidak punya akses.' }
 
   const { data, error } = await ctx.supabase.from('family_items').delete().eq('id', id).eq('created_by', ctx.userId).select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Hanya pembuat yang bisa menghapus.' }
 
   revalidatePath('/keluarga')

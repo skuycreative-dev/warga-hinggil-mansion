@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -56,7 +57,7 @@ export async function createContact(prevState: ContactFormState, formData: FormD
     updated_at: new Date().toISOString(),
   })
 
-  if (error) return { error: error.message, success: false }
+  if (error) return { error: publicError(error), success: false }
 
   refresh()
   return { error: '', success: true }
@@ -82,7 +83,7 @@ export async function updateContact(id: string, input: ContactInput) {
     })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   refresh()
   return { error: null }
@@ -98,7 +99,7 @@ export async function setContactActive(id: string, isActive: boolean) {
     .update({ is_active: isActive, updated_by: access.userId, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   refresh()
   return { error: null }
@@ -111,7 +112,7 @@ export async function deleteContact(id: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('emergency_contacts').delete().eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   refresh()
   return { error: null }

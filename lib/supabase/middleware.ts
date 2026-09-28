@@ -1,6 +1,7 @@
 ﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { featureForPath } from '@/lib/features'
+import { MFA_ALWAYS_OPEN, MFA_OPEN_PATHS, roleNeeds2fa } from '@/lib/mfa'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -44,12 +45,49 @@ export async function updateSession(request: NextRequest) {
   // Fitur yang bisa dimatikan Superadmin (white label). Halaman portal admin tidak ikut dikunci.
   const featureKey = portalRule ? null : featureForPath(path)
 
+  // Profil hanya diambil sekali per permintaan
+  let profilePromise: Promise<{ role: string; staff_position: string | null; account_status: string } | null> | null = null
+  const loadProfile = () => {
+    if (!profilePromise && user) {
+      profilePromise = Promise.resolve(
+        supabase.from('profiles').select('role, staff_position, account_status').eq('id', user.id).maybeSingle()
+      ).then(({ data }) => (data as { role: string; staff_position: string | null; account_status: string } | null) ?? null)
+    }
+    return profilePromise ?? Promise.resolve(null)
+  }
+
+  // ---------------------------------------------------------------------
+  // 2FA (Step 334): akun yang punya perangkat 2FA wajib memasukkan kode;
+  // akun admin yang belum memasang 2FA diarahkan untuk memasangnya.
+  // Tombol Darurat dan halaman login selalu terbuka.
+  // ---------------------------------------------------------------------
+  const isOpen = (list: string[]) => list.some((p) => path === p || path.startsWith(p + '/'))
+  if (user && !isOpen(MFA_ALWAYS_OPEN)) {
+    let mfaTarget: string | null = null
+    const hasFactor = (user.factors ?? []).some((f) => f.status === 'verified')
+    if (hasFactor) {
+      // Punya 2FA tapi belum memasukkan kode: semua halaman (termasuk Keamanan Akun) ditutup
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aal?.currentLevel !== 'aal2') {
+        mfaTarget = `/login/2fa?next=${encodeURIComponent(path + request.nextUrl.search)}`
+      }
+    } else if (!isOpen(MFA_OPEN_PATHS)) {
+      const me = await loadProfile()
+      if (roleNeeds2fa(me?.role)) mfaTarget = '/keamanan-akun?wajib=1'
+    }
+
+    if (mfaTarget) {
+      if (request.method !== 'GET' && request.method !== 'HEAD') {
+        return new NextResponse('Verifikasi 2 langkah diperlukan.', { status: 401 })
+      }
+      const redirect = NextResponse.redirect(new URL(mfaTarget, request.url))
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie))
+      return redirect
+    }
+  }
+
   if (user && (portalRule || isWargaFeature || featureKey)) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, staff_position, account_status')
-      .eq('id', user.id)
-      .maybeSingle()
+    const profile = await loadProfile()
 
     const role = profile?.role ?? 'warga'
     const roleKey = role === 'staff_paguyuban' ? `staff_paguyuban:${profile?.staff_position ?? ''}` : role

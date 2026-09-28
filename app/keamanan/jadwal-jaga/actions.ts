@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -62,7 +63,7 @@ export async function addShifts(input: ShiftInput) {
     .from('security_shifts')
     .upsert(rows, { onConflict: 'shift_date,start_time,security_id', ignoreDuplicates: true })
     .select('id')
-  if (error) return { error: error.message, count: 0 }
+  if (error) return { error: publicError(error), count: 0 }
   refresh()
   return { error: null, count: data?.length ?? 0 }
 }
@@ -71,7 +72,7 @@ export async function deleteShift(id: string) {
   const ctx = await team()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { error } = await ctx.supabase.from('security_shifts').delete().eq('id', id)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -88,7 +89,7 @@ export async function copyPreviousWeek(weekStart: string) {
     .select('shift_date, start_time, end_time, security_id, post, note')
     .gte('shift_date', prevStart)
     .lte('shift_date', addDaysIso(prevStart, 6))
-  if (readError) return { error: readError.message, count: 0 }
+  if (readError) return { error: publicError(readError), count: 0 }
   if (!prev?.length) return { error: 'Minggu lalu belum ada jadwal.', count: 0 }
 
   const rows = prev.map((s: any) => ({ ...s, shift_date: addDaysIso(s.shift_date, 7), created_by: ctx.userId }))
@@ -96,7 +97,7 @@ export async function copyPreviousWeek(weekStart: string) {
     .from('security_shifts')
     .upsert(rows, { onConflict: 'shift_date,start_time,security_id', ignoreDuplicates: true })
     .select('id')
-  if (error) return { error: error.message, count: 0 }
+  if (error) return { error: publicError(error), count: 0 }
   refresh()
   return { error: null, count: data?.length ?? 0 }
 }

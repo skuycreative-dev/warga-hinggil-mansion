@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -81,7 +82,7 @@ export async function endAbsence(id: string) {
     .eq('status', 'aktif')
     .select('id')
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Tidak bisa mengakhiri: data tidak ditemukan atau bukan rumahmu.' }
 
   revalidatePath('/rumah-kosong')

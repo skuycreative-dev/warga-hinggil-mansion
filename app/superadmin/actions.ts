@@ -1,6 +1,9 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
+import { getMyAccess } from '@/lib/access'
 import { revalidatePath } from 'next/cache'
+import { passwordProblem } from '@/lib/security'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -11,20 +14,17 @@ export type AdminAccountState = { error: string; success: boolean }
 const MANAGED_ROLES = ['manajemen', 'paguyuban']
 
 async function requireSuperadmin() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getMyAccess juga memastikan kode 2FA sudah dimasukkan
+  const access = await getMyAccess()
+  return access.isSuperadmin ? { userId: access.userId } : null
+}
 
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-
-  if (!profile || profile.role !== 'superadmin') {
-    return null
-  }
-
-  return { userId: user.id }
+// Hanya akun Manajemen / Ketua Paguyuban yang boleh diubah atau dihapus dari panel ini
+// (Superadmin lain dan akun sendiri tidak bisa)
+async function managedTarget(id: string, requesterId: string) {
+  if (!id || id === requesterId) return false
+  const { data } = await createAdminClient().from('profiles').select('role').eq('id', id).maybeSingle()
+  return !!data && MANAGED_ROLES.includes(data.role as string)
 }
 
 export async function createAdminAccount(prevState: AdminAccountState, formData: FormData): Promise<AdminAccountState> {
@@ -37,8 +37,9 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
     return { error: 'Nama, email, password, dan role wajib diisi dengan benar.', success: false }
   }
 
-  if (password.length < 6) {
-    return { error: 'Password minimal 6 karakter.', success: false }
+  const weak = passwordProblem(password)
+  if (weak) {
+    return { error: weak, success: false }
   }
 
   const supabase = await createClient()
@@ -64,7 +65,7 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
     })
 
     if (createError || !created.user) {
-      return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+      return { error: publicError(createError, 'Gagal membuat akun.'), success: false }
     }
 
     const { error: profileError } = await admin
@@ -79,7 +80,7 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
       .eq('id', created.user.id)
 
     if (profileError) {
-      return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
+      return { error: `Akun dibuat tapi gagal set profil: ${publicError(profileError)}`, success: false }
     }
 
     revalidatePath('/superadmin')
@@ -100,11 +101,17 @@ export async function updateAdminAccount(id: string, fullName: string, role: str
   if (!MANAGED_ROLES.includes(role)) {
     return { error: 'Role tidak valid.' }
   }
+  if (!(await managedTarget(id, requester.userId))) {
+    return { error: 'Akun ini tidak bisa diubah dari panel ini.' }
+  }
+  if (!fullName?.trim() || fullName.length > 100) {
+    return { error: 'Nama tidak valid.' }
+  }
 
   try {
     const admin = createAdminClient()
     const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
 
     revalidatePath('/superadmin')
     return { error: null }
@@ -117,6 +124,7 @@ export async function updateAdminAccount(id: string, fullName: string, role: str
 export async function deleteAdminAccount(id: string) {
   const requester = await requireSuperadmin()
   if (!requester) return
+  if (!(await managedTarget(id, requester.userId))) return
 
   try {
     const admin = createAdminClient()

@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { getMyAccess, type MyAccess } from '@/lib/access'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -53,7 +54,7 @@ export async function approveAccount(id: string, force = false): Promise<{ error
       .in('account_status', ['menunggu_verifikasi', 'ditolak'])
       .select('id')
 
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
     if (!data || data.length === 0) return { error: 'Akun ini sudah diproses atau bukan akun warga.' }
 
     await notify(admin, id, 'Akun kamu sudah diverifikasi', 'Selamat datang! Semua fitur aplikasi warga sekarang sudah bisa dipakai.', '/dashboard')
@@ -89,7 +90,7 @@ export async function rejectAccount(id: string, reason: string) {
       .eq('account_status', 'menunggu_verifikasi')
       .select('id')
 
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
     if (!data || data.length === 0) return { error: 'Akun ini sudah diproses sebelumnya.' }
 
     await notify(admin, id, 'Pendaftaran belum disetujui', `Alasan: ${finalReason}`, '/dashboard')
@@ -173,13 +174,13 @@ export async function approveChangeRequest(id: string) {
       .from('profiles')
       .update({ [request.field]: request.new_value, ...extra })
       .eq('id', request.user_id)
-    if (profileError) return { error: profileError.message }
+    if (profileError) return { error: publicError(profileError) }
 
     const { error } = await admin
       .from('profile_change_requests')
       .update({ status: 'disetujui', reviewed_by: access.userId, reviewed_at: new Date().toISOString() })
       .eq('id', id)
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
 
     await notify(
       admin,
@@ -218,7 +219,7 @@ export async function rejectChangeRequest(id: string, note: string) {
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id)
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
 
     await notify(
       admin,

@@ -42,9 +42,9 @@ export async function completeProfile(prevState: CompleteProfileState, formData:
     redirect('/login')
   }
 
-  const { data: existingNik } = await supabase.from('profiles').select('id').eq('nik', nik).neq('id', user.id).maybeSingle()
+  const { data: existingNik } = await supabase.rpc('nik_in_use', { p_nik: nik })
 
-  if (existingNik) {
+  if (existingNik === true) {
     return { error: 'NIK ini sudah terdaftar oleh akun lain.' }
   }
 

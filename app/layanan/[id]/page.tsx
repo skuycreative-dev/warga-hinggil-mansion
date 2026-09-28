@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { privateFields } from '@/lib/private-fields'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -34,8 +35,11 @@ export default async function LayananThreadPage({ params }: { params: Promise<{ 
     .limit(500)
 
   const peopleIds = Array.from(new Set([req.requester_id, req.handled_by, ...(msgs ?? []).map((m: any) => m.sender_id)].filter(Boolean) as string[]))
-  const { data: people } = await supabase.from('profiles').select('id, full_name, nickname, role, staff_position, phone').in('id', peopleIds)
-  const personMap = new Map((people ?? []).map((p: any) => [p.id as string, p]))
+  const [{ data: people }, phones] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, nickname, role, staff_position').in('id', peopleIds),
+    privateFields(supabase, peopleIds),
+  ])
+  const personMap = new Map((people ?? []).map((p: any) => [p.id as string, { ...p, phone: phones.get(p.id)?.phone ?? null }]))
   const isStaffProfile = (p: any) => !!p && (['paguyuban', 'superadmin'].includes(p.role) || (p.role === 'staff_paguyuban' && p.staff_position === 'sekretaris'))
 
   // Pratinjau foto (link sementara 1 jam)

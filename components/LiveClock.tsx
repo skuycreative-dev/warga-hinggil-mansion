@@ -9,9 +9,25 @@ export default function LiveClock({ variant = 'dark', full = false }: { variant?
 
   useEffect(() => {
     setNow(new Date())
-    const timer = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(timer)
-  }, [])
+    // Tanpa detik: cukup diperbarui tiap pergantian menit (hemat baterai HP)
+    let timer: ReturnType<typeof setTimeout>
+    const schedule = () => {
+      const wait = full ? 1000 - (Date.now() % 1000) : 60000 - (Date.now() % 60000)
+      timer = setTimeout(() => {
+        setNow(new Date())
+        schedule()
+      }, wait + 20)
+    }
+    schedule()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') setNow(new Date())
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [full])
 
   const mainColor = variant === 'dark' ? '#efe4c8' : '#1f1a10'
   const subColor = variant === 'dark' ? '#9c7a3f' : '#9c7a3f'

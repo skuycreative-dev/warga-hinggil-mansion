@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
@@ -40,7 +41,7 @@ export async function createAnnouncement(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: publicError(error) }
   }
 
   revalidatePath('/pengumuman')
@@ -54,7 +55,7 @@ export async function deleteAnnouncement(id: string) {
   const { error } = await supabase.from('announcements').delete().eq('id', id)
 
   if (error) {
-    return { error: error.message }
+    return { error: publicError(error) }
   }
 
   revalidatePath('/pengumuman')
@@ -81,7 +82,7 @@ export async function updateAnnouncement(id: string, title: string, content: str
   if (!ctx) return { error: 'Tidak punya akses untuk mengubah pengumuman.' }
 
   const { error } = await ctx.supabase.from('announcements').update({ title: cleanTitle, content: cleanContent }).eq('id', id)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/pengumuman')
   revalidatePath('/dashboard')
@@ -93,7 +94,7 @@ export async function setAnnouncementPinned(id: string, pinned: boolean) {
   if (!ctx) return { error: 'Tidak punya akses.' }
 
   const { error } = await ctx.supabase.from('announcements').update({ is_pinned: pinned }).eq('id', id)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/pengumuman')
   revalidatePath('/dashboard')
@@ -129,7 +130,7 @@ export async function toggleReaction(announcementId: string, reaction: string) {
     existing?.reaction === reaction
       ? await supabase.from('announcement_reactions').delete().eq('announcement_id', announcementId).eq('user_id', userId)
       : await supabase.from('announcement_reactions').upsert({ announcement_id: announcementId, user_id: userId, reaction })
-  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : error.message }
+  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : publicError(error) }
   revalidatePath('/pengumuman')
   return { error: null }
 }
@@ -140,7 +141,7 @@ export async function addAnnouncementComment(announcementId: string, body: strin
   if (text.length > 500) return { error: 'Komentar maksimal 500 karakter.' }
   const { supabase, userId } = await me()
   const { error } = await supabase.from('announcement_comments').insert({ announcement_id: announcementId, user_id: userId, body: text })
-  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : error.message }
+  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : publicError(error) }
   revalidatePath('/pengumuman')
   return { error: null }
 }
@@ -148,7 +149,7 @@ export async function addAnnouncementComment(announcementId: string, body: strin
 export async function deleteAnnouncementComment(commentId: string) {
   const { supabase } = await me()
   const { data, error } = await supabase.from('announcement_comments').delete().eq('id', commentId).select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Komentar tidak bisa dihapus.' }
   revalidatePath('/pengumuman')
   return { error: null }

@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import { privateFields } from '@/lib/private-fields'
+import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
 
 type Supa = Awaited<ReturnType<typeof createClient>>
@@ -120,13 +121,14 @@ export async function loadPatrolAbsences(supabase: Supa): Promise<PatrolAbsence[
           .order('checked_at', { ascending: false })
           .limit(1000)
       : Promise.resolve({ data: [] as any[] }),
-    ownerIds.length ? supabase.from('profiles').select('id, full_name, nickname, phone').in('id', ownerIds) : Promise.resolve({ data: [] as any[] }),
+    ownerIds.length ? supabase.from('profiles').select('id, full_name, nickname').in('id', ownerIds) : Promise.resolve({ data: [] as any[] }),
   ])
+  const ownerPhones = await privateFields(supabase, ownerIds)
 
   const checkerIds = Array.from(new Set((checks ?? []).map((c: any) => c.checked_by as string)))
   const { data: checkers } = checkerIds.length ? await supabase.from('profiles').select('id, full_name, nickname').in('id', checkerIds) : { data: [] as any[] }
   const checkerName = new Map((checkers ?? []).map((p: any) => [p.id as string, displayName(p, 'Petugas')]))
-  const ownerMap = new Map((owners ?? []).map((p: any) => [p.id as string, p]))
+  const ownerMap = new Map((owners ?? []).map((p: any) => [p.id as string, { ...p, phone: ownerPhones.get(p.id)?.phone ?? null }]))
   const planMap = new Map((plans ?? []).map((p: any) => [p.absence_id as string, p]))
 
   return list.map((r: any) => {

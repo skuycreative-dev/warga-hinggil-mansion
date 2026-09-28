@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -80,7 +81,7 @@ export async function submitTukang(prevState: SubmitTukangState, formData: FormD
 
   if (id) {
     const { data, error } = await supabase.from('tukang_catalog').update(parsed.values).eq('id', id).select('id')
-    if (error) return { error: error.message, success: false }
+    if (error) return { error: publicError(error), success: false }
     if (!data || data.length === 0) return { error: 'Kamu tidak bisa mengubah data tukang ini.', success: false }
     refresh(id)
     return { error: '', success: true, id }
@@ -93,9 +94,9 @@ export async function submitTukang(prevState: SubmitTukangState, formData: FormD
     .single()
 
   if (error || !data) {
-    await logError('tukang: tambah', error?.message ?? 'gagal', { userId })
+    await logError('tukang: tambah', publicError(error, 'gagal'), { userId })
     return {
-      error: error?.message?.includes('row-level security') ? 'Akunmu perlu diverifikasi Pengurus dulu.' : error?.message ?? 'Gagal menyimpan.',
+      error: error?.message?.includes('row-level security') ? 'Akunmu perlu diverifikasi Pengurus dulu.' : publicError(error, 'Gagal menyimpan.'),
       success: false,
     }
   }
@@ -117,7 +118,7 @@ export async function deleteTukang(id: string) {
   const paths = await collectPaths(supabase, id)
 
   const { data, error } = await supabase.from('tukang_catalog').delete().eq('id', id).select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Kamu tidak bisa menghapus data tukang ini.' }
 
   // Foto milik orang lain hanya bisa dihapus admin; yang gagal dihapus tidak lagi terhubung ke data apa pun
@@ -139,7 +140,7 @@ export async function addPortfolioPhoto(tukangId: string, path: string, caption:
     .insert({ tukang_id: tukangId, path, caption: caption.trim().slice(0, 120) || null, created_by: userId })
   if (error) {
     await supabase.storage.from(BUCKET).remove([path])
-    return { error: error.message.includes('Maksimal') ? 'Maksimal 6 foto portofolio.' : error.message }
+    return { error: error.message.includes('Maksimal') ? 'Maksimal 6 foto portofolio.' : publicError(error) }
   }
   refresh(tukangId)
   return { error: null }
@@ -148,7 +149,7 @@ export async function addPortfolioPhoto(tukangId: string, path: string, caption:
 export async function deletePortfolioPhoto(photoId: string) {
   const { supabase } = await ctx()
   const { data, error } = await supabase.from('tukang_photos').delete().eq('id', photoId).select('path, tukang_id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Foto tidak ditemukan.' }
   await supabase.storage.from(BUCKET).remove([data[0].path as string])
   refresh(data[0].tukang_id as string)
@@ -181,7 +182,7 @@ export async function saveReview(tukangId: string, rating: number, comment: stri
     if (error.message.includes('row-level security')) {
       return { error: 'Kamu tidak bisa memberi ulasan untuk tukang yang kamu posting sendiri, atau akunmu belum diverifikasi.' }
     }
-    return { error: error.message }
+    return { error: publicError(error) }
   }
 
   // Foto lama yang tidak dipakai lagi dihapus dari penyimpanan
@@ -195,7 +196,7 @@ export async function saveReview(tukangId: string, rating: number, comment: stri
 export async function deleteReview(reviewId: string) {
   const { supabase } = await ctx()
   const { data, error } = await supabase.from('tukang_reviews').delete().eq('id', reviewId).select('photo_paths, tukang_id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Ulasan tidak ditemukan.' }
   const paths = (data[0].photo_paths as string[]) ?? []
   if (paths.length) await supabase.storage.from(BUCKET).remove(paths)

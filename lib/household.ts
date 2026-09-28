@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import { publicError } from '@/lib/safe-error'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>
@@ -80,7 +81,7 @@ export async function assignHousehold(
         .insert({ nomor_rumah: nomorRumah })
         .select('id')
         .single()
-      if (houseError || !newHouse) return { error: `Gagal menyimpan data rumah: ${houseError?.message ?? '-'}` }
+      if (houseError || !newHouse) return { error: `Gagal menyimpan data rumah: ${publicError(houseError, '-')}` }
       houseId = newHouse.id
     }
   } else {
@@ -103,7 +104,7 @@ export async function assignHousehold(
 
   if (error) {
     if ((error as { code?: string }).code === '23505') return { error: 'NIK ini sudah terdaftar oleh akun lain.' }
-    return { error: `Gagal menyimpan profil: ${error.message}` }
+    return { error: `Gagal menyimpan profil: ${publicError(error)}` }
   }
 
   if (familyStatus === 'menunggu_kepala') {

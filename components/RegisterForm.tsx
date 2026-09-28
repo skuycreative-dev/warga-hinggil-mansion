@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { registerUser, type RegisterState } from '@/app/register/actions'
 import HouseholdFields, { type HouseOption } from '@/components/HouseholdFields'
+import PasswordInput from '@/components/PasswordInput'
 
 const initialState: RegisterState = { error: '', success: false }
 
@@ -163,7 +164,8 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
 
           <div className="flex flex-col gap-1.5">
             <label style={labelStyle}>Password</label>
-            <input type="password" name="password" placeholder="••••••••" required minLength={6} style={inputStyle} />
+            <PasswordInput name="password" minLength={8} autoComplete="new-password" style={{ ...inputStyle, fontSize: '16px' }} />
+            <span style={{ fontSize: '11px', color: '#9a9ca8' }}>Minimal 8 karakter, berisi huruf dan angka. Tekan ikon mata untuk memeriksa ketikan.</span>
           </div>
 
           <div className="flex flex-col gap-1.5">

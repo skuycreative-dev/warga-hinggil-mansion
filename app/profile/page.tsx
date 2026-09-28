@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { privateFields } from '@/lib/private-fields'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ProfileEditForm from '@/components/ProfileEditForm'
@@ -16,10 +17,10 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  const [{ data: profile }, { data: status }, { data: pendingRequests }] = await Promise.all([
+  const [{ data: profileRow }, { data: status }, { data: pendingRequests }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, nickname, phone, bio, nik, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
+      .select('full_name, nickname, bio, avatar_url, family_role, occupancy_status, account_status, is_house_owner, house:houses(nomor_rumah)')
       .eq('id', user.id)
       .maybeSingle(),
     supabase.from('profile_statuses').select('content, expires_at').eq('user_id', user.id).maybeSingle(),
@@ -30,6 +31,8 @@ export default async function ProfilePage() {
       .eq('status', 'menunggu'),
   ])
 
+  const mine = (await privateFields(supabase, [user.id])).get(user.id)
+  const profile = profileRow ? { ...profileRow, nik: mine?.nik ?? null, phone: mine?.phone ?? null } : null
   const houseLabel = (profile as any)?.house?.nomor_rumah ?? null
   const inCompletion = !profile?.nik || profile?.account_status === 'menunggu_verifikasi'
   const activeStatus = status && new Date(status.expires_at).getTime() > Date.now() ? status : null

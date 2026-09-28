@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
@@ -9,7 +10,7 @@ export async function confirmFamilyMember(memberId: string, approve: boolean) {
   const supabase = await createClient()
   const { error } = await supabase.rpc('confirm_family_member', { member_id: memberId, approve })
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/dashboard')
   revalidatePath('/verifikasi-akun')
@@ -22,7 +23,7 @@ export async function reviewRoleRequest(requestId: string, approve: boolean) {
   const supabase = await createClient()
   const { error } = await supabase.rpc('review_family_role_request', { request_id: requestId, approve })
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/dashboard')
   revalidatePath('/verifikasi-akun')

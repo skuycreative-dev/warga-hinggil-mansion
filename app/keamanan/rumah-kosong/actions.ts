@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -34,7 +35,7 @@ export async function savePatrolPlan(absenceId: string, perDay: number, assignee
     updated_by: ctx.userId,
     updated_at: new Date().toISOString(),
   })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -55,7 +56,7 @@ export async function recordPatrol(absenceId: string, houseId: string, result: s
   })
   if (error) {
     await logError('patroli: catat', error.message, { absenceId })
-    return { error: error.message }
+    return { error: publicError(error) }
   }
   refresh()
   return { error: null }
@@ -66,7 +67,7 @@ export async function undoPatrol(checkId: string) {
   const ctx = await team()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { data, error } = await ctx.supabase.from('patrol_checks').delete().eq('id', checkId).select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Hanya bisa dibatalkan pencatatnya dalam 15 menit.' }
   refresh()
   return { error: null }

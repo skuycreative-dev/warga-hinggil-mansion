@@ -1,6 +1,8 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
+import { passwordProblem } from '@/lib/security'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logError } from '@/lib/log-error'
 import { getMyAccess } from '@/lib/access'
@@ -35,8 +37,9 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
     return { error: 'Nama, email, password, dan role wajib diisi dengan benar.', success: false }
   }
 
-  if (password.length < 6) {
-    return { error: 'Password minimal 6 karakter.', success: false }
+  const weak = passwordProblem(password)
+  if (weak) {
+    return { error: weak, success: false }
   }
 
   const requester = await requireStaffManager()
@@ -58,7 +61,7 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
     })
 
     if (createError || !created.user) {
-      return { error: createError?.message ?? 'Gagal membuat akun.', success: false }
+      return { error: publicError(createError, 'Gagal membuat akun.'), success: false }
     }
 
     const { error: profileError } = await admin
@@ -74,7 +77,7 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
       .eq('id', created.user.id)
 
     if (profileError) {
-      return { error: `Akun dibuat tapi gagal set profil: ${profileError.message}`, success: false }
+      return { error: `Akun dibuat tapi gagal set profil: ${publicError(profileError)}`, success: false }
     }
 
     revalidatePath('/paguyuban/kelola-staff')
@@ -113,7 +116,7 @@ export async function updateStaffAccount(id: string, fullName: string, roleValue
       .from('profiles')
       .update({ full_name: fullName, role: option.role, staff_position: option.staff_position })
       .eq('id', id)
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
 
     revalidatePath('/paguyuban/kelola-staff')
     return { error: null }

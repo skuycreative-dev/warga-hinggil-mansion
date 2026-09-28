@@ -128,3 +128,24 @@
     @apply font-sans;
   }
 }
+/* ---------- Optimasi HP & tablet ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+a,
+button,
+[role='button'],
+label,
+summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+/* iPhone/iPad: kolom isian di bawah 16px membuat layar otomatis membesar saat diketuk */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}

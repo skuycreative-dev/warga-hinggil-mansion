@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { roleNeeds2fa } from '@/lib/mfa'
 
 // Satu tempat untuk aturan "siapa boleh apa" di portal admin.
 // Struktur role (keputusan 27 Sep 2026):
@@ -30,6 +31,7 @@ export type MyAccess = {
   canPatrol: boolean
   canManageTukang: boolean
   isServiceStaff: boolean
+  needs2fa: boolean
   roleLabel: string
 }
 
@@ -42,7 +44,10 @@ const ROLE_LABEL: Record<string, string> = {
   warga: 'Warga',
 }
 
-export async function getMyAccess(): Promise<MyAccess> {
+// allowPending2fa: hanya untuk halaman Keamanan Akun (tempat memasang 2FA).
+// Selain itu, akun admin WAJIB sudah memasukkan kode 2FA sebelum aksi/halaman admin dijalankan
+// (pengaman kedua selain proxy, karena server action bisa dipanggil dari alamat mana pun).
+export async function getMyAccess(opts: { allowPending2fa?: boolean } = {}): Promise<MyAccess> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -58,6 +63,13 @@ export async function getMyAccess(): Promise<MyAccess> {
 
   const role = profile?.role ?? 'warga'
   const staffPosition = profile?.staff_position ?? null
+
+  if (!opts.allowPending2fa && roleNeeds2fa(role)) {
+    const hasFactor = (user.factors ?? []).some((f) => f.status === 'verified')
+    if (!hasFactor) redirect('/keamanan-akun?wajib=1')
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.currentLevel !== 'aal2') redirect('/login/2fa')
+  }
 
   const isSuperadmin = role === 'superadmin'
   const isKetuaPaguyuban = role === 'paguyuban'
@@ -109,6 +121,8 @@ export async function getMyAccess(): Promise<MyAccess> {
     canManageTukang: ['manajemen', 'paguyuban', 'superadmin'].includes(role),
     // Layanan Surat & status hunian: Ketua Paguyuban, Sekretaris, Superadmin (Step 327)
     isServiceStaff: isSuperadmin || isKetuaPaguyuban || isSekretaris,
+    // 2FA wajib (Step 334): Superadmin, Ketua, Sekretaris, Bendahara, Manajemen
+    needs2fa: roleNeeds2fa(role),
     roleLabel,
   }
 }

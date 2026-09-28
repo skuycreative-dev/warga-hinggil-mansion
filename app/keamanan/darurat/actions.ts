@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -29,7 +30,7 @@ export async function takeAlert(id: string) {
   const ctx = await responder()
   if (!ctx) return { error: 'Hanya Security dan Pengurus yang bisa mengambil alert.' }
   const { error } = await ctx.supabase.rpc('emergency_take', { p_alert: id })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh(id)
   return { error: null }
 }
@@ -53,7 +54,7 @@ export async function addTeamEvent(id: string, kind: string, body: string) {
   })
   if (error) {
     await logError('darurat: catatan tim', error.message, { id, kind })
-    return { error: error.message }
+    return { error: publicError(error) }
   }
   refresh(id)
   return { error: null }
@@ -63,7 +64,7 @@ export async function escalateAlert(id: string, note: string) {
   const ctx = await responder()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { error } = await ctx.supabase.rpc('emergency_escalate', { p_alert: id, p_note: note.trim().slice(0, 500) })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh(id)
   return { error: null }
 }
@@ -73,7 +74,7 @@ export async function closeAlert(id: string, resolution: string, note: string) {
   if (!ctx) return { error: 'Tidak punya akses.' }
   if (!['asli', 'alarm_palsu', 'polisi'].includes(resolution)) return { error: 'Pilih kategori penutupan.' }
   const { error } = await ctx.supabase.rpc('emergency_close', { p_alert: id, p_resolution: resolution, p_note: note.trim().slice(0, 1000) })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh(id)
   return { error: null }
 }

@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -54,7 +55,7 @@ export async function triggerEmergency(prevState: EmergencyState, formData: Form
 
   if (error) {
     await logError('darurat: kirim alert', error.message, { emergencyType, userId: user.id })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   revalidatePath('/darurat')
@@ -82,7 +83,7 @@ export async function resolveOwnEmergency(id: string) {
     .in('status', ['aktif', 'ditangani'])
     .select('id')
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Alert tidak ditemukan atau sudah selesai.' }
 
   revalidatePath('/darurat')
@@ -104,7 +105,7 @@ export async function addReporterInfo(id: string, body: string) {
   if (text.length > 500) return { error: 'Maksimal 500 karakter.' }
 
   const { error } = await supabase.from('emergency_events').insert({ alert_id: id, actor_id: user.id, kind: 'info_pelapor', body: text, is_internal: false })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/darurat')
   revalidatePath(`/keamanan/darurat/${id}`)

@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -15,7 +16,7 @@ export async function setFeatureEnabled(key: string, enabled: boolean) {
     .from('app_features')
     .upsert({ key, enabled, updated_by: access.userId, updated_at: new Date().toISOString() })
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/superadmin/fitur')
   revalidatePath('/dashboard')

@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -57,7 +58,7 @@ export async function createGuestVisit(prevState: GuestVisitState, formData: For
   }).select('qr_code_token').single()
 
   if (error) {
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   revalidatePath('/qr-tamu')

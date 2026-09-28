@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { privateFields } from '@/lib/private-fields'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
 import { adminNavFor } from '@/lib/admin-nav'
@@ -31,21 +32,27 @@ export default async function VerifikasiAkunPage() {
 
   const { data: pendingRaw } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, nik, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
+    .select('id, full_name, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
     .eq('role', 'warga')
     .eq('account_status', 'menunggu_verifikasi')
     .order('created_at', { ascending: true })
 
   const { data: ditolakRaw } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, nik, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
+    .select('id, full_name, family_role, family_status, occupancy_status, created_at, house:houses(nomor_rumah)')
     .eq('role', 'warga')
     .eq('account_status', 'ditolak')
     .order('created_at', { ascending: false })
     .limit(30)
 
+  const secret = await privateFields(supabase, [...(pendingRaw ?? []), ...(ditolakRaw ?? [])].map((r: any) => r.id as string))
   const normalize = (rows: any[] | null) =>
-    (rows ?? []).map((r) => ({ ...r, house: Array.isArray(r.house) ? r.house[0] : r.house }))
+    (rows ?? []).map((r) => ({
+      ...r,
+      nik: secret.get(r.id)?.nik ?? null,
+      phone: secret.get(r.id)?.phone ?? null,
+      house: Array.isArray(r.house) ? r.house[0] : r.house,
+    }))
 
   const pending = normalize(pendingRaw)
   const ditolak = normalize(ditolakRaw)

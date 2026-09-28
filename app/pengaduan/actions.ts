@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -42,7 +43,7 @@ export async function createComplaint(prevState: ComplaintState, formData: FormD
   })
 
   if (error) {
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   revalidatePath('/pengaduan')
@@ -73,7 +74,7 @@ export async function updateComplaintStatus(id: string, status: string) {
     .update({ status, handled_by: user.id, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/pengaduan')
   revalidatePath('/manajemen')

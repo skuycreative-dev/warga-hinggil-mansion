@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { getMyHousehold } from '@/lib/household-access'
 import { logError } from '@/lib/log-error'
@@ -39,12 +40,13 @@ function isDate(v: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(v)
 }
 
-function friendly(message: string) {
+function friendly(err: { message?: string; code?: string } | null | undefined) {
+  const message = err?.message ?? ''
   if (message.includes('household_transactions_account_fk') || message.includes('household_transactions_to_account_fk')) {
     return 'Rekening ini sudah punya transaksi. Arsipkan saja supaya riwayat tetap rapi.'
   }
   if (message.includes('household_transactions_transfer_check')) return 'Rekening asal dan tujuan transfer harus berbeda.'
-  return message
+  return publicError(err)
 }
 
 // ---------------------------------------------------------------------
@@ -104,7 +106,7 @@ export async function addHouseholdTransaction(prevState: HouseholdTxState, formD
 
   if (error) {
     await logError('keuangan-rumah: tambah', error.message, { userId: ctx.userId })
-    return { error: friendly(error.message), success: false }
+    return { error: friendly(error), success: false }
   }
 
   refresh()
@@ -125,7 +127,7 @@ export async function updateHouseholdTransaction(id: string, input: HouseholdTxI
     .eq('house_id', ctx.houseId)
     .select('id')
 
-  if (error) return { error: friendly(error.message) }
+  if (error) return { error: friendly(error) }
   if (!data || data.length === 0) return { error: 'Transaksi tidak ditemukan.' }
 
   refresh()
@@ -137,7 +139,7 @@ export async function deleteHouseholdTransaction(id: string) {
   if (!ctx) return { error: 'Tidak punya akses.' }
 
   const { error } = await ctx.supabase.from('household_transactions').delete().eq('id', id).eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   refresh()
   return { error: null }
@@ -168,7 +170,7 @@ export async function saveAccount(prevState: HhFormState, formData: FormData): P
 
   if (error) {
     await logError('keuangan-rumah: rekening', error.message, { userId: ctx.userId })
-    return { error: friendly(error.message), success: false }
+    return { error: friendly(error), success: false }
   }
 
   refresh()
@@ -183,7 +185,7 @@ export async function setAccountArchived(id: string, archived: boolean) {
     .update({ is_archived: archived, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -192,7 +194,7 @@ export async function deleteAccount(id: string) {
   const ctx = await manager()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { error } = await ctx.supabase.from('household_accounts').delete().eq('id', id).eq('house_id', ctx.houseId)
-  if (error) return { error: friendly(error.message) }
+  if (error) return { error: friendly(error) }
   refresh()
   return { error: null }
 }
@@ -236,7 +238,7 @@ export async function saveGoal(prevState: HhFormState, formData: FormData): Prom
 
   if (error) {
     await logError('keuangan-rumah: pos tujuan', error.message, { userId: ctx.userId })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   refresh()
@@ -251,7 +253,7 @@ export async function setGoalDone(id: string, done: boolean) {
     .update({ is_done: done, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -260,7 +262,7 @@ export async function deleteGoal(id: string) {
   const ctx = await manager()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { error } = await ctx.supabase.from('household_goals').delete().eq('id', id).eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -281,7 +283,7 @@ export async function addGoalEntry(goalId: string, amount: number, withdraw: boo
     note: note.trim() || null,
     created_by: ctx.userId,
   })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -290,7 +292,7 @@ export async function deleteGoalEntry(id: string) {
   const ctx = await manager()
   if (!ctx) return { error: 'Tidak punya akses.' }
   const { error } = await ctx.supabase.from('household_goal_entries').delete().eq('id', id).eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -346,7 +348,7 @@ export async function saveDebt(prevState: HhFormState, formData: FormData): Prom
 
   if (error) {
     await logError('keuangan-rumah: hutang', error.message, { userId: ctx.userId })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   // Perubahan pokok bisa mengubah status lunas/aktif
@@ -365,7 +367,7 @@ export async function deleteDebt(id: string) {
   if (!ctx) return { error: 'Tidak punya akses.' }
   // Riwayat pembayaran tetap ada di transaksi (hanya tautannya yang dilepas)
   const { error } = await ctx.supabase.from('household_debts').delete().eq('id', id).eq('house_id', ctx.houseId)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -401,7 +403,7 @@ export async function payDebt(debtId: string, amount: number, date: string, acco
 
   if (error) {
     await logError('keuangan-rumah: bayar hutang', error.message, { userId: ctx.userId })
-    return { error: friendly(error.message) }
+    return { error: friendly(error) }
   }
 
   refresh()

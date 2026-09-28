@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { assignHousehold, validateHousehold, type HouseholdInput } from '@/lib/household'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { clientIp, hashKey, passwordProblem } from '@/lib/security'
 
 export type RegisterState = {
   error: string
@@ -36,6 +38,24 @@ export async function registerUser(prevState: RegisterState, formData: FormData)
     return { error: 'Nama Panggilan maksimal 30 karakter.', success: false }
   }
 
+  if (fullName.length > 100 || email.length > 120 || phone.length > 20 || !/^[0-9+\-\s]{8,20}$/.test(phone)) {
+    return { error: 'Periksa lagi nama, email, dan nomor HP.', success: false }
+  }
+
+  const weak = passwordProblem(password)
+  if (weak) return { error: weak, success: false }
+
+  // Anti spam pendaftaran: maksimal 5 akun per jaringan per jam
+  try {
+    const ip = await clientIp()
+    if (ip) {
+      const { data: allowed } = await createAdminClient().rpc('hit_rate_limit', { p_key: hashKey('daftar', ip), p_max: 5, p_window_seconds: 3600 })
+      if (allowed === false) return { error: 'Terlalu banyak pendaftaran dari jaringan ini. Coba lagi 1 jam lagi.', success: false }
+    }
+  } catch {
+    // gagal-terbuka: pendaftaran tetap berjalan
+  }
+
   const supabase = await createClient()
 
   // Cek data rumah SEBELUM akun dibuat
@@ -49,7 +69,7 @@ export async function registerUser(prevState: RegisterState, formData: FormData)
   })
 
   if (signUpError || !signUpData.user) {
-    return { error: signUpError?.message ?? 'Gagal membuat akun.', success: false }
+    return { error: 'Pendaftaran gagal. Kalau email ini pernah didaftarkan, masuk atau gunakan Lupa Password.', success: false }
   }
 
   const userId = signUpData.user.id

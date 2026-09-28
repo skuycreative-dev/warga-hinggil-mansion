@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import { privateFields } from '@/lib/private-fields'
+import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
 import type { EmergencyEvent } from '@/lib/emergency'
 
@@ -35,8 +36,11 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 async function peopleMap(supabase: Supa, ids: (string | null | undefined)[]) {
   const unique = Array.from(new Set(ids.filter(Boolean) as string[]))
   if (!unique.length) return new Map<string, { name: string; phone: string | null }>()
-  const { data } = await supabase.from('profiles').select('id, full_name, nickname, phone').in('id', unique)
-  return new Map((data ?? []).map((p: any) => [p.id as string, { name: displayName(p), phone: (p.phone as string) ?? null }]))
+  const [{ data }, secret] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, nickname').in('id', unique),
+    privateFields(supabase, unique),
+  ])
+  return new Map((data ?? []).map((p: any) => [p.id as string, { name: displayName(p), phone: secret.get(p.id)?.phone ?? null }]))
 }
 
 export async function loadAlerts(supabase: Supa, filter: { openOnly?: boolean; sinceIso?: string; ids?: string[]; limit?: number }) {

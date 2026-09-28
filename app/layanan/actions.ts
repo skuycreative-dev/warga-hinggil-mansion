@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -44,9 +45,9 @@ export async function createServiceRequest(prevState: LayananState, formData: Fo
     .single()
 
   if (error || !data) {
-    await logError('layanan: buat', error?.message ?? 'gagal', { userId })
+    await logError('layanan: buat', publicError(error, 'gagal'), { userId })
     return {
-      error: error?.message?.includes('row-level security') ? 'Akunmu perlu diverifikasi Pengurus dulu.' : error?.message ?? 'Gagal membuat permintaan.',
+      error: error?.message?.includes('row-level security') ? 'Akunmu perlu diverifikasi Pengurus dulu.' : publicError(error, 'Gagal membuat permintaan.'),
       success: false,
     }
   }
@@ -86,7 +87,7 @@ export async function sendServiceMessage(requestId: string, body: string, attach
   if (error) {
     await logError('layanan: kirim pesan', error.message, { requestId })
     if (attachment) await supabase.storage.from('service-files').remove([attachment.path])
-    return { error: error.message.includes('row-level security') ? 'Permintaan ini sudah dibatalkan atau kamu tidak punya akses.' : error.message }
+    return { error: error.message.includes('row-level security') ? 'Permintaan ini sudah dibatalkan atau kamu tidak punya akses.' : publicError(error) }
   }
 
   await supabase.from('service_request_reads').upsert({ request_id: requestId, user_id: userId, read_at: new Date().toISOString() })
@@ -105,7 +106,7 @@ export async function setServiceStatus(requestId: string, status: string) {
   if (!['baru', 'diproses', 'selesai', 'dibatalkan'].includes(status)) return { error: 'Status tidak valid.' }
 
   const { data, error } = await supabase.from('service_requests').update({ status }).eq('id', requestId).select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Permintaan tidak ditemukan.' }
   refresh(requestId)
   return { error: null }

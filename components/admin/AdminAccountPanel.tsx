@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import PasswordInput from '@/components/PasswordInput'
 
 const inputStyle: React.CSSProperties = {
   background: '#f2f1ec',
@@ -71,7 +72,7 @@ export default function AdminAccountPanel({
 
         <div className="flex flex-col gap-1.5">
           <label style={labelStyle}>Password Sementara</label>
-          <input type="text" name="password" required minLength={6} placeholder="Minimal 6 karakter" style={inputStyle} />
+          <PasswordInput name="password" minLength={8} autoComplete="new-password" placeholder="Min. 8 karakter, huruf + angka" tone="light" style={{ ...inputStyle, fontSize: '16px' }} />
         </div>
 
         <div className="flex flex-col gap-1.5">

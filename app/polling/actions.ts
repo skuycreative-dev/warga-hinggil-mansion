@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -39,7 +40,7 @@ export async function createPoll(prevState: CreatePollState, formData: FormData)
     .single()
 
   if (error || !poll) {
-    return { error: error?.message ?? 'Gagal membuat polling.', success: false }
+    return { error: publicError(error, 'Gagal membuat polling.'), success: false }
   }
 
   const { error: optError } = await supabase
@@ -47,7 +48,7 @@ export async function createPoll(prevState: CreatePollState, formData: FormData)
     .insert(options.map((option_text) => ({ poll_id: poll.id, option_text })))
 
   if (optError) {
-    return { error: optError.message, success: false }
+    return { error: publicError(optError), success: false }
   }
 
   revalidatePath('/polling')

@@ -34,8 +34,29 @@ export default function ChatThread({ myId, friendId, friendName }: { myId: strin
   useEffect(() => {
     load()
     markMessagesRead(friendId)
-    const interval = setInterval(load, 4000)
-    return () => clearInterval(interval)
+    // Pesan masuk dikirim real-time; cek ulang berkala hanya sebagai cadangan dan hanya saat layar aktif (hemat baterai)
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`obrolan-${myId}-${friendId}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `receiver_id=eq.${myId}` }, (payload) => {
+        if ((payload.new as { sender_id?: string })?.sender_id === friendId) {
+          load()
+          markMessagesRead(friendId)
+        }
+      })
+      .subscribe()
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') load()
+    }, 20000)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+      supabase.removeChannel(channel)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friendId])
 

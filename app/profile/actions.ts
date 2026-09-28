@@ -1,5 +1,7 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
+import { privateFields } from '@/lib/private-fields'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -49,13 +51,14 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
 
   const { data: current } = await supabase
     .from('profiles')
-    .select('full_name, nik, account_status, family_role, occupancy_status')
+    .select('full_name, account_status, family_role, occupancy_status')
     .eq('id', user.id)
     .maybeSingle()
 
   if (!current) return { error: 'Profil tidak ditemukan.', success: false }
+  const currentNik = (await privateFields(supabase, [user.id])).get(user.id)?.nik ?? null
 
-  const inCompletion = !current.nik || current.account_status === 'menunggu_verifikasi'
+  const inCompletion = !currentNik || current.account_status === 'menunggu_verifikasi'
 
   const update: Record<string, string | null> = {
     nickname: nickname || null,
@@ -80,8 +83,8 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     if (!/^\d{16}$/.test(nik)) return { error: 'NIK harus terdiri dari 16 digit angka.', success: false }
     if (occupancyStatus && !OCCUPANCY.includes(occupancyStatus)) return { error: 'Status hunian tidak valid.', success: false }
 
-    const { data: existingNik } = await supabase.from('profiles').select('id').eq('nik', nik).neq('id', user.id).maybeSingle()
-    if (existingNik) return { error: 'NIK ini sudah terdaftar pada akun lain.', success: false }
+    const { data: existingNik } = await supabase.rpc('nik_in_use', { p_nik: nik })
+    if (existingNik === true) return { error: 'NIK ini sudah terdaftar pada akun lain.', success: false }
 
     update.full_name = fullName
     update.nik = nik
@@ -99,7 +102,7 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     if ((error as { code?: string }).code === '23505') {
       return { error: 'NIK ini sudah terdaftar pada akun lain.', success: false }
     }
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   for (const r of requests) {
@@ -114,7 +117,7 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
           success: false,
         }
       }
-      return { error: requestError.message, success: false }
+      return { error: publicError(requestError), success: false }
     }
   }
 
@@ -150,7 +153,7 @@ export async function cancelChangeRequest(id: string) {
     .eq('user_id', user.id)
     .eq('status', 'menunggu')
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/profile')
   return { error: null }
@@ -176,7 +179,7 @@ export async function setMyStatus(content: string) {
     expires_at: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/profile')
   revalidatePath('/warga')
@@ -193,7 +196,7 @@ export async function clearMyStatus() {
 
   const { error } = await supabase.from('profile_statuses').delete().eq('user_id', user.id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/profile')
   revalidatePath('/warga')

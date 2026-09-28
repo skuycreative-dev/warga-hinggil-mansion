@@ -6,6 +6,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isSuperadmin) {
     return [
       { title: 'Dashboard Superadmin', href: '/superadmin/dashboard' },
+      { title: 'Keamanan & Reset Password', href: '/superadmin/keamanan' },
       { title: 'Layanan Surat Warga', href: '/layanan' },
       { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Kelola Admin', href: '/superadmin' },
@@ -21,6 +22,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Dashboard Paguyuban', href: '/paguyuban' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
+      { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
     ]
   }
 
@@ -41,6 +43,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Polling Warga', href: '/polling' },
       { title: 'Pengumuman', href: '/pengumuman' },
+      { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
     ]
   }
 
@@ -52,6 +55,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
+      { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
     ]
   }
 
@@ -62,6 +66,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
+      { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
     ]
   }
 
@@ -81,6 +86,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Anggaran Paguyuban', href: '/anggaran' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
+      { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
     ]
   }
 

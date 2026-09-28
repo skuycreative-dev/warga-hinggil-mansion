@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -78,7 +79,7 @@ export async function createIplPeriod(prevState: IplFormState, formData: FormDat
   const { error } = await ctx.supabase.from('iuran_payment_status').insert(rows)
   if (error) {
     await logError('iuran-ipl: buat tagihan', error.message, { period })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   refresh()
@@ -143,7 +144,7 @@ export async function updateIplBill(id: string, input: IplBillInput) {
 
   if (error) {
     await logError('iuran-ipl: ubah tagihan', error.message, { id })
-    return { error: error.message }
+    return { error: publicError(error) }
   }
   if (!data || data.length === 0) return { error: 'Tagihan tidak ditemukan.' }
 
@@ -172,7 +173,7 @@ export async function markIplPaid(id: string, paymentMethod: string) {
     })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }
@@ -186,7 +187,7 @@ export async function deleteIplBill(id: string) {
   if (row.status !== 'belum') return { error: 'Tagihan yang sudah ada pembayarannya tidak bisa dihapus. Ubah statusnya ke Belum dulu.' }
 
   const { error } = await ctx.supabase.from('iuran_payment_status').delete().eq('id', id)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (row.proof_path) await ctx.supabase.storage.from('ipl-proofs').remove([row.proof_path])
 
   refresh()
@@ -212,7 +213,7 @@ export async function applyLateFees(period: string) {
     .lt('due_date', todayWib())
     .select('id')
 
-  if (error) return { error: error.message, count: 0 }
+  if (error) return { error: publicError(error), count: 0 }
   refresh()
   return { error: null, count: data?.length ?? 0 }
 }
@@ -232,7 +233,7 @@ export async function setIplProof(id: string, path: string | null) {
     .from('iuran_payment_status')
     .update({ proof_path: path, updated_by: ctx.userId, updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   if (row.proof_path && row.proof_path !== path) {
     await ctx.supabase.storage.from('ipl-proofs').remove([row.proof_path])
@@ -271,7 +272,7 @@ export async function saveIplSettings(prevState: IplFormState, formData: FormDat
     .update({ default_amount: defaultAmount, late_fee: lateFee, due_day: dueDay, updated_by: ctx.userId, updated_at: new Date().toISOString() })
     .eq('id', 1)
 
-  if (error) return { error: error.message, success: false }
+  if (error) return { error: publicError(error), success: false }
   refresh()
   return { error: '', success: true, message: 'Pengaturan IPL disimpan.' }
 }
@@ -282,7 +283,7 @@ export async function setHouseRate(houseId: string, amount: number | null, note:
 
   if (amount === null) {
     const { error } = await ctx.supabase.from('ipl_house_rates').delete().eq('house_id', houseId)
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
   } else {
     if (!(amount > 0)) return { error: 'Nominal harus lebih dari 0.' }
     const { error } = await ctx.supabase.from('ipl_house_rates').upsert({
@@ -292,7 +293,7 @@ export async function setHouseRate(houseId: string, amount: number | null, note:
       updated_by: ctx.userId,
       updated_at: new Date().toISOString(),
     })
-    if (error) return { error: error.message }
+    if (error) return { error: publicError(error) }
   }
 
   refresh()
@@ -323,7 +324,7 @@ export async function createDisbursement(prevState: IplFormState, formData: Form
 
   if (error) {
     await logError('iuran-ipl: kirim setoran', error.message, { amount })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   refresh()
@@ -335,7 +336,7 @@ export async function cancelDisbursement(id: string) {
   if (!ctx) return { error: 'Tidak punya akses.' }
 
   const { data, error } = await ctx.supabase.from('ipl_disbursements').delete().eq('id', id).eq('status', 'dikirim').select('id')
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Setoran yang sudah diproses Paguyuban tidak bisa dibatalkan.' }
 
   refresh()
@@ -348,7 +349,7 @@ export async function confirmDisbursement(id: string, accept: boolean, reason: s
 
   const supabase = await createClient()
   const { error } = await supabase.rpc('confirm_ipl_disbursement', { p_id: id, p_accept: accept, p_reason: reason || null })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   refresh()
   return { error: null }

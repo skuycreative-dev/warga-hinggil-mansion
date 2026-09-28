@@ -1,9 +1,9 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { requestPasswordReset, type ResetRequestState } from './actions'
 
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
@@ -11,54 +11,26 @@ const inputStyle: React.CSSProperties = {
   borderRadius: '12px',
   padding: '13px 14px',
   color: '#f5f3ee',
-  fontSize: '14px',
+  fontSize: '16px',
   fontFamily: 'inherit',
   boxSizing: 'border-box',
   width: '100%',
   outline: 'none',
 }
 
+const initialState: ResetRequestState = { sent: false, error: null }
+
 export default function LupaPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setIsSubmitting(true)
-
-    const supabase = createClient()
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-
-    setIsSubmitting(false)
-
-    if (resetError) {
-      setError(resetError.message)
-      return
-    }
-
-    setSent(true)
-  }
+  const [state, formAction, isPending] = useActionState(requestPasswordReset, initialState)
 
   return (
     <main
       className="mx-auto flex min-h-screen w-full max-w-md flex-col"
-      style={{
-        background:
-          'radial-gradient(120% 50% at 50% 0%, rgba(212,175,106,0.10) 0%, rgba(10,11,15,0) 55%)',
-      }}
+      style={{ background: 'radial-gradient(120% 50% at 50% 0%, rgba(212,175,106,0.10) 0%, rgba(10,11,15,0) 55%)' }}
     >
       <div className="px-6 pt-6">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1.5 text-[13px]"
-          style={{ color: '#9a9ca8' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Link href="/login" className="inline-flex items-center gap-1.5 text-[13px]" style={{ color: '#9a9ca8' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Kembali ke Masuk
@@ -67,80 +39,73 @@ export default function LupaPasswordPage() {
 
       <div className="flex flex-1 flex-col justify-center px-7 pb-16 pt-4">
         <div className="mb-8 flex flex-col items-center gap-3.5">
-          <Image
-            src="/logo-hinggil-mansion.jpg"
-            alt="Hinggil Mansion"
-            width={52}
-            height={52}
-            className="rounded-2xl object-cover"
-          />
+          <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={52} height={52} className="rounded-2xl object-cover" />
           <div className="text-center">
-            <h1
-              className="mb-1.5 text-2xl font-medium"
-              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}
-            >
+            <h1 className="mb-1.5 text-2xl font-medium" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}>
               Lupa Password
             </h1>
-            <p className="text-[13px]" style={{ color: '#9a9ca8' }}>
-              Masukkan email kamu, kami kirimkan link untuk atur ulang password
+            <p className="text-[13px] leading-relaxed" style={{ color: '#9a9ca8' }}>
+              Permintaanmu dikirim ke Superadmin. Setelah dicek, Superadmin mengirim link atur ulang password ke WhatsApp atau email yang
+              terdaftar di akunmu.
             </p>
           </div>
         </div>
 
-        {sent ? (
-          <div
-            className="rounded-2xl px-6 py-7 text-center"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
-          >
-            <div
-              className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ background: 'rgba(212,175,106,0.15)' }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        {state.sent ? (
+          <div className="rounded-2xl px-6 py-7 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(212,175,106,0.15)' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M20 6 9 17l-5-5" />
               </svg>
             </div>
-            <p className="text-sm font-semibold" style={{ color: '#f5f3ee' }}>
-              Link berhasil dikirim ke {email}
+            <p className="text-sm font-semibold" style={{ color: '#f5f3ee' }}>Permintaan diterima</p>
+            <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: '#9a9ca8' }}>
+              Kalau data cocok dengan akun terdaftar, Superadmin akan mengirim link lewat WhatsApp atau email. Link hanya bisa dipakai sekali
+              dan berlaku terbatas. Jangan berikan link itu ke siapa pun.
             </p>
-            <p className="mt-2 text-[12.5px]" style={{ color: '#9a9ca8' }}>
-              Cek inbox atau folder spam kamu, lalu ikuti link untuk membuat password baru.
-            </p>
+            <Link href="/login" className="mt-5 inline-block text-[13px] font-bold" style={{ color: '#e6c98a' }}>
+              Kembali ke Masuk
+            </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form action={formAction} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label style={{ fontSize: '12px', color: '#b9b2a0' }}>Email</label>
+              <label htmlFor="reset-identifier" style={{ fontSize: '12px', color: '#b9b2a0' }}>Email atau nomor HP terdaftar</label>
               <input
-                type="email"
+                id="reset-identifier"
+                name="identifier"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@email.com"
+                maxLength={120}
+                autoComplete="username"
+                autoCapitalize="none"
+                placeholder="nama@email.com atau 08xx"
                 style={inputStyle}
               />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="reset-note" style={{ fontSize: '12px', color: '#b9b2a0' }}>Catatan untuk Superadmin (opsional)</label>
+              <input id="reset-note" name="note" maxLength={300} placeholder="mis. nomor rumah, atau kirim lewat WA saja" style={inputStyle} />
+            </div>
+            {/* Isian jebakan robot: tidak terlihat oleh manusia */}
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
 
-            {error ? (
-              <p className="text-[12.5px]" style={{ color: '#e08a8a' }}>
-                {error}
-              </p>
+            {state.error ? (
+              <p role="alert" className="text-[12.5px]" style={{ color: '#e08a8a' }}>{state.error}</p>
             ) : null}
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="mt-1.5 rounded-xl py-3.5 text-[14.5px] font-bold"
               style={{
                 border: 'none',
                 background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
                 color: '#1a1305',
                 boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
-                opacity: isSubmitting ? 0.7 : 1,
-                cursor: isSubmitting ? 'default' : 'pointer',
+                opacity: isPending ? 0.7 : 1,
               }}
             >
-              {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
+              {isPending ? 'Mengirim...' : 'Kirim Permintaan ke Superadmin'}
             </button>
           </form>
         )}

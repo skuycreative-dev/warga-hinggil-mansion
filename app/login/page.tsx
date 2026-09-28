@@ -1,11 +1,12 @@
 ﻿'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { loginUser } from './actions'
+import { loginUser, type LoginState } from './actions'
+import PasswordInput from '@/components/PasswordInput'
 
-const initialState = { error: '' }
+const initialState: LoginState = { error: null }
 
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
@@ -13,7 +14,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: '12px',
   padding: '13px 14px',
   color: '#f5f3ee',
-  fontSize: '14px',
+  fontSize: '16px',
   fontFamily: 'inherit',
   boxSizing: 'border-box',
   width: '100%',
@@ -25,8 +26,29 @@ const labelStyle: React.CSSProperties = {
   color: '#b9b2a0',
 }
 
+function useCountdown(untilIso: string | null | undefined) {
+  const [left, setLeft] = useState(0)
+  useEffect(() => {
+    if (!untilIso) {
+      setLeft(0)
+      return
+    }
+    const tick = () => setLeft(Math.max(0, Math.ceil((new Date(untilIso).getTime() - Date.now()) / 1000)))
+    tick()
+    const t = setInterval(tick, 1000)
+    return () => clearInterval(t)
+  }, [untilIso])
+  return left
+}
+
+function mmss(seconds: number) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+}
+
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginUser, initialState)
+  const left = useCountdown(state?.lockedUntil)
+  const locked = left > 0
 
   return (
     <main
@@ -56,6 +78,7 @@ export default function LoginPage() {
             alt="Hinggil Mansion"
             width={56}
             height={56}
+            priority
             className="rounded-2xl object-cover"
           />
           <div className="text-center">
@@ -73,40 +96,50 @@ export default function LoginPage() {
 
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label style={labelStyle}>Email</label>
-            <input type="email" name="email" placeholder="nama@email.com" required style={inputStyle} />
+            <label htmlFor="login-email" style={labelStyle}>Email</label>
+            <input
+              id="login-email"
+              type="email"
+              name="email"
+              placeholder="nama@email.com"
+              required
+              autoComplete="username"
+              autoCapitalize="none"
+              inputMode="email"
+              style={inputStyle}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label style={labelStyle}>Password</label>
+              <label htmlFor="login-password" style={labelStyle}>Password</label>
               <Link href="/lupa-password" style={{ fontSize: '12px', color: '#e6c98a', fontWeight: 600 }}>
                 Lupa Password?
               </Link>
             </div>
-            <input type="password" name="password" placeholder="••••••••" required style={inputStyle} />
+            <PasswordInput id="login-password" name="password" autoComplete="current-password" style={inputStyle} />
           </div>
 
           {state?.error ? (
-            <p className="text-[12.5px]" style={{ color: '#e08a8a' }}>
-              {state.error}
+            <p role="alert" className="text-[12.5px]" style={{ color: '#e08a8a' }}>
+              {locked ? `Terlalu banyak percobaan gagal. Demi keamanan, coba lagi dalam ${mmss(left)}.` : state.error}
             </p>
           ) : null}
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || locked}
             className="mt-1.5 rounded-xl py-3.5 text-[14.5px] font-bold"
             style={{
               border: 'none',
               background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
               color: '#1a1305',
               boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
-              opacity: isPending ? 0.7 : 1,
-              cursor: isPending ? 'default' : 'pointer',
+              opacity: isPending || locked ? 0.6 : 1,
+              cursor: isPending || locked ? 'default' : 'pointer',
             }}
           >
-            {isPending ? 'Memproses...' : 'Masuk'}
+            {isPending ? 'Memproses...' : locked ? `Tunggu ${mmss(left)}` : 'Masuk'}
           </button>
 
           <p className="mt-1.5 text-center text-[13px]" style={{ color: '#9a9ca8' }}>

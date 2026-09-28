@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -19,7 +20,7 @@ export async function changeOccupancy(status: string, note: string, houseId: str
   if (note.trim().length > 200) return { error: 'Catatan maksimal 200 karakter.' }
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('set_house_occupancy', { p_status: status, p_note: note.trim() || null, p_house: houseId })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null, unchanged: data === 'tidak_berubah' }
 }
@@ -29,7 +30,7 @@ export async function assignHouseOwner(houseId: string, userId: string | null) {
   if (!access.isServiceStaff) return { error: 'Hanya Ketua / Sekretaris Paguyuban atau Superadmin.' }
   const supabase = await createClient()
   const { error } = await supabase.rpc('set_house_owner', { p_house: houseId, p_user: userId })
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   refresh()
   return { error: null }
 }

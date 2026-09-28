@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -32,7 +33,7 @@ export async function resolveErrorLog(id: string) {
     .update({ resolved: true, resolved_by: ctx.userId, resolved_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
 
   revalidatePath('/it-support')
   return { error: null }
@@ -59,7 +60,7 @@ export async function createErrorLog(prevState: ErrorLogState, formData: FormDat
     resolved: false,
   })
 
-  if (error) return { error: error.message, success: false }
+  if (error) return { error: publicError(error), success: false }
 
   revalidatePath('/it-support')
   return { error: '', success: true }

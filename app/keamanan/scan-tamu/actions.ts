@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -51,7 +52,7 @@ export async function checkInGuest(prevState: ScanState, formData: FormData): Pr
     .update({ status: 'masuk', checked_in_at: new Date().toISOString(), checked_in_by: ctx.userId })
     .eq('id', visit.id)
 
-  if (error) return { error: error.message, success: false }
+  if (error) return { error: publicError(error), success: false }
 
   revalidatePath('/keamanan/scan-tamu')
   return { error: '', success: true }
@@ -133,7 +134,7 @@ export async function checkInGuestById(id: string) {
     .eq('status', 'menunggu')
     .select('id')
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Tamu ini sudah masuk atau undangannya dibatalkan.' }
   revalidatePath('/keamanan/scan-tamu')
   revalidatePath('/security')
@@ -151,7 +152,7 @@ export async function checkOutGuestById(id: string) {
     .eq('status', 'masuk')
     .select('id')
 
-  if (error) return { error: error.message }
+  if (error) return { error: publicError(error) }
   if (!data || data.length === 0) return { error: 'Tamu ini belum tercatat masuk.' }
   revalidatePath('/keamanan/scan-tamu')
   revalidatePath('/security')

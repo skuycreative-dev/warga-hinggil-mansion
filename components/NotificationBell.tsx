@@ -62,7 +62,9 @@ export default function NotificationBell() {
         .subscribe()
     })
 
-    const interval = setInterval(load, 60000)
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') load()
+    }, 60000)
     const onVisible = () => {
       if (document.visibilityState === 'visible') load()
     }

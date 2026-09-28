@@ -146,7 +146,7 @@ export default function EmergencyAlertWatcher() {
 
     // Cadangan kalau koneksi real-time terputus: cek ulang tiap 30 detik
     const timer = setInterval(() => {
-      if (userRef.current) loadAlerts()
+      if (userRef.current && document.visibilityState === 'visible') loadAlerts()
     }, 30000)
 
     return () => {

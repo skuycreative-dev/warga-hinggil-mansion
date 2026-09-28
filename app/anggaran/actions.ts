@@ -1,5 +1,6 @@
 ﻿'use server'
 
+import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -52,7 +53,7 @@ export async function addTransaction(prevState: AddTransactionState, formData: F
 
   if (error) {
     await logError('keuangan warga: tambah transaksi', error.message, { userId: ctx.userId })
-    return { error: error.message, success: false }
+    return { error: publicError(error), success: false }
   }
 
   refresh()
