@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createGuestVisit } from '@/app/qr-tamu/actions'
+import GuestQr from '@/components/tamu/GuestQr'
 
 const inputStyle: React.CSSProperties = {
   background: '#ffffff',
@@ -27,11 +28,11 @@ const PURPOSE_OPTIONS = [
   { value: 'lainnya', label: 'Lainnya' },
 ]
 
-export default function GuestInviteForm() {
+export default function GuestInviteForm({ houseLabel = null }: { houseLabel?: string | null }) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null)
+  const [generated, setGenerated] = useState<{ code: string; token: string | null; name: string; purpose: string } | null>(null)
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -40,31 +41,35 @@ export default function GuestInviteForm() {
     const result = await createGuestVisit({ error: '', success: false }, formData)
     setIsPending(false)
     if (result.success) {
-      setGeneratedCode(result.code ?? null)
+      setGenerated(result.code ? { code: result.code, token: result.token ?? null, name: result.guestName ?? 'Tamu', purpose: result.purpose ?? 'lainnya' } : null)
       router.refresh()
     } else {
       setError(result.error)
     }
   }
 
-  if (generatedCode) {
+  if (generated) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: '#1a1305' }}>
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Kode Tamu</span>
-        <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#e6c98a' }}>
-          {generatedCode}
-        </span>
-        <p className="text-[12.5px] font-medium" style={{ color: '#c7c9d2' }}>
-          Berikan kode ini ke tamu. Tunjukkan ke Security saat tiba di gerbang.
+      <div className="flex flex-col gap-3">
+        {generated.token ? (
+          <GuestQr token={generated.token} code={generated.code} guestName={generated.name} purpose={generated.purpose} houseLabel={houseLabel} />
+        ) : (
+          <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: '#1a1305' }}>
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Kode Tamu</span>
+            <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#e6c98a' }}>{generated.code}</span>
+          </div>
+        )}
+        <p className="text-center text-[12.5px] font-medium" style={{ color: '#5b543f' }}>
+          Kirim gambar QR ke tamu. Security memindai QR di gerbang; kode 6 digit dipakai kalau QR tidak terbaca.
         </p>
         <button
           type="button"
           onClick={() => {
-            setGeneratedCode(null)
+            setGenerated(null)
             setOpen(false)
           }}
-          className="mt-1 rounded-xl px-5 py-2.5 text-sm font-bold"
-          style={{ background: '#e6c98a', color: '#1a1305' }}
+          className="rounded-xl py-2.5 text-sm font-bold"
+          style={{ background: '#faf7f0', color: '#1f1a10', border: '1px solid rgba(26,19,5,0.12)' }}
         >
           Selesai
         </button>
@@ -129,7 +134,7 @@ export default function GuestInviteForm() {
           className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
           style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}
         >
-          {isPending ? 'Membuat Kode...' : 'Buat Kode Tamu'}
+          {isPending ? 'Membuat QR...' : 'Buat QR Undangan'}
         </button>
       </div>
     </form>

@@ -99,3 +99,57 @@ export async function setAnnouncementPinned(id: string, pinned: boolean) {
   revalidatePath('/dashboard')
   return { error: null }
 }
+
+// ---------------------------------------------------------------------
+// Reaksi & komentar warga (Step 327). Database memeriksa ulang (RLS).
+// ---------------------------------------------------------------------
+const REACTIONS = ['suka', 'setuju', 'terima_kasih', 'wow']
+
+async function me() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Belum login')
+  return { supabase, userId: user.id }
+}
+
+// Tekan reaksi yang sama lagi = batal; tekan reaksi lain = ganti
+export async function toggleReaction(announcementId: string, reaction: string) {
+  if (!REACTIONS.includes(reaction)) return { error: 'Reaksi tidak valid.' }
+  const { supabase, userId } = await me()
+  const { data: existing } = await supabase
+    .from('announcement_reactions')
+    .select('reaction')
+    .eq('announcement_id', announcementId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  const { error } =
+    existing?.reaction === reaction
+      ? await supabase.from('announcement_reactions').delete().eq('announcement_id', announcementId).eq('user_id', userId)
+      : await supabase.from('announcement_reactions').upsert({ announcement_id: announcementId, user_id: userId, reaction })
+  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : error.message }
+  revalidatePath('/pengumuman')
+  return { error: null }
+}
+
+export async function addAnnouncementComment(announcementId: string, body: string) {
+  const text = body.trim()
+  if (!text) return { error: 'Tulis komentar dulu.' }
+  if (text.length > 500) return { error: 'Komentar maksimal 500 karakter.' }
+  const { supabase, userId } = await me()
+  const { error } = await supabase.from('announcement_comments').insert({ announcement_id: announcementId, user_id: userId, body: text })
+  if (error) return { error: error.message.includes('row-level security') ? 'Akunmu perlu diverifikasi dulu.' : error.message }
+  revalidatePath('/pengumuman')
+  return { error: null }
+}
+
+export async function deleteAnnouncementComment(commentId: string) {
+  const { supabase } = await me()
+  const { data, error } = await supabase.from('announcement_comments').delete().eq('id', commentId).select('id')
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Komentar tidak bisa dihapus.' }
+  revalidatePath('/pengumuman')
+  return { error: null }
+}

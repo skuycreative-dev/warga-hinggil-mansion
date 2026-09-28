@@ -41,6 +41,12 @@ const TABLES = [
   'patrol_checks',
   'absence_patrol_plans',
   'security_shifts',
+  'service_requests',
+  'service_messages',
+  'announcement_reactions',
+  'announcement_comments',
+  'house_occupancy_history',
+  'houses',
 ]
 
 export default function RealtimeRefresher() {

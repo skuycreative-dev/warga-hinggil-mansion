@@ -97,6 +97,18 @@ const menu: MenuItem[] = [
     feature: 'rumah_kosong',
   },
   {
+    title: 'Layanan Surat',
+    href: '/layanan',
+    path: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5',
+    feature: 'layanan',
+  },
+  {
+    title: 'Status Hunian',
+    href: '/status-hunian',
+    path: 'M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1ZM9 21v-7h6v7',
+    feature: 'status_hunian',
+  },
+  {
     title: 'Jadwal Jaga',
     href: '/jadwal-jaga',
     path: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM12 14v3l2 1',

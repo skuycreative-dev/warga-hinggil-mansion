@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { compressImage, extFor, isImage } from '@/lib/image-upload'
 import {
   applyLateFees,
   createIplPeriod,
@@ -18,7 +19,6 @@ import { cardStyle, dateLabel, formatAmountInput, inputStyle, labelStyle, parseA
 
 const initialState: IplFormState = { error: '', success: false }
 const MAX_PROOF = 5 * 1024 * 1024
-const PROOF_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 
 type Draft = {
   amountDue: string
@@ -161,20 +161,29 @@ export default function IplBillsPanel({
   async function uploadProof(b: IplBill, file: File | undefined) {
     if (!file) return
     setRowError('')
-    if (!PROOF_TYPES.includes(file.type)) {
-      setRowError('Bukti harus berupa foto (JPG/PNG/WEBP) atau PDF.')
+    const isPdf = file.type === 'application/pdf'
+    if (!isPdf && !isImage(file)) {
+      setRowError('Bukti harus berupa foto atau PDF.')
       return
     }
-    if (file.size > MAX_PROOF) {
-      setRowError('Ukuran bukti maksimal 5 MB.')
+    if (isPdf && file.size > MAX_PROOF) {
+      setRowError('Ukuran PDF maksimal 5 MB.')
       return
     }
 
     setUploadingId(b.id)
+    // Foto dikompres otomatis maks 2 MB sebelum diunggah
+    let upload: Blob = file
+    try {
+      if (!isPdf) upload = await compressImage(file)
+    } catch (e) {
+      setUploadingId(null)
+      setRowError(e instanceof Error ? e.message : 'Foto tidak bisa diproses.')
+      return
+    }
     const supabase = createClient()
-    const ext = file.type === 'application/pdf' ? 'pdf' : file.type.split('/')[1].replace('jpeg', 'jpg')
-    const path = `${b.house_id}/${b.period}-${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('ipl-proofs').upload(path, file, { contentType: file.type, upsert: false })
+    const path = `${b.house_id}/${b.period}-${Date.now()}.${extFor(upload.type || file.type)}`
+    const { error } = await supabase.storage.from('ipl-proofs').upload(path, upload, { contentType: upload.type || file.type, upsert: false })
     if (error) {
       setUploadingId(null)
       setRowError(`Gagal mengunggah bukti: ${error.message}`)
@@ -385,11 +394,11 @@ export default function IplBillsPanel({
                         <input value={draft.note} maxLength={300} placeholder="mis. bayar tunai ke pos, sisa dibayar tgl 20" onChange={(e) => setDraft({ ...draft, note: e.target.value })} style={{ ...inputStyle, background: '#fff' }} />
                       </div>
                       <div className="flex flex-col gap-1 sm:col-span-2">
-                        <label style={labelStyle}>Bukti bayar (foto / PDF, maks 5 MB)</label>
+                        <label style={labelStyle}>Bukti bayar (foto dikompres otomatis / PDF maks 5 MB)</label>
                         <div className="flex flex-wrap items-center gap-3">
                           <input
                             type="file"
-                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            accept="image/*,application/pdf"
                             disabled={uploadingId === b.id}
                             onChange={(e) => {
                               void uploadProof(b, e.target.files?.[0])

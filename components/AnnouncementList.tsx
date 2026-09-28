@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteAnnouncement, updateAnnouncement, setAnnouncementPinned } from '@/app/pengumuman/actions'
+import AnnouncementEngagement, { type AnnComment } from '@/components/AnnouncementEngagement'
 
 type Announcement = {
   id: string
@@ -11,6 +12,11 @@ type Announcement = {
   created_at: string
   is_pinned: boolean
   author_name: string
+  is_new?: boolean
+  my_reaction?: string | null
+  reaction_counts?: Record<string, number>
+  read_count?: number | null
+  comments?: AnnComment[]
 }
 
 const fieldStyle: React.CSSProperties = {
@@ -26,7 +32,17 @@ const fieldStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-export default function AnnouncementList({ items, canManage }: { items: Announcement[]; canManage: boolean }) {
+export default function AnnouncementList({
+  items,
+  canManage,
+  myId = '',
+  totalWarga = null,
+}: {
+  items: Announcement[]
+  canManage: boolean
+  myId?: string
+  totalWarga?: number | null
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -86,13 +102,19 @@ export default function AnnouncementList({ items, canManage }: { items: Announce
         ) : (
           <div
             key={a.id}
-            className="rounded-2xl px-5 py-4"
+            id={`p-${a.id}`}
+            className="scroll-mt-20 rounded-2xl px-5 py-4"
             style={{ background: '#ffffff', border: a.is_pinned ? '1px solid rgba(212,175,106,0.6)' : '1px solid rgba(26,19,5,0.08)' }}
           >
             <div className="min-w-0">
               {a.is_pinned ? (
-                <span className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                <span className="mb-1.5 mr-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
                   Disematkan
+                </span>
+              ) : null}
+              {a.is_new ? (
+                <span className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#b3392f', color: '#ffffff' }}>
+                  Baru
                 </span>
               ) : null}
               <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{a.title}</div>
@@ -101,6 +123,18 @@ export default function AnnouncementList({ items, canManage }: { items: Announce
                 {a.author_name} · {new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
               </div>
             </div>
+            {myId ? (
+              <AnnouncementEngagement
+                announcementId={a.id}
+                myId={myId}
+                myReaction={a.my_reaction ?? null}
+                reactionCounts={a.reaction_counts ?? {}}
+                comments={a.comments ?? []}
+                canModerate={canManage}
+                readCount={canManage ? a.read_count ?? 0 : null}
+                totalWarga={totalWarga}
+              />
+            ) : null}
             {canManage ? (
               <div className="mt-3 flex flex-wrap gap-4 border-t pt-2.5" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
                 <button

@@ -13,9 +13,12 @@ export default async function QrTamuPage() {
 
   if (!user) redirect('/login')
 
+  const { data: me } = await supabase.from('profiles').select('house:houses(nomor_rumah)').eq('id', user.id).maybeSingle()
+  const houseLabel = ((Array.isArray((me as any)?.house) ? (me as any).house[0] : (me as any)?.house)?.nomor_rumah ?? null) as string | null
+
   const { data: visits } = await supabase
     .from('guest_visits')
-    .select('id, guest_name, purpose, visit_code, status, created_at, checked_in_at')
+    .select('id, guest_name, purpose, visit_code, status, created_at, checked_in_at, qr_code_token')
     .eq('invited_by', user.id)
     .order('created_at', { ascending: false })
 
@@ -29,14 +32,14 @@ export default async function QrTamuPage() {
               QR Tamu
             </h1>
             <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-              Buat kode tamu, berikan ke tamu, lalu tunjukkan ke Security saat tiba.
+              Buat QR undangan, bagikan ke tamu lewat WhatsApp, lalu tamu menunjukkannya ke Security di gerbang.
             </p>
           </div>
           <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
 
         <div className="mb-6">
-          <GuestInviteForm />
+          <GuestInviteForm houseLabel={houseLabel} />
         </div>
 
         <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
@@ -46,7 +49,7 @@ export default async function QrTamuPage() {
         {visits && visits.length > 0 ? (
           <div className="flex flex-col gap-3">
             {visits.map((v) => (
-              <GuestVisitItem key={v.id} item={v} />
+              <GuestVisitItem key={v.id} item={v} houseLabel={houseLabel} />
             ))}
           </div>
         ) : (

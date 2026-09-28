@@ -23,7 +23,7 @@ const OCCUPANCY = ['pemilik', 'penyewa', 'sementara']
 
 // Aturan (keputusan 27 Sep 2026):
 // - Bebas diubah sendiri: Nama Panggilan, Nomor HP, Bio, peran keluarga (kecuali status Kepala Keluarga).
-// - Lewat pengajuan: Nama Lengkap (Ketua Paguyuban / Superadmin), Status Hunian (Ketua / Sekretaris / Superadmin).
+// - Lewat pengajuan: Nama Lengkap (Ketua Paguyuban / Superadmin). Status Hunian: menu Status Hunian (pemilik rumah).
 // - Masa pengisian data (NIK belum ada / akun masih menunggu verifikasi): semua boleh diisi langsung.
 export async function updateProfile(prevState: UpdateProfileState, formData: FormData): Promise<UpdateProfileState> {
   const nickname = ((formData.get('nickname') as string) ?? '').trim()
@@ -90,10 +90,7 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     if (fullName !== (current.full_name ?? '')) {
       requests.push({ field: 'full_name', old_value: current.full_name ?? null, new_value: fullName })
     }
-    if (occupancyStatus && occupancyStatus !== (current.occupancy_status ?? '')) {
-      if (!OCCUPANCY.includes(occupancyStatus)) return { error: 'Status hunian tidak valid.', success: false }
-      requests.push({ field: 'occupancy_status', old_value: current.occupancy_status ?? null, new_value: occupancyStatus })
-    }
+    // Status hunian setelah terverifikasi diubah per rumah oleh pemilik rumah (menu Status Hunian, Step 327)
   }
 
   const { error } = await supabase.from('profiles').update(update).eq('id', user.id)

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { compressImage, extFor, isImage } from '@/lib/image-upload'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -22,24 +23,27 @@ export default function AvatarUploader({
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      setError('File harus berformat JPG atau PNG.')
-      return
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Ukuran file maksimal 2MB.')
+    if (!isImage(file)) {
+      setError('File harus berupa foto.')
       return
     }
     setError(null)
 
     const supabase = createClient()
-    const ext = file.name.split('.').pop()
-    const path = `${userId}/avatar.${ext}`
 
     startTransition(async () => {
+      // Foto profil dikompres otomatis (maks 2 MB, 800 px) supaya aplikasi tetap ringan
+      let blob: Blob
+      try {
+        blob = await compressImage(file, { maxSize: 800 })
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Foto tidak bisa diproses.')
+        return
+      }
+      const path = `${userId}/avatar.${extFor(blob.type)}`
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { upsert: true })
+        .upload(path, blob, { upsert: true, contentType: blob.type })
 
       if (uploadError) {
         setError(`Gagal upload: ${uploadError.message}`)
@@ -78,11 +82,11 @@ export default function AvatarUploader({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="avatar">Ganti Foto Profil (JPG/PNG, maks 2MB)</Label>
+        <Label htmlFor="avatar">Ganti Foto Profil (dikompres otomatis)</Label>
         <Input
           id="avatar"
           type="file"
-          accept="image/png,image/jpeg"
+          accept="image/*"
           onChange={handleFileChange}
           disabled={isPending}
         />

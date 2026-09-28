@@ -6,6 +6,8 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isSuperadmin) {
     return [
       { title: 'Dashboard Superadmin', href: '/superadmin/dashboard' },
+      { title: 'Layanan Surat Warga', href: '/layanan' },
+      { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Kelola Admin', href: '/superadmin' },
       { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
@@ -25,6 +27,8 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isKetuaPaguyuban) {
     return [
       { title: 'Dashboard', href: '/paguyuban' },
+      { title: 'Layanan Surat Warga', href: '/layanan' },
+      { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
       { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
@@ -42,6 +46,8 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
 
   if (access.isSekretaris) {
     return [
+      { title: 'Layanan Surat Warga', href: '/layanan' },
+      { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },

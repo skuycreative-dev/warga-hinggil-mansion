@@ -18,6 +18,8 @@ export type FeatureKey =
   | 'keluarga'
   | 'keuangan_rumah'
   | 'cctv'
+  | 'layanan'
+  | 'status_hunian'
 
 export const FEATURES: { key: FeatureKey; label: string; description: string; paths: string[] }[] = [
   { key: 'darurat', label: 'Tombol Darurat', description: 'Alert darurat + nomor darurat. Disarankan selalu aktif.', paths: ['/darurat'] },
@@ -34,6 +36,8 @@ export const FEATURES: { key: FeatureKey; label: string; description: string; pa
   { key: 'rumah_kosong', label: 'Rumah Kosong', description: 'Warga melapor rumah kosong, dipantau Security.', paths: ['/rumah-kosong'] },
   { key: 'keluarga', label: 'Catatan & Kalender Keluarga', description: 'Catatan & event khusus penghuni 1 rumah.', paths: ['/keluarga'] },
   { key: 'keuangan_rumah', label: 'Keuangan Rumah Tangga', description: 'Khusus Kepala Keluarga & Ibu Rumah Tangga.', paths: ['/keuangan-rumah'] },
+  { key: 'layanan', label: 'Layanan Surat', description: 'Chat & kirim file dengan Pengurus (surat domisili, pengantar, dll).', paths: ['/layanan'] },
+  { key: 'status_hunian', label: 'Status Hunian', description: 'Status rumah (pemilik/penyewa/sementara/kosong), diubah pemilik rumah.', paths: ['/status-hunian'] },
   { key: 'cctv', label: 'CCTV Jogja', description: 'Tautan ke cctv.jogjaprov.go.id.', paths: [] },
 ]
 

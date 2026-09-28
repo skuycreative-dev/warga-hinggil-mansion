@@ -29,6 +29,7 @@ export type MyAccess = {
   canRespondEmergency: boolean
   canPatrol: boolean
   canManageTukang: boolean
+  isServiceStaff: boolean
   roleLabel: string
 }
 
@@ -106,6 +107,8 @@ export async function getMyAccess(): Promise<MyAccess> {
     canPatrol: ['security', 'paguyuban', 'superadmin'].includes(role),
     // Katalog Tukang: hapus postingan bermasalah
     canManageTukang: ['manajemen', 'paguyuban', 'superadmin'].includes(role),
+    // Layanan Surat & status hunian: Ketua Paguyuban, Sekretaris, Superadmin (Step 327)
+    isServiceStaff: isSuperadmin || isKetuaPaguyuban || isSekretaris,
     roleLabel,
   }
 }

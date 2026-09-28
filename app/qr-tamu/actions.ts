@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-export type GuestVisitState = { error: string; success: boolean; code?: string }
+export type GuestVisitState = { error: string; success: boolean; code?: string; token?: string; guestName?: string; purpose?: string }
 
 const PURPOSE_OPTIONS = ['keluarga', 'kurir', 'tukang', 'delivery', 'lainnya']
 
@@ -46,7 +46,7 @@ export async function createGuestVisit(prevState: GuestVisitState, formData: For
     code = generateCode()
   }
 
-  const { error } = await supabase.from('guest_visits').insert({
+  const { data: created, error } = await supabase.from('guest_visits').insert({
     guest_name: guestName,
     guest_phone: guestPhone || null,
     purpose,
@@ -54,14 +54,14 @@ export async function createGuestVisit(prevState: GuestVisitState, formData: For
     status: 'menunggu',
     invited_by: user.id,
     house_id: profile?.house_id ?? null,
-  })
+  }).select('qr_code_token').single()
 
   if (error) {
     return { error: error.message, success: false }
   }
 
   revalidatePath('/qr-tamu')
-  return { error: '', success: true, code }
+  return { error: '', success: true, code, token: (created?.qr_code_token as string) ?? undefined, guestName, purpose }
 }
 
 export async function cancelGuestVisit(id: string) {

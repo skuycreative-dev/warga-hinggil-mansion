@@ -262,6 +262,7 @@ export default function ProfileEditForm({
           )}
         </div>
 
+        {inCompletion ? (
         <div className="flex flex-col gap-1.5">
           <label style={labelStyle}>Status Hunian</label>
           <div style={{ position: 'relative' }}>
@@ -280,14 +281,18 @@ export default function ProfileEditForm({
             </select>
             <SelectChevron />
           </div>
-          <span style={hintStyle}>
-            {inCompletion
-              ? 'Pilih sesuai kondisi sekarang.'
-              : pendingOccupancy
-                ? 'Sedang diajukan ke Pengurus.'
-                : 'Perubahan status hunian perlu persetujuan Admin atau Sekretaris Paguyuban.'}
-          </span>
+          <span style={hintStyle}>Pilih sesuai kondisi sekarang.</span>
         </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            <label style={labelStyle}>Status Hunian</label>
+            <div style={{ ...selectStyle, ...readOnlyStyle }}>{OCCUPANCY_LABEL[occupancyStatus] ?? occupancyStatus}</div>
+            <span style={hintStyle}>
+              Status hunian sekarang dicatat per rumah dan hanya bisa diubah pemilik rumah di{' '}
+              <a href="/status-hunian" style={{ fontWeight: 700, textDecoration: 'underline' }}>menu Status Hunian</a>.
+            </span>
+          </div>
+        )}
 
         {state.error ? (
           <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>{state.error}</p>

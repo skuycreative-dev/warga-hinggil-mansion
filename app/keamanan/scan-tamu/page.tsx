@@ -3,19 +3,18 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
-import ScanTamuForm from '@/components/ScanTamuForm'
+import ScanTamuPanel from '@/components/tamu/ScanTamuPanel'
+import { getMyAccess } from '@/lib/access'
+import { adminNavFor } from '@/lib/admin-nav'
 import GuestLogTable from '@/components/admin/GuestLogTable'
 
 const ALLOWED_ROLES = ['security', 'superadmin']
 
-const NAV_ITEMS = [
-  { title: 'Dashboard', href: '/security' },
-  { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu' },
-  { title: 'Status Rumah Kosong', href: '/rumah-kosong' },
-  { title: 'Tombol Darurat', href: '/darurat' },
-]
 
-export default async function ScanTamuPage() {
+export default async function ScanTamuPage({ searchParams }: { searchParams: Promise<{ t?: string }> }) {
+  const { t: tokenParam } = await searchParams
+  const initialToken = tokenParam && /^[0-9a-f]{32}$/i.test(tokenParam) ? tokenParam : null
+  const access = await getMyAccess()
   const supabase = await createClient()
 
   const {
@@ -60,14 +59,14 @@ export default async function ScanTamuPage() {
   }).length
 
   return (
-    <AdminLayout portalLabel="Portal Admin" roleLabel="Security" userName={myProfile.full_name ?? 'Security'} navItems={NAV_ITEMS}>
+    <AdminLayout portalLabel="Portal Admin" roleLabel="Security" userName={myProfile.full_name ?? 'Security'} navItems={adminNavFor(access)}>
       <div className="mb-6">
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Security</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
           Verifikasi Tamu
         </h1>
         <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-          Masukkan kode tamu untuk verifikasi masuk, lalu catat saat tamu keluar.
+          Scan QR undangan tamu dengan kamera (atau ketik kode 6 digit), cek datanya, lalu tandai masuk / keluar.
         </p>
       </div>
 
@@ -101,7 +100,7 @@ export default async function ScanTamuPage() {
         </div>
 
         <div>
-          <ScanTamuForm />
+          <ScanTamuPanel initialToken={initialToken} />
         </div>
       </div>
     </AdminLayout>

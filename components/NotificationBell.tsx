@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { initNotificationSound, isSoundEnabled, playNotificationSound, setSoundEnabled } from '@/lib/notification-sound'
 
 type Notif = {
   id: string
@@ -18,6 +19,7 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [notifs, setNotifs] = useState<Notif[]>([])
   const [unread, setUnread] = useState(0)
+  const [soundOn, setSoundOn] = useState(true)
 
   async function load() {
     const supabase = createClient()
@@ -40,6 +42,8 @@ export default function NotificationBell() {
   }
 
   useEffect(() => {
+    initNotificationSound()
+    setSoundOn(isSoundEnabled())
     load()
     // Notifikasi baru langsung masuk (real-time); cek berkala tetap ada sebagai cadangan
     const supabase = createClient()
@@ -50,7 +54,11 @@ export default function NotificationBell() {
       if (cancelled || !data.user) return
       channel = supabase
         .channel(`notifikasi-${data.user.id}-${Math.random().toString(36).slice(2)}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` }, (payload) => {
+          // Notifikasi baru: bunyi "ding-dong" 2 ketukan (sekali saja walau ada 2 lonceng di halaman)
+          if (payload.eventType === 'INSERT') playNotificationSound(String((payload.new as { id?: string })?.id ?? Date.now()))
+          load()
+        })
         .subscribe()
     })
 
@@ -145,11 +153,28 @@ export default function NotificationBell() {
           >
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(26,19,5,0.06)' }}>
               <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>Notifikasi</span>
-              {unread > 0 ? (
-                <button type="button" onClick={markAllRead} className="text-[11.5px] font-bold" style={{ color: '#9c7a3f' }}>
-                  Tandai semua dibaca
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !soundOn
+                    setSoundEnabled(next)
+                    setSoundOn(next)
+                    if (next) playNotificationSound()
+                  }}
+                  aria-pressed={soundOn}
+                  title={soundOn ? 'Matikan suara notifikasi' : 'Nyalakan suara notifikasi'}
+                  className="text-[11.5px] font-bold"
+                  style={{ color: soundOn ? '#2f6b4f' : '#8a8c96' }}
+                >
+                  {soundOn ? 'Suara: aktif' : 'Suara: mati'}
                 </button>
-              ) : null}
+                {unread > 0 ? (
+                  <button type="button" onClick={markAllRead} className="text-[11.5px] font-bold" style={{ color: '#9c7a3f' }}>
+                    Tandai semua dibaca
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             {notifs.length === 0 ? (

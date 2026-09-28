@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import { after } from 'next/server'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
@@ -26,14 +27,55 @@ export default async function PengumumanPage() {
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
 
-  const announcements = (announcementsRaw ?? []).map((a: any) => ({
-    id: a.id,
-    title: a.title,
-    content: a.content,
-    created_at: a.created_at,
-    is_pinned: !!a.is_pinned,
-    author_name: displayName(Array.isArray(a.author) ? a.author[0] : a.author, 'Pengurus'),
-  }))
+  const ids = (announcementsRaw ?? []).map((a: any) => a.id as string)
+
+  // Reaksi, komentar, dan (khusus pengurus) jumlah pembaca — Step 327
+  const [{ data: reactions }, { data: comments }, { data: reads }, { count: activeWarga }] = await Promise.all([
+    ids.length ? supabase.from('announcement_reactions').select('announcement_id, user_id, reaction').in('announcement_id', ids).limit(20000) : Promise.resolve({ data: [] as any[] }),
+    ids.length
+      ? supabase.from('announcement_comments').select('id, announcement_id, user_id, body, created_at').in('announcement_id', ids).order('created_at').limit(5000)
+      : Promise.resolve({ data: [] as any[] }),
+    ids.length ? supabase.from('announcement_reads').select('announcement_id, user_id').in('announcement_id', ids).limit(50000) : Promise.resolve({ data: [] as any[] }),
+    canManage
+      ? supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'warga').eq('account_status', 'aktif')
+      : Promise.resolve({ count: null as number | null }),
+  ])
+
+  const commenterIds = Array.from(new Set((comments ?? []).map((c: any) => c.user_id as string)))
+  const { data: commenters } = commenterIds.length ? await supabase.from('profiles').select('id, full_name, nickname').in('id', commenterIds) : { data: [] as any[] }
+  const nameMap = new Map((commenters ?? []).map((p: any) => [p.id as string, displayName(p)]))
+  const readSet = new Set((reads ?? []).filter((r: any) => r.user_id === user.id).map((r: any) => r.announcement_id as string))
+
+  const announcements = (announcementsRaw ?? []).map((a: any) => {
+    const myReaction = (reactions ?? []).find((r: any) => r.announcement_id === a.id && r.user_id === user.id)?.reaction ?? null
+    const reactionCounts: Record<string, number> = {}
+    ;(reactions ?? []).filter((r: any) => r.announcement_id === a.id).forEach((r: any) => (reactionCounts[r.reaction] = (reactionCounts[r.reaction] ?? 0) + 1))
+    return {
+      id: a.id,
+      title: a.title,
+      content: a.content,
+      created_at: a.created_at,
+      is_pinned: !!a.is_pinned,
+      author_name: displayName(Array.isArray(a.author) ? a.author[0] : a.author, 'Pengurus'),
+      is_new: !readSet.has(a.id),
+      my_reaction: myReaction as string | null,
+      reaction_counts: reactionCounts,
+      read_count: canManage ? (reads ?? []).filter((r: any) => r.announcement_id === a.id).length : null,
+      comments: (comments ?? [])
+        .filter((c: any) => c.announcement_id === a.id)
+        .map((c: any) => ({ id: c.id as string, user_id: c.user_id as string, name: nameMap.get(c.user_id) ?? 'Warga', body: c.body as string, created_at: c.created_at as string })),
+    }
+  })
+
+  // Tandai sudah dibaca setelah halaman terkirim (tidak memperlambat tampilan)
+  const unreadIds = ids.filter((id) => !readSet.has(id))
+  if (unreadIds.length) {
+    after(async () => {
+      await supabase
+        .from('announcement_reads')
+        .upsert(unreadIds.map((id) => ({ announcement_id: id, user_id: user.id })), { onConflict: 'announcement_id,user_id', ignoreDuplicates: true })
+    })
+  }
 
   return (
     <main className="flex w-full flex-col" style={{ background: '#faf7f0' }}>
@@ -62,7 +104,7 @@ export default async function PengumumanPage() {
       <section className="w-full">
         <div className="mx-auto w-full max-w-3xl px-6 py-8 md:px-10 md:py-10">
           {canManage ? <AnnouncementForm /> : null}
-          <AnnouncementList items={announcements} canManage={canManage} />
+          <AnnouncementList items={announcements} canManage={canManage} myId={user.id} totalWarga={activeWarga ?? null} />
         </div>
       </section>
     </main>

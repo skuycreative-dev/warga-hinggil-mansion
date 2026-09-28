@@ -1,8 +1,9 @@
 ﻿'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cancelGuestVisit } from '@/app/qr-tamu/actions'
+import GuestQr from '@/components/tamu/GuestQr'
 
 type GuestVisit = {
   id: string
@@ -12,6 +13,7 @@ type GuestVisit = {
   status: string
   created_at: string
   checked_in_at: string | null
+  qr_code_token?: string | null
 }
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
@@ -29,7 +31,8 @@ const PURPOSE_LABEL: Record<string, string> = {
   lainnya: 'Lainnya',
 }
 
-export default function GuestVisitItem({ item }: { item: GuestVisit }) {
+export default function GuestVisitItem({ item, houseLabel = null }: { item: GuestVisit; houseLabel?: string | null }) {
+  const [showQr, setShowQr] = useState(false)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const statusStyle = STATUS_STYLE[item.status] ?? STATUS_STYLE.menunggu
@@ -62,17 +65,29 @@ export default function GuestVisitItem({ item }: { item: GuestVisit }) {
           {item.visit_code}
         </span>
         {item.status === 'menunggu' ? (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={handleCancel}
-            className="text-[12px] font-bold"
-            style={{ color: '#b3392f' }}
-          >
-            Batalkan
-          </button>
+          <div className="flex gap-4">
+            {item.qr_code_token ? (
+              <button type="button" onClick={() => setShowQr(!showQr)} className="text-[12px] font-bold" style={{ color: '#1f1a10' }}>
+                {showQr ? 'Tutup QR' : 'Lihat QR'}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={handleCancel}
+              className="text-[12px] font-bold"
+              style={{ color: '#b3392f' }}
+            >
+              Batalkan
+            </button>
+          </div>
         ) : null}
       </div>
+      {showQr && item.qr_code_token ? (
+        <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
+          <GuestQr token={item.qr_code_token} code={item.visit_code} guestName={item.guest_name} purpose={item.purpose} houseLabel={houseLabel} compact />
+        </div>
+      ) : null}
     </div>
   )
 }
