@@ -4,17 +4,15 @@ import { createClient } from '@/lib/supabase/server'
 import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
 import GuestLogTable from '@/components/admin/GuestLogTable'
+import { getMyAccess } from '@/lib/access'
+import { adminNavFor } from '@/lib/admin-nav'
+import { addDaysIso, loadShifts, onDutyNow, todayWib } from '@/lib/patrol'
 
 const ALLOWED_ROLES = ['security', 'superadmin']
 
-const NAV_ITEMS = [
-  { title: 'Dashboard', href: '/security' },
-  { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu' },
-  { title: 'Status Rumah Kosong', href: '/rumah-kosong' },
-  { title: 'Tombol Darurat', href: '/darurat' },
-]
 
 export default async function SecurityDashboardPage() {
+  const access = await getMyAccess()
   const supabase = await createClient()
 
   const {
@@ -91,8 +89,11 @@ export default async function SecurityDashboardPage() {
     end_date: a.end_date as string,
   }))
 
+  const shifts = await loadShifts(supabase, addDaysIso(todayWib(), -1), todayWib())
+  const onDuty = onDutyNow(shifts)
+
   return (
-    <AdminLayout portalLabel="Portal Admin" roleLabel="Security" userName={myProfile.full_name ?? 'Security'} navItems={NAV_ITEMS}>
+    <AdminLayout portalLabel="Portal Admin" roleLabel="Security" userName={myProfile.full_name ?? 'Security'} navItems={adminNavFor(access)}>
       <div className="mb-6">
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Security</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
@@ -133,6 +134,25 @@ export default async function SecurityDashboardPage() {
         />
       </div>
 
+      <div className="mb-7 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <Link href="/keamanan/darurat" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: (alertAktif ?? 0) > 0 ? '#b3392f' : '#ffffff', border: '1px solid rgba(179,57,47,0.3)' }}>
+          <div className="text-[14px] font-bold" style={{ color: (alertAktif ?? 0) > 0 ? '#ffffff' : '#1f1a10' }}>Alert Command Center →</div>
+          <div className="text-[12px]" style={{ color: (alertAktif ?? 0) > 0 ? '#ffe3df' : '#5b543f' }}>
+            {(alertAktif ?? 0) > 0 ? `${alertAktif} alert menunggu diambil` : 'Ambil alert, log respons, eskalasi, laporan'}
+          </div>
+        </Link>
+        <Link href="/keamanan/rumah-kosong" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
+          <div className="text-[14px] font-bold" style={{ color: '#1f1a10' }}>Rumah Kosong & Patroli →</div>
+          <div className="text-[12px]" style={{ color: '#5b543f' }}>Target patroli, catat patroli, cetak jadwal</div>
+        </Link>
+        <Link href="/keamanan/jadwal-jaga" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#1a1305' }}>
+          <div className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>Jadwal Jaga →</div>
+          <div className="text-[12px]" style={{ color: '#d8cfb8' }}>
+            {onDuty.length ? `Sedang jaga: ${onDuty.map((s) => s.security_name).join(', ')}` : 'Belum ada yang dijadwalkan jam ini'}
+          </div>
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
@@ -169,7 +189,7 @@ export default async function SecurityDashboardPage() {
               </div>
             )}
             <Link
-              href="/rumah-kosong"
+              href="/keamanan/rumah-kosong"
               className="rounded-xl py-2.5 text-center text-[12.5px] font-bold"
               style={{ background: '#1a1305', color: '#e6c98a' }}
             >

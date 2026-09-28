@@ -195,12 +195,12 @@ export default function EmergencyAlertWatcher() {
         </div>
         <div className="flex flex-col gap-2 px-5 pb-5">
           <Link
-            href="/darurat"
+            href={userRef.current?.responder ? `/keamanan/darurat/${current.id}` : '/darurat'}
             onClick={() => dismiss(current.id)}
             className="block w-full rounded-xl py-3 text-center text-sm font-bold"
             style={{ background: '#ffffff', color: '#b3392f' }}
           >
-            Lihat Detail
+            {userRef.current?.responder ? 'Buka & Tangani' : 'Lihat Detail'}
           </Link>
           <button
             type="button"

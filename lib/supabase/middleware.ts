@@ -98,6 +98,12 @@ const PORTAL_RULES: { prefix: string; roles: string[] }[] = [
   { prefix: '/tukang/kelola', roles: ['superadmin', 'manajemen', 'paguyuban'] },
   { prefix: '/it-support', roles: ['superadmin', 'it_support'] },
   { prefix: '/security', roles: ['superadmin', 'security'] },
+  {
+    prefix: '/keamanan/darurat',
+    roles: ['superadmin', 'security', 'paguyuban', 'manajemen', 'staff_paguyuban:sekretaris', 'staff_paguyuban:bendahara'],
+  },
+  { prefix: '/keamanan/rumah-kosong', roles: ['superadmin', 'security', 'paguyuban'] },
+  { prefix: '/keamanan/jadwal-jaga', roles: ['superadmin', 'security', 'paguyuban'] },
   { prefix: '/keamanan', roles: ['superadmin', 'security'] },
 ]
 

@@ -35,6 +35,12 @@ const TABLES = [
   'household_debts',
   'household_goals',
   'household_goal_entries',
+  'emergency_events',
+  'tukang_reviews',
+  'tukang_photos',
+  'patrol_checks',
+  'absence_patrol_plans',
+  'security_shifts',
 ]
 
 export default function RealtimeRefresher() {

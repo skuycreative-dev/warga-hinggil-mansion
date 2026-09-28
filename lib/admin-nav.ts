@@ -5,12 +5,17 @@ import type { MyAccess } from '@/lib/access'
 export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isSuperadmin) {
     return [
+      { title: 'Dashboard Superadmin', href: '/superadmin/dashboard' },
       { title: 'Kelola Admin', href: '/superadmin' },
       { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Kelola Fitur', href: '/superadmin/fitur' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
+      { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
+      { title: 'Dashboard Security', href: '/security' },
       { title: 'Dashboard Paguyuban', href: '/paguyuban' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
@@ -20,6 +25,9 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isKetuaPaguyuban) {
     return [
       { title: 'Dashboard', href: '/paguyuban' },
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
+      { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
@@ -34,6 +42,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
 
   if (access.isSekretaris) {
     return [
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
@@ -44,13 +53,26 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
     return [
       { title: 'Dashboard', href: '/manajemen' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
     ]
   }
 
+  if (access.role === 'security') {
+    return [
+      { title: 'Dashboard', href: '/security' },
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
+      { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
+      { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu' },
+      { title: 'Tombol Darurat', href: '/darurat' },
+    ]
+  }
+
   if (access.isBendahara) {
     return [
+      { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Anggaran Paguyuban', href: '/anggaran' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
     ]

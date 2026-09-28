@@ -26,6 +26,9 @@ export type MyAccess = {
   canManageIpl: boolean
   canViewIpl: boolean
   canConfirmIplDisbursement: boolean
+  canRespondEmergency: boolean
+  canPatrol: boolean
+  canManageTukang: boolean
   roleLabel: string
 }
 
@@ -97,6 +100,12 @@ export async function getMyAccess(): Promise<MyAccess> {
       (role === 'warga' && (profile?.account_status ?? '') === 'aktif'),
     // Setoran IPL dari Manajemen masuk kas Paguyuban setelah dikonfirmasi Ketua / Bendahara
     canConfirmIplDisbursement: isSuperadmin || isKetuaPaguyuban || isBendahara,
+    // Pusat Alert Darurat (Step 321): Security, Pengurus Paguyuban, Manajemen, Superadmin
+    canRespondEmergency: ['security', 'paguyuban', 'staff_paguyuban', 'manajemen', 'superadmin'].includes(role),
+    // Rumah Kosong & jadwal jaga: Security, Ketua Paguyuban, Superadmin
+    canPatrol: ['security', 'paguyuban', 'superadmin'].includes(role),
+    // Katalog Tukang: hapus postingan bermasalah
+    canManageTukang: ['manajemen', 'paguyuban', 'superadmin'].includes(role),
     roleLabel,
   }
 }

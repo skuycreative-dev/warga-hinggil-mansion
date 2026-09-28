@@ -1,6 +1,7 @@
 ﻿import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from './actions'
 import NotificationBell from '@/components/NotificationBell'
@@ -96,6 +97,12 @@ const menu: MenuItem[] = [
     feature: 'rumah_kosong',
   },
   {
+    title: 'Jadwal Jaga',
+    href: '/jadwal-jaga',
+    path: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM12 14v3l2 1',
+    feature: null,
+  },
+  {
     title: 'CCTV Jogja',
     href: CCTV_URL,
     path: 'M3 7h13l5-3v12l-5-3H3zM7 17l-2 4M13 17l2 4',
@@ -111,7 +118,7 @@ const menu: MenuItem[] = [
 ]
 
 // Menu yang tetap bisa dipakai walau akun warga belum diverifikasi Pengurus
-const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya', 'CCTV Jogja']
+const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya', 'CCTV Jogja', 'Jadwal Jaga']
 
 const EMERGENCY_LABEL: Record<string, string> = {
   kebakaran: 'Kebakaran',
@@ -198,6 +205,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const isManajemen = profile?.role === 'manajemen' || profile?.role === 'superadmin'
   const isItSupport = profile?.role === 'it_support' || profile?.role === 'superadmin'
   const isSuperadmin = profile?.role === 'superadmin'
+  const canRespondEmergency = ['security', 'paguyuban', 'staff_paguyuban', 'manajemen', 'superadmin'].includes(profile?.role ?? '')
+  const canPatrol = ['security', 'paguyuban', 'superadmin'].includes(profile?.role ?? '')
 
   const isSekretaris = profile?.role === 'staff_paguyuban' && profile?.staff_position === 'sekretaris'
   const canVerifyAccounts = isSuperadmin || profile?.role === 'paguyuban' || isSekretaris
@@ -252,7 +261,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // Pengingat jatuh tempo cicilan (Keuangan Rumah Tangga) dikirim saat Kepala / Ibu RT membuka Beranda.
   // Database mencegah notifikasi dobel; kalau jadwal harian (pg_cron) aktif, ini hanya cadangan.
   if (isHouseholdManager && !disabledFeatures.has('keuangan_rumah')) {
-    await supabase.rpc('refresh_my_debt_reminders')
+    after(async () => {
+      await supabase.rpc('refresh_my_debt_reminders')
+    })
   }
 
   return (
@@ -440,6 +451,36 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               </Link>
             ) : null}
 
+            {canRespondEmergency ? (
+              <Link
+                href="/keamanan/darurat"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Alert Darurat</div>
+              </Link>
+            ) : null}
+
+            {canPatrol ? (
+              <Link
+                href="/keamanan/rumah-kosong"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1ZM9 13l2 2 4-4" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Rumah Kosong & Patroli</div>
+              </Link>
+            ) : null}
+
             {isSecurity ? (
               <Link
                 href="/keamanan/scan-tamu"
@@ -581,6 +622,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   </svg>
                 </div>
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Error Logs</div>
+              </Link>
+            ) : null}
+
+            {isSuperadmin ? (
+              <Link
+                href="/superadmin/dashboard"
+                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
+                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z" />
+                  </svg>
+                </div>
+                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Dashboard Superadmin</div>
               </Link>
             ) : null}
 

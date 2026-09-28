@@ -1,7 +1,8 @@
 ﻿import Link from 'next/link'
+import { after } from 'next/server'
 import { getMyHousehold } from '@/lib/household-access'
 import { displayName } from '@/lib/display-name'
-import TabNav from '@/components/TabNav'
+import ClientTabs from '@/components/ClientTabs'
 import HouseholdFinance, { type HouseholdTx } from '@/components/HouseholdFinance'
 import HouseholdAccounts from '@/components/household/HouseholdAccounts'
 import HouseholdDebts, { type DebtPayment } from '@/components/household/HouseholdDebts'
@@ -48,8 +49,11 @@ export default async function KeuanganRumahPage({ searchParams }: { searchParams
   const houseId = ctx.houseId
   const today = todayWib()
 
-  // Kirim pengingat jatuh tempo cicilan yang sudah dekat (tidak dobel, dicek database)
-  await supabase.rpc('refresh_my_debt_reminders')
+  // Kirim pengingat jatuh tempo cicilan (tidak dobel, dicek database) SETELAH halaman terkirim,
+  // supaya tidak memperlambat tampilan
+  after(async () => {
+    await supabase.rpc('refresh_my_debt_reminders')
+  })
 
   const [
     { data: txRaw },
@@ -217,42 +221,45 @@ export default async function KeuanganRumahPage({ searchParams }: { searchParams
           <Link href="/dashboard" className="flex-shrink-0 text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
 
-        <TabNav basePath="/keuangan-rumah" tabs={TABS.map((t) => (t.key === 'hutang' ? { ...t, badge: upcoming.length || undefined } : t))} active={tab} />
-
-        {tab === 'transaksi' ? (
-          <>
-            {upcoming.length > 0 || monthlyInstallments > 0 || earmarked > 0 ? (
-              <div className="mb-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <Link href="/keuangan-rumah?tab=rekening" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
-                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Dana Bebas</div>
-                  <div className="mt-1 text-lg font-bold" style={{ color: totalBalance - earmarked >= 0 ? '#2f6b4f' : '#b3392f' }}>{rupiah(totalBalance - earmarked)}</div>
-                  <div className="text-[11.5px]" style={{ color: '#5b543f' }}>{rupiah(earmarked)} sudah disisihkan di pos tujuan</div>
-                </Link>
-                <Link href="/keuangan-rumah?tab=hutang" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
-                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Cicilan / Bulan</div>
-                  <div className="mt-1 text-lg font-bold" style={{ color: '#1f1a10' }}>
-                    {rupiah(monthlyInstallments)}
-                    {ratio.ratio !== null && monthlyInstallments > 0 ? (
-                      <span className="ml-2 text-[12px]" style={{ color: ratio.level === 'aman' ? '#2f6b4f' : ratio.level === 'waspada' ? '#7a5a1f' : '#b3392f' }}>
-                        {Math.round(ratio.ratio * 100)}% pemasukan
-                      </span>
-                    ) : null}
+        <ClientTabs
+          basePath="/keuangan-rumah"
+          initial={tab}
+          tabs={TABS.map((t) => (t.key === 'hutang' ? { ...t, badge: upcoming.length || undefined } : t))}
+          panels={{
+            transaksi: (
+              <>
+                {upcoming.length > 0 || monthlyInstallments > 0 || earmarked > 0 ? (
+                  <div className="mb-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+                      <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Dana Bebas</div>
+                      <div className="mt-1 text-lg font-bold" style={{ color: totalBalance - earmarked >= 0 ? '#2f6b4f' : '#b3392f' }}>{rupiah(totalBalance - earmarked)}</div>
+                      <div className="text-[11.5px]" style={{ color: '#5b543f' }}>{rupiah(earmarked)} sudah disisihkan di pos tujuan</div>
+                    </div>
+                    <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+                      <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Cicilan / Bulan</div>
+                      <div className="mt-1 text-lg font-bold" style={{ color: '#1f1a10' }}>
+                        {rupiah(monthlyInstallments)}
+                        {ratio.ratio !== null && monthlyInstallments > 0 ? (
+                          <span className="ml-2 text-[12px]" style={{ color: ratio.level === 'aman' ? '#2f6b4f' : ratio.level === 'waspada' ? '#7a5a1f' : '#b3392f' }}>
+                            {Math.round(ratio.ratio * 100)}% pemasukan
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="text-[11.5px]" style={{ color: upcoming.length ? '#b3392f' : '#5b543f' }}>
+                        {upcoming.length
+                          ? `${upcoming[0].d.name} jatuh tempo ${dateLabel(upcoming[0].due, false)}${upcoming.length > 1 ? ` (+${upcoming.length - 1} lainnya)` : ''}`
+                          : 'Tidak ada jatuh tempo 14 hari ke depan'}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-[11.5px]" style={{ color: upcoming.length ? '#b3392f' : '#5b543f' }}>
-                    {upcoming.length
-                      ? `${upcoming[0].d.name} jatuh tempo ${dateLabel(upcoming[0].due, false)}${upcoming.length > 1 ? ` (+${upcoming.length - 1} lainnya)` : ''}`
-                      : 'Tidak ada jatuh tempo 14 hari ke depan'}
-                  </div>
-                </Link>
-              </div>
-            ) : null}
-            <HouseholdFinance transactions={transactions} houseLabel={ctx.houseLabel} accounts={accounts} totalBalance={totalBalance} />
-          </>
-        ) : null}
-
-        {tab === 'rekening' ? <HouseholdAccounts accounts={accounts} goals={goals} unassigned={unassigned} totalBalance={totalBalance} /> : null}
-
-        {tab === 'hutang' ? <HouseholdDebts debts={debts} payments={payments} accounts={accounts} avgMonthlyIncome={avgMonthlyIncome} /> : null}
+                ) : null}
+                <HouseholdFinance transactions={transactions} houseLabel={ctx.houseLabel} accounts={accounts} totalBalance={totalBalance} />
+              </>
+            ),
+            rekening: <HouseholdAccounts accounts={accounts} goals={goals} unassigned={unassigned} totalBalance={totalBalance} />,
+            hutang: <HouseholdDebts debts={debts} payments={payments} accounts={accounts} avgMonthlyIncome={avgMonthlyIncome} />,
+          }}
+        />
       </div>
     </main>
   )

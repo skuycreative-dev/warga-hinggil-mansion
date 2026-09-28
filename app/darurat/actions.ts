@@ -7,7 +7,6 @@ import { logError } from '@/lib/log-error'
 
 export type EmergencyState = { error: string; success: boolean }
 
-const RESOLVER_ROLES = ['security', 'paguyuban', 'manajemen', 'superadmin']
 const EMERGENCY_TYPES = ['kebakaran', 'maling', 'perampokan', 'kekerasan', 'medis', 'bencana', 'lainnya']
 
 // Tombol darurat sengaja TIDAK mengecek status verifikasi akun: warga baru pun boleh memakainya.
@@ -63,55 +62,8 @@ export async function triggerEmergency(prevState: EmergencyState, formData: Form
   return { error: '', success: true }
 }
 
-async function requireResolver() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-
-  if (!profile || !RESOLVER_ROLES.includes(profile.role)) {
-    return null
-  }
-
-  return { supabase, userId: user.id }
-}
-
-export async function handleEmergency(id: string) {
-  const requester = await requireResolver()
-  if (!requester) return { error: 'Tidak punya akses.' }
-
-  const { error } = await requester.supabase
-    .from('emergency_alerts')
-    .update({ status: 'ditangani', handled_by: requester.userId })
-    .eq('id', id)
-    .eq('status', 'aktif')
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/darurat')
-  revalidatePath('/dashboard')
-  return { error: null }
-}
-
-export async function resolveEmergency(id: string) {
-  const requester = await requireResolver()
-  if (!requester) return { error: 'Tidak punya akses.' }
-
-  const { error } = await requester.supabase
-    .from('emergency_alerts')
-    .update({ status: 'selesai', resolved_by: requester.userId, resolved_at: new Date().toISOString() })
-    .eq('id', id)
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/darurat')
-  revalidatePath('/dashboard')
-  return { error: null }
-}
+// Menangani & menutup alert oleh petugas sekarang lewat Pusat Alert (app/keamanan/darurat/actions.ts)
+// supaya setiap penutupan wajib memilih kategori dan tercatat di log respons.
 
 // Pelapor me-reset alert miliknya sendiri ("saya sudah aman" / tidak sengaja terkirim)
 export async function resolveOwnEmergency(id: string) {
@@ -135,5 +87,26 @@ export async function resolveOwnEmergency(id: string) {
 
   revalidatePath('/darurat')
   revalidatePath('/dashboard')
+  return { error: null }
+}
+
+// Pelapor menambah info (mis. ciri pelaku, kondisi terbaru). Terkirim ke petugas yang menangani.
+export async function addReporterInfo(id: string, body: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const text = body.trim()
+  if (!text) return { error: 'Isi info tambahan dulu.' }
+  if (text.length > 500) return { error: 'Maksimal 500 karakter.' }
+
+  const { error } = await supabase.from('emergency_events').insert({ alert_id: id, actor_id: user.id, kind: 'info_pelapor', body: text, is_internal: false })
+  if (error) return { error: error.message }
+
+  revalidatePath('/darurat')
+  revalidatePath(`/keamanan/darurat/${id}`)
   return { error: null }
 }

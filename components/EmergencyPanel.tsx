@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { triggerEmergency, handleEmergency, resolveEmergency, resolveOwnEmergency } from '@/app/darurat/actions'
+import Link from 'next/link'
+import { triggerEmergency, resolveOwnEmergency, addReporterInfo } from '@/app/darurat/actions'
+import AlertTimeline from '@/components/darurat/AlertTimeline'
+import type { EmergencyEvent } from '@/lib/emergency'
 
 type Alert = {
   id: string
@@ -56,11 +59,13 @@ export default function EmergencyPanel({
   canResolve,
   currentUserId,
   contacts,
+  myEvents = {},
 }: {
   alerts: Alert[]
   canResolve: boolean
   currentUserId: string
   contacts: Contact[]
+  myEvents?: Record<string, EmergencyEvent[]>
 }) {
   const router = useRouter()
   const [step, setStep] = useState<'idle' | 'pilih' | 'countdown'>('idle')
@@ -71,6 +76,8 @@ export default function EmergencyPanel({
   const [justSent, setJustSent] = useState(false)
   const [isPending, startTransition] = useTransition()
   const sentRef = useRef(false)
+  const [infoFor, setInfoFor] = useState<string | null>(null)
+  const [infoText, setInfoText] = useState('')
 
   const openAlerts = alerts.filter((a) => a.status === 'aktif' || a.status === 'ditangani')
   const myOpenAlerts = openAlerts.filter((a) => a.reporter_id === currentUserId)
@@ -140,7 +147,8 @@ export default function EmergencyPanel({
           </div>
           <div className="mt-2 flex flex-col gap-2">
             {myOpenAlerts.map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5" style={{ background: '#ffffff' }}>
+              <div key={a.id} className="rounded-xl px-3.5 py-2.5" style={{ background: '#ffffff' }}>
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{typeLabel(a.emergency_type)}</div>
                   <div className="text-[11.5px] font-semibold" style={{ color: a.status === 'ditangani' ? '#2f6b4f' : '#9c7a3f' }}>
@@ -159,6 +167,53 @@ export default function EmergencyPanel({
                 >
                   Saya Sudah Aman
                 </button>
+              </div>
+              <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.08)' }}>
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Response Log</div>
+                <AlertTimeline events={myEvents[a.id] ?? []} showInternalBadge={false} />
+                {infoFor === a.id ? (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <textarea
+                      value={infoText}
+                      maxLength={500}
+                      rows={2}
+                      onChange={(e) => setInfoText(e.target.value)}
+                      placeholder="mis. pelaku 2 orang, motor merah, ke arah utara"
+                      className="w-full rounded-lg px-3 py-2 text-[13px]"
+                      style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.12)', color: '#1f1a10' }}
+                    />
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setInfoFor(null)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
+                        Batal
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isPending || !infoText.trim()}
+                        onClick={() =>
+                          startTransition(async () => {
+                            const r = await addReporterInfo(a.id, infoText)
+                            if (r.error) {
+                              alert(r.error)
+                              return
+                            }
+                            setInfoText('')
+                            setInfoFor(null)
+                            router.refresh()
+                          })
+                        }
+                        className="flex-1 rounded-lg py-1.5 text-[12px] font-bold"
+                        style={{ background: '#b3392f', color: '#fff' }}
+                      >
+                        Kirim ke Petugas
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => { setInfoFor(a.id); setInfoText('') }} className="mt-2 text-[12px] font-bold" style={{ color: '#b3392f' }}>
+                    + Tambah info untuk petugas
+                  </button>
+                )}
+              </div>
               </div>
             ))}
           </div>
@@ -364,28 +419,13 @@ export default function EmergencyPanel({
                     <span className="mt-1 block text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>{timeAgo(a.created_at)}</span>
                   </div>
                   {canResolve ? (
-                    <div className="flex flex-shrink-0 flex-col gap-1.5">
-                      {a.status === 'aktif' ? (
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() => runAction(handleEmergency, a.id)}
-                          className="rounded-lg px-3 py-1.5 text-[12px] font-bold text-white"
-                          style={{ background: '#b3392f' }}
-                        >
-                          Tangani
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => runAction(resolveEmergency, a.id)}
-                        className="rounded-lg px-3 py-1.5 text-[12px] font-bold"
-                        style={{ background: '#1a1305', color: '#e6c98a' }}
-                      >
-                        Selesai
-                      </button>
-                    </div>
+                    <Link
+                      href={`/keamanan/darurat/${a.id}`}
+                      className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold text-white"
+                      style={{ background: '#b3392f' }}
+                    >
+                      {a.status === 'aktif' ? 'Tangani' : 'Detail'}
+                    </Link>
                   ) : null}
                 </div>
               </div>

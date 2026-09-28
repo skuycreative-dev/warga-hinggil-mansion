@@ -2,7 +2,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
-import RumahKosongList from '@/components/RumahKosongList'
 import RumahKosongWarga from '@/components/RumahKosongWarga'
 
 const VIEWER_ROLES = ['security', 'paguyuban', 'superadmin']
@@ -44,24 +43,23 @@ export default async function RumahKosongPage() {
         .maybeSingle()
     : { data: null }
 
-  // Security / Paguyuban / Superadmin: semua rumah yang sedang / akan kosong
-  const { data: absencesRaw } = isViewer
+  // Riwayat patroli Security untuk rumah sendiri selama Mode Rumah Kosong (Step 321)
+  const { data: checksRaw } = myActive
     ? await supabase
-        .from('house_absences')
-        .select('id, start_date, end_date, note, contact_phone, house:houses(nomor_rumah), reporter:profiles!house_absences_created_by_fkey(full_name, nickname)')
-        .eq('status', 'aktif')
-        .gte('end_date', todayIso())
-        .order('start_date', { ascending: true })
+        .from('patrol_checks')
+        .select('id, checked_at, result, note, checker:profiles!patrol_checks_checked_by_fkey(full_name, nickname)')
+        .eq('absence_id', myActive.id)
+        .order('checked_at', { ascending: false })
+        .limit(30)
     : { data: [] as any[] }
 
-  const absences = (absencesRaw ?? []).map((a: any) => {
-    const reporter = Array.isArray(a.reporter) ? a.reporter[0] : a.reporter
-    return {
-      ...a,
-      house: Array.isArray(a.house) ? a.house[0] : a.house,
-      reporter_name: reporter ? displayName(reporter) : null,
-    }
-  })
+  const checks = (checksRaw ?? []).map((c: any) => ({
+    id: c.id as string,
+    checked_at: c.checked_at as string,
+    result: c.result as string,
+    note: c.note as string | null,
+    checker: displayName(Array.isArray(c.checker) ? c.checker[0] : c.checker, 'Security'),
+  }))
 
   if (!isViewer && !canActivate) {
     return (
@@ -97,13 +95,43 @@ export default async function RumahKosongPage() {
           </div>
         ) : null}
 
-        {isViewer ? (
-          <div>
-            <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
-              Rumah yang Sedang / Akan Kosong ({absences.length})
-            </div>
-            <RumahKosongList absences={absences} />
+        {myActive ? (
+          <div className="mb-9">
+            <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Patroli Security di Rumahmu ({checks.length})</div>
+            {checks.length === 0 ? (
+              <p className="rounded-2xl px-5 py-5 text-center text-[13px]" style={{ background: '#ffffff', color: '#5b543f' }}>
+                Belum ada patroli tercatat. Kamu akan mendapat notifikasi setiap kali rumahmu dicek.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {checks.map((c) => (
+                  <div key={c.id} className="rounded-xl px-4 py-2.5" style={{ background: '#ffffff', border: `1px solid ${c.result === 'aman' ? 'rgba(47,107,79,0.25)' : 'rgba(179,57,47,0.35)'}` }}>
+                    <div className="text-[13px] font-bold" style={{ color: c.result === 'aman' ? '#2f6b4f' : '#b3392f' }}>
+                      {c.result === 'aman' ? 'Aman ✓' : 'Perlu perhatian'} · {c.checker}
+                    </div>
+                    <div className="text-[11.5px]" style={{ color: '#9c7a3f' }}>
+                      {new Date(c.checked_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    {c.note ? <p className="mt-0.5 text-[12.5px]" style={{ color: '#3d3727' }}>{c.note}</p> : null}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+        ) : null}
+
+        {isViewer ? (
+          <Link
+            href="/keamanan/rumah-kosong"
+            className="flex items-center justify-between rounded-2xl px-5 py-4"
+            style={{ background: '#1a1305' }}
+          >
+            <div>
+              <div className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>Dashboard Rumah Kosong & Patroli</div>
+              <div className="text-[12px]" style={{ color: '#d8cfb8' }}>Daftar rumah kosong, target patroli, catat patroli, cetak jadwal.</div>
+            </div>
+            <span className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>→</span>
+          </Link>
         ) : null}
       </div>
     </main>

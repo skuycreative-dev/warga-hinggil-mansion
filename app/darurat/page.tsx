@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EmergencyPanel from '@/components/EmergencyPanel'
 import { displayName } from '@/lib/display-name'
+import { loadEvents } from '@/lib/emergency-data'
 
-const RESOLVER_ROLES = ['security', 'paguyuban', 'manajemen', 'superadmin']
+const RESOLVER_ROLES = ['security', 'paguyuban', 'staff_paguyuban', 'manajemen', 'superadmin']
 
 export default async function DaruratPage() {
   const supabase = await createClient()
@@ -31,6 +32,11 @@ export default async function DaruratPage() {
     reporter: { full_name: displayName(Array.isArray(a.reporter) ? a.reporter[0] : a.reporter) },
   }))
 
+  // Log respons untuk alert milik sendiri (database hanya mengirim catatan yang tidak internal)
+  const myAlertIds = alerts.filter((a: any) => a.reporter_id === user.id).map((a: any) => a.id as string)
+  const eventMap = await loadEvents(supabase, myAlertIds)
+  const myEvents = Object.fromEntries(Array.from(eventMap.entries()))
+
   const { data: contacts } = await supabase
     .from('emergency_contacts')
     .select('id, name, phone, description')
@@ -53,7 +59,7 @@ export default async function DaruratPage() {
           <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
 
-        <EmergencyPanel alerts={alerts} canResolve={canResolve} currentUserId={user.id} contacts={contacts ?? []} />
+        <EmergencyPanel alerts={alerts} canResolve={canResolve} currentUserId={user.id} contacts={contacts ?? []} myEvents={myEvents} />
       </div>
     </main>
   )
