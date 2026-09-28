@@ -6,6 +6,7 @@ import { signOut } from './actions'
 import NotificationBell from '@/components/NotificationBell'
 import { displayName as nameOf } from '@/lib/display-name'
 import FamilyRequestList from '@/components/FamilyRequestList'
+import InstallAppBanner from '@/components/InstallAppBanner'
 
 const menu = [
   {
@@ -123,7 +124,8 @@ export default async function DashboardPage() {
 
   const { data: announcements } = await supabase
     .from('announcements')
-    .select('id, title, created_at')
+    .select('id, title, created_at, is_pinned')
+    .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(3)
 
@@ -263,6 +265,8 @@ export default async function DashboardPage() {
               <div className="mt-2 text-[12px] font-bold" style={{ color: 'rgba(255,255,255,0.9)' }}>Lihat detail →</div>
             </Link>
           ) : null}
+
+          <InstallAppBanner />
 
           <FamilyRequestList requests={familyRequests} houseLabel={houseLabel ?? null} canConfirm={accountStatus === 'aktif'} />
 
@@ -478,7 +482,7 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
 
-            {isManajemen ? (
+            {isManajemen || isPaguyuban ? (
               <Link
                 href="/tukang/kelola"
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
@@ -631,6 +635,11 @@ export default async function DashboardPage() {
                     style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
                   >
                     <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>
+                      {a.is_pinned ? (
+                        <span className="mr-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                          Disematkan
+                        </span>
+                      ) : null}
                       {a.title}
                     </span>
                     <span className="text-[11.5px] font-semibold" style={{ color: '#9c7a3f' }}>

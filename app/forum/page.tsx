@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
+import { forumLevel } from '@/lib/forum-level'
 import ForumPostForm from '@/components/ForumPostForm'
 import ForumFeed from '@/components/ForumFeed'
 import NotificationBell from '@/components/NotificationBell'
@@ -14,7 +15,7 @@ export default async function ForumPage() {
 
   const { data: rawPosts } = await supabase
     .from('forum_posts')
-    .select('id, content, created_at, author:profiles(full_name, nickname)')
+    .select('id, content, created_at, author:profiles(full_name, nickname, forum_points)')
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -28,7 +29,7 @@ export default async function ForumPage() {
     postIds.length
       ? supabase
           .from('forum_comments')
-          .select('id, post_id, content, created_at, author:profiles(full_name, nickname)')
+          .select('id, post_id, content, created_at, author:profiles(full_name, nickname, forum_points)')
           .in('post_id', postIds)
           .order('created_at', { ascending: true })
       : Promise.resolve({ data: [] as any[] }),
@@ -43,6 +44,7 @@ export default async function ForumPage() {
         content: c.content,
         created_at: c.created_at,
         author_name: displayName(c.author),
+        author_level: forumLevel(c.author?.forum_points).name,
       }))
 
     return {
@@ -50,6 +52,7 @@ export default async function ForumPage() {
       content: p.content,
       created_at: p.created_at,
       author_name: displayName(p.author),
+      author_level: forumLevel(p.author?.forum_points).name,
       likeCount: postLikes.length,
       likedByMe: !!user && postLikes.some((l: any) => l.user_id === user.id),
       comments: postComments,

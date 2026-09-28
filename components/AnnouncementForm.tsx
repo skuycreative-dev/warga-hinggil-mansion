@@ -65,6 +65,11 @@ export default function AnnouncementForm() {
         style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.1)', color: '#1f1a10' }}
       />
 
+      <label className="flex cursor-pointer items-center gap-2 text-[13px] font-semibold" style={{ color: '#1f1a10' }}>
+        <input type="checkbox" name="is_pinned" style={{ width: 16, height: 16, accentColor: '#1a1305' }} />
+        Sematkan di paling atas
+      </label>
+
       {error ? <p className="text-[12.5px] font-semibold" style={{ color: '#b3392f' }}>{error}</p> : null}
 
       <div className="flex gap-2">

@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import NotificationBell from '@/components/NotificationBell'
 import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
 import LiveClock from '@/components/LiveClock'
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 
 const sidebarLinks = [
   { title: 'Beranda', href: '/dashboard' },
@@ -120,6 +121,7 @@ export default function AppNavbar() {
   return (
     <>
       <EmergencyAlertWatcher />
+      <ServiceWorkerRegister />
       <div
         className="sticky top-0 z-40 w-full"
         style={{ background: '#0a0b0f', borderBottom: '1px solid rgba(230,201,138,0.15)' }}

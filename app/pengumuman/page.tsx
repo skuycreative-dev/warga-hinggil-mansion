@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { displayName } from '@/lib/display-name'
 import AnnouncementForm from '@/components/AnnouncementForm'
 import AnnouncementList from '@/components/AnnouncementList'
 
@@ -21,7 +22,8 @@ export default async function PengumumanPage() {
 
   const { data: announcementsRaw } = await supabase
     .from('announcements')
-    .select('id, title, content, created_at, author:profiles(full_name)')
+    .select('id, title, content, created_at, is_pinned, author:profiles(full_name, nickname)')
+    .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
 
   const announcements = (announcementsRaw ?? []).map((a: any) => ({
@@ -29,7 +31,8 @@ export default async function PengumumanPage() {
     title: a.title,
     content: a.content,
     created_at: a.created_at,
-    author_name: (Array.isArray(a.author) ? a.author[0]?.full_name : a.author?.full_name) ?? 'Admin',
+    is_pinned: !!a.is_pinned,
+    author_name: displayName(Array.isArray(a.author) ? a.author[0] : a.author, 'Pengurus'),
   }))
 
   return (

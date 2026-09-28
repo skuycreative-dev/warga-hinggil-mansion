@@ -3,12 +3,14 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toggleLike, addComment, reportPost } from '@/app/forum/actions'
+import { FORUM_LEVELS } from '@/lib/forum-level'
 
 type Comment = {
   id: string
   content: string
   created_at: string
   author_name: string
+  author_level?: string
 }
 
 type Post = {
@@ -16,9 +18,23 @@ type Post = {
   content: string
   created_at: string
   author_name: string
+  author_level?: string
   likeCount: number
   likedByMe: boolean
   comments: Comment[]
+}
+
+function LevelBadge({ name }: { name?: string }) {
+  if (!name) return null
+  const level = FORUM_LEVELS.find((l) => l.name === name)
+  return (
+    <span
+      className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+      style={{ background: level?.background ?? '#f2f1ec', color: level?.color ?? '#5b543f' }}
+    >
+      {name}
+    </span>
+  )
 }
 
 function timeAgo(dateStr: string) {
@@ -76,7 +92,10 @@ function PostCard({ post }: { post: Post }) {
             {post.author_name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{post.author_name}</div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>{post.author_name}</span>
+              <LevelBadge name={post.author_level} />
+            </div>
             <div className="text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>{timeAgo(post.created_at)}</div>
           </div>
         </div>
@@ -124,7 +143,10 @@ function PostCard({ post }: { post: Post }) {
           {post.comments.map((c) => (
             <div key={c.id} className="rounded-xl px-3.5 py-2.5" style={{ background: '#faf7f0' }}>
               <div className="flex items-center justify-between">
-                <span className="text-[12.5px] font-bold" style={{ color: '#1f1a10' }}>{c.author_name}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[12.5px] font-bold" style={{ color: '#1f1a10' }}>{c.author_name}</span>
+                  <LevelBadge name={c.author_level} />
+                </span>
                 <span className="text-[10.5px] font-semibold" style={{ color: '#9c7a3f' }}>{timeAgo(c.created_at)}</span>
               </div>
               <p className="mt-0.5 text-[12.5px] font-medium" style={{ color: '#3a3424' }}>{c.content}</p>

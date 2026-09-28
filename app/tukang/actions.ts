@@ -40,7 +40,8 @@ export async function submitTukang(prevState: SubmitTukangState, formData: FormD
   return { error: '', success: true }
 }
 
-async function requireManajemen() {
+// Kebutuhan #11: katalog tukang dikelola Manajemen DAN Paguyuban
+async function requireTukangManager() {
   const supabase = await createClient()
   const {
     data: { user },
@@ -50,25 +51,28 @@ async function requireManajemen() {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
 
-  if (!profile || !['manajemen', 'superadmin'].includes(profile.role)) {
+  if (!profile || !['manajemen', 'paguyuban', 'superadmin'].includes(profile.role)) {
     return null
   }
 
-  return supabase
+  return { supabase, userId: user.id }
 }
 
 export async function approveTukang(id: string) {
-  const supabase = await requireManajemen()
-  if (!supabase) return
-  await supabase.from('tukang_catalog').update({ status: 'approved' }).eq('id', id)
+  const ctx = await requireTukangManager()
+  if (!ctx) return
+  await ctx.supabase
+    .from('tukang_catalog')
+    .update({ status: 'approved', approved_by: ctx.userId, approved_at: new Date().toISOString() })
+    .eq('id', id)
   revalidatePath('/tukang')
   revalidatePath('/tukang/kelola')
 }
 
 export async function rejectTukang(id: string) {
-  const supabase = await requireManajemen()
-  if (!supabase) return
-  await supabase.from('tukang_catalog').update({ status: 'rejected' }).eq('id', id)
+  const ctx = await requireTukangManager()
+  if (!ctx) return
+  await ctx.supabase.from('tukang_catalog').update({ status: 'rejected' }).eq('id', id)
   revalidatePath('/tukang')
   revalidatePath('/tukang/kelola')
 }

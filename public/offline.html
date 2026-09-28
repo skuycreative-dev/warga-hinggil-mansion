@@ -1,0 +1,30 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sedang Offline - Warga Hinggil Mansion</title>
+    <style>
+      body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0b0f; font-family: sans-serif; color: #f5f3ee; padding: 24px; box-sizing: border-box; }
+      .card { max-width: 340px; text-align: center; }
+      img { width: 72px; height: 72px; border-radius: 16px; }
+      h1 { font-size: 20px; margin: 16px 0 8px; color: #efe4c8; }
+      p { font-size: 14px; color: #c7c9d2; line-height: 1.5; }
+      .darurat { margin-top: 16px; padding: 14px; border-radius: 14px; background: #b3392f; }
+      .darurat a { color: #ffffff; font-weight: bold; text-decoration: none; font-size: 18px; }
+      button { margin-top: 18px; width: 100%; padding: 12px; border: none; border-radius: 12px; background: #e6c98a; color: #1a1305; font-weight: bold; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img src="/icons/icon-192.png" alt="Hinggil Mansion" />
+      <h1>Kamu sedang offline</h1>
+      <p>Periksa koneksi internet, lalu coba lagi. Tombol Darurat di aplikasi butuh internet.</p>
+      <div class="darurat">
+        <p style="margin: 0 0 6px; color: #ffffff">Keadaan darurat? Telepon langsung:</p>
+        <a href="tel:112">112 &middot; Panggilan Darurat</a>
+      </div>
+      <button type="button" onclick="location.reload()">Coba Lagi</button>
+    </div>
+  </body>
+</html>

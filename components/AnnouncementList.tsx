@@ -1,25 +1,48 @@
 ﻿'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { deleteAnnouncement } from '@/app/pengumuman/actions'
+import { deleteAnnouncement, updateAnnouncement, setAnnouncementPinned } from '@/app/pengumuman/actions'
 
 type Announcement = {
   id: string
   title: string
   content: string
   created_at: string
+  is_pinned: boolean
   author_name: string
+}
+
+const fieldStyle: React.CSSProperties = {
+  background: '#faf7f0',
+  border: '1px solid rgba(26,19,5,0.1)',
+  color: '#1f1a10',
+  borderRadius: '12px',
+  padding: '10px 14px',
+  fontSize: '14px',
+  fontFamily: 'inherit',
+  width: '100%',
+  boxSizing: 'border-box',
+  outline: 'none',
 }
 
 export default function AnnouncementList({ items, canManage }: { items: Announcement[]; canManage: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [error, setError] = useState('')
 
-  function handleDelete(id: string) {
-    if (!confirm('Hapus pengumuman ini?')) return
+  function run(fn: () => Promise<{ error: string | null } | undefined>, after?: () => void) {
     startTransition(async () => {
-      await deleteAnnouncement(id)
+      const result = await fn()
+      if (result?.error) {
+        setError(result.error)
+        return
+      }
+      setError('')
+      after?.()
       router.refresh()
     })
   }
@@ -34,31 +57,91 @@ export default function AnnouncementList({ items, canManage }: { items: Announce
 
   return (
     <div className="flex flex-col gap-2.5">
-      {items.map((a) => (
-        <div key={a.id} className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{a.title}</div>
-              <p className="mt-1.5 whitespace-pre-wrap text-[13px]" style={{ color: '#5b543f' }}>{a.content}</p>
-              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>
-                {a.author_name} ·{' '}
-                {new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </div>
-            </div>
-            {canManage ? (
+      {error ? <p className="text-[12.5px] font-bold" style={{ color: '#b3392f' }}>{error}</p> : null}
+      {items.map((a) =>
+        editingId === a.id ? (
+          <div key={a.id} className="flex flex-col gap-2.5 rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
+            <input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} style={fieldStyle} />
+            <textarea value={content} rows={5} onChange={(e) => setContent(e.target.value)} style={{ ...fieldStyle, resize: 'vertical' }} />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingId(null)}
+                className="flex-1 rounded-xl py-2.5 text-sm font-bold"
+                style={{ background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+              >
+                Batal
+              </button>
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => handleDelete(a.id)}
-                className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
-                style={{ background: '#faf7f0', color: '#b3392f', border: '1px solid rgba(179,57,47,0.2)' }}
+                onClick={() => run(() => updateAnnouncement(a.id, title, content), () => setEditingId(null))}
+                className="flex-1 rounded-xl py-2.5 text-sm font-bold"
+                style={{ background: '#1a1305', color: '#e6c98a' }}
               >
-                Hapus
+                {isPending ? 'Menyimpan...' : 'Simpan'}
               </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            key={a.id}
+            className="rounded-2xl px-5 py-4"
+            style={{ background: '#ffffff', border: a.is_pinned ? '1px solid rgba(212,175,106,0.6)' : '1px solid rgba(26,19,5,0.08)' }}
+          >
+            <div className="min-w-0">
+              {a.is_pinned ? (
+                <span className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                  Disematkan
+                </span>
+              ) : null}
+              <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{a.title}</div>
+              <p className="mt-1.5 whitespace-pre-wrap text-[13px]" style={{ color: '#5b543f' }}>{a.content}</p>
+              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>
+                {a.author_name} · {new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </div>
+            </div>
+            {canManage ? (
+              <div className="mt-3 flex flex-wrap gap-4 border-t pt-2.5" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => run(() => setAnnouncementPinned(a.id, !a.is_pinned))}
+                  className="text-[12px] font-bold"
+                  style={{ color: '#1f1a10' }}
+                >
+                  {a.is_pinned ? 'Lepas Sematan' : 'Sematkan'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingId(a.id)
+                    setTitle(a.title)
+                    setContent(a.content)
+                    setError('')
+                  }}
+                  className="text-[12px] font-bold"
+                  style={{ color: '#9c7a3f' }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => {
+                    if (!confirm('Hapus pengumuman ini?')) return
+                    run(() => deleteAnnouncement(a.id))
+                  }}
+                  className="text-[12px] font-bold"
+                  style={{ color: '#b3392f' }}
+                >
+                  Hapus
+                </button>
+              </div>
             ) : null}
           </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   )
 }
