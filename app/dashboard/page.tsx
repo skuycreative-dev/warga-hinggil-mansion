@@ -263,9 +263,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     created_at: r.created_at as string,
   }))
 
-  // Fitur khusus keluarga dalam 1 rumah
-  const isHouseholdMember =
-    isWarga && accountStatus === 'aktif' && !!profile?.house_id && (!familyStatus || familyStatus === 'dikonfirmasi')
+  // Fitur khusus keluarga dalam 1 rumah. Sengaja TIDAK dibatasi role === 'warga': pengurus/admin
+  // (paguyuban, sekretaris, dll) yang juga tinggal di perumahan sebagai Kepala/Ibu Rumah Tangga
+  // tetap perlu melihat menu ini di dashboard mereka sendiri.
+  const isHouseholdMember = accountStatus === 'aktif' && !!profile?.house_id && (!familyStatus || familyStatus === 'dikonfirmasi')
   const isHouseholdManager =
     isHouseholdMember &&
     (profile?.family_role === 'kepala_keluarga' || (profile?.family_role === 'ibu_rumah_tangga' && familyStatus === 'dikonfirmasi'))

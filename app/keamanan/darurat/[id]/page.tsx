@@ -27,9 +27,15 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
   const events = (await loadEvents(supabase, [id])).get(id) ?? []
   const timeline = events.filter((e) => e.kind !== 'chat' && e.kind !== 'logbook')
 
-  const { data: household } = alert.house_id
-    ? await supabase.from('profiles').select('id, full_name, nickname, family_role').eq('house_id', alert.house_id).neq('id', alert.reporter_id).limit(12)
-    : { data: [] as any[] }
+  const [{ data: household }, { data: nonAccountMembers }] = await Promise.all([
+    alert.house_id
+      ? supabase.from('profiles').select('id, full_name, nickname, family_role').eq('house_id', alert.house_id).neq('id', alert.reporter_id).limit(12)
+      : Promise.resolve({ data: [] as any[] }),
+    // Anggota keluarga tanpa akun (anak kecil, ART, dsb) -- ikut jadi kontak saat keadaan darurat (Kebutuhan #11)
+    alert.house_id
+      ? supabase.from('family_members').select('id, name, relation').eq('house_id', alert.house_id).limit(20)
+      : Promise.resolve({ data: [] as any[] }),
+  ])
 
   const closed = alert.status === 'selesai'
   const shortId = `#${alert.id.slice(0, 8).toUpperCase()}`
@@ -92,6 +98,11 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
             {household && household.length > 0 ? (
               <div className="mt-3 text-[12px]" style={{ color: '#5b543f' }}>
                 <b>Penghuni lain di rumah:</b> {household.map((h: any) => displayName(h)).join(', ')}
+              </div>
+            ) : null}
+            {nonAccountMembers && nonAccountMembers.length > 0 ? (
+              <div className="mt-1.5 text-[12px]" style={{ color: '#5b543f' }}>
+                <b>Anggota keluarga tanpa akun:</b> {nonAccountMembers.map((m: any) => m.name).join(', ')}
               </div>
             ) : null}
           </section>

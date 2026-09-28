@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAlertModal, useConfirm, usePromptModal } from '@/components/ModalProvider'
 
 type Account = {
   id: string
@@ -45,46 +46,49 @@ export default function VerifikasiAccountTable({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
+  const promptModal = usePromptModal()
 
-  function handleApprove(a: Account) {
+  async function handleApprove(a: Account) {
     if (!approveAction) return
-    if (!confirm(`Setujui akun ${a.full_name}? Semua fitur akan langsung terbuka untuk akun ini.`)) return
+    if (!(await confirmModal(`Setujui akun ${a.full_name}? Semua fitur akan langsung terbuka untuk akun ini.`))) return
     setBusyId(a.id)
     startTransition(async () => {
       let result = await approveAction(a.id, false)
       if (result.needsForce) {
-        if (confirm(`${result.error}\n\nTetap setujui akun ${a.full_name}? Pastikan kamu sudah mengecek langsung bahwa orang ini benar penghuni rumah tersebut.`)) {
+        if (await confirmModal(`${result.error}\n\nTetap setujui akun ${a.full_name}? Pastikan kamu sudah mengecek langsung bahwa orang ini benar penghuni rumah tersebut.`)) {
           result = await approveAction(a.id, true)
         } else {
           result = { error: null }
         }
       }
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })
   }
 
-  function handleReject(a: Account) {
+  async function handleReject(a: Account) {
     if (!rejectAction) return
-    const reason = window.prompt(`Alasan menolak akun ${a.full_name} (opsional):`, '')
+    const reason = await promptModal(`Alasan menolak akun ${a.full_name} (opsional):`)
     if (reason === null) return
     setBusyId(a.id)
     startTransition(async () => {
       const result = await rejectAction(a.id, reason)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })
   }
 
-  function handleDelete(a: Account) {
+  async function handleDelete(a: Account) {
     if (!deleteAction) return
-    if (!confirm(`Hapus akun ${a.full_name} secara permanen? NIK dan emailnya akan bisa dipakai untuk daftar ulang.`)) return
+    if (!(await confirmModal(`Hapus akun ${a.full_name} secara permanen? NIK dan emailnya akan bisa dipakai untuk daftar ulang.`, { danger: true }))) return
     setBusyId(a.id)
     startTransition(async () => {
       const result = await deleteAction(a.id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })

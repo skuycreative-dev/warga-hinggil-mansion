@@ -7,6 +7,7 @@ import PhotoLightbox from '@/components/tukang/PhotoLightbox'
 import { deleteReview, saveReview } from '@/app/tukang/actions'
 import { removePhotos, uploadPhoto } from '@/lib/image-upload'
 import { inputStyle } from '@/lib/format'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type ReviewItem = {
   id: string
@@ -52,6 +53,8 @@ export default function TukangReviews({
   const [newPaths, setNewPaths] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const [isPending, startTransition] = useTransition()
   const [lightbox, setLightbox] = useState<{ photos: { url: string }[]; index: number } | null>(null)
 
@@ -104,11 +107,11 @@ export default function TukangReviews({
     })
   }
 
-  function remove(id: string) {
-    if (!confirm('Hapus ulasan ini?')) return
+  async function remove(id: string) {
+    if (!(await confirmModal('Hapus ulasan ini?', { danger: true }))) return
     startTransition(async () => {
       const result = await deleteReview(id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

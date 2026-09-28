@@ -17,9 +17,10 @@ export async function getMyHousehold() {
     .eq('id', user.id)
     .maybeSingle()
 
+  // Sengaja TIDAK dibatasi role === 'warga': pengurus/admin yang juga tinggal di perumahan
+  // sebagai Kepala/Ibu Rumah Tangga tetap berhak mengelola fitur rumah tangganya sendiri.
   const isMember =
     !!profile?.house_id &&
-    profile.role === 'warga' &&
     profile.account_status === 'aktif' &&
     (!profile.family_status || profile.family_status === 'dikonfirmasi')
 

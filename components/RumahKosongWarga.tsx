@@ -3,6 +3,7 @@
 import { useActionState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { activateAbsence, endAbsence, type AbsenceState } from '@/app/rumah-kosong/actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 type Absence = {
   id: string
@@ -43,6 +44,8 @@ export default function RumahKosongWarga({ active, houseLabel }: { active: Absen
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(activateAbsence, initialState)
   const [isEnding, startEnding] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
   const today = addDays(new Date(), 0)
 
@@ -61,11 +64,11 @@ export default function RumahKosongWarga({ active, houseLabel }: { active: Absen
         <button
           type="button"
           disabled={isEnding}
-          onClick={() => {
-            if (!confirm('Kamu sudah kembali ke rumah? Mode Rumah Kosong akan dimatikan.')) return
+          onClick={async () => {
+            if (!(await confirmModal('Kamu sudah kembali ke rumah? Mode Rumah Kosong akan dimatikan.'))) return
             startEnding(async () => {
               const result = await endAbsence(active.id)
-              if (result.error) alert(result.error)
+              if (result.error) await alertModal(result.error)
               router.refresh()
             })
           }}

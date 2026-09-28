@@ -7,6 +7,8 @@ import { deleteForumPost, reportPost, toggleLike } from '@/app/forum/actions'
 import { FORUM_LEVELS } from '@/lib/forum-level'
 import { FORUM_CATEGORIES, findCategory } from '@/lib/categories'
 import type { ForumPost } from '@/lib/forum-data'
+import Avatar from '@/components/Avatar'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export function LevelBadge({ name }: { name?: string }) {
   if (!name) return null
@@ -57,6 +59,8 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
   const [viewer, setViewer] = useState<number | null>(null)
   const cat = findCategory(FORUM_CATEGORIES, post.category)
   const mine = post.author_id === myId
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
   function like() {
     startTransition(async () => {
@@ -64,19 +68,19 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
       router.refresh()
     })
   }
-  function report() {
-    if (!confirm('Laporkan postingan ini sebagai tidak pantas?')) return
+  async function report() {
+    if (!(await confirmModal('Laporkan postingan ini sebagai tidak pantas?'))) return
     startTransition(async () => {
       await reportPost(post.id)
-      alert('Terima kasih, laporan dikirim ke Pengurus.')
+      await alertModal('Terima kasih, laporan dikirim ke Pengurus.')
     })
   }
-  function remove() {
-    if (!confirm('Hapus postingan ini beserta fotonya?')) return
+  async function remove() {
+    if (!(await confirmModal('Hapus postingan ini beserta fotonya?', { danger: true }))) return
     startTransition(async () => {
       const r = await deleteForumPost(post.id)
       if (r.error) {
-        alert(r.error)
+        await alertModal(r.error)
         return
       }
       if (detail) router.push('/forum')
@@ -88,9 +92,7 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
     <article className="rounded-2xl px-5 py-4 md:px-6 md:py-5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
-            {post.author_name.charAt(0).toUpperCase()}
-          </div>
+          <Avatar name={post.author_name} url={post.author_avatar} size={36} />
           <div>
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>{post.author_name}</span>

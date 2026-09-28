@@ -10,6 +10,7 @@ import { rupiah, dateLabel } from '@/lib/format'
 import { EMERGENCY_LABEL, FACILITY_LABEL, houseColor, type MapData, type MapHouse } from '@/lib/map-types'
 import { addFacility, deleteFacility, moveFacility, saveHouseLocation, saveHousePosition, saveMapCenter, saveSitePlanImage } from '@/app/peta/actions'
 import DenahView from '@/components/peta/DenahView'
+import { useConfirm } from '@/components/ModalProvider'
 
 const StreetMap = dynamic(() => import('@/components/peta/StreetMap'), {
   ssr: false,
@@ -33,6 +34,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
   const [newFacility, setNewFacility] = useState({ name: '', kind: 'pos_security' })
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [busy, setBusy] = useState(false)
   const viewRef = useRef<{ lat: number; lng: number; zoom: number } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -332,8 +334,8 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => {
-                  if (!confirm(`Hapus fasilitas "${facility.name}"?`)) return
+                onClick={async () => {
+                  if (!(await confirmModal(`Hapus fasilitas "${facility.name}"?`, { danger: true }))) return
                   setSelected(null)
                   run(() => deleteFacility(facility.id), 'Fasilitas dihapus.')
                 }}

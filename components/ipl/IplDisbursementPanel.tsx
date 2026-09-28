@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { cancelDisbursement, confirmDisbursement, createDisbursement, type IplFormState } from '@/app/iuran-ipl/actions'
 import type { IplDisbursement } from '@/lib/ipl'
 import { cardStyle, dateLabel, formatAmountInput, inputStyle, labelStyle, periodLabel, rupiah, todayWib } from '@/lib/format'
+import { useConfirm, usePromptModal } from '@/components/ModalProvider'
 
 const initialState: IplFormState = { error: '', success: false }
 
@@ -28,6 +29,8 @@ export default function IplDisbursementPanel({
   const router = useRouter()
   const [state, formAction, isSending] = useActionState(createDisbursement, initialState)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const promptModal = usePromptModal()
   const [amount, setAmount] = useState('')
   const [error, setError] = useState('')
 
@@ -135,8 +138,8 @@ export default function IplDisbursementPanel({
                         <button
                           type="button"
                           disabled={isPending}
-                          onClick={() => {
-                            const reason = prompt('Alasan menolak setoran ini?') ?? ''
+                          onClick={async () => {
+                            const reason = (await promptModal('Alasan menolak setoran ini?')) ?? ''
                             if (!reason.trim()) return
                             run(() => confirmDisbursement(i.id, false, reason))
                           }}
@@ -148,8 +151,8 @@ export default function IplDisbursementPanel({
                         <button
                           type="button"
                           disabled={isPending}
-                          onClick={() => {
-                            if (!confirm(`Konfirmasi setoran ${rupiah(i.amount)} sudah diterima? Otomatis dicatat sebagai pemasukan kas Paguyuban.`)) return
+                          onClick={async () => {
+                            if (!(await confirmModal(`Konfirmasi setoran ${rupiah(i.amount)} sudah diterima? Otomatis dicatat sebagai pemasukan kas Paguyuban.`))) return
                             run(() => confirmDisbursement(i.id, true, ''))
                           }}
                           className="flex-1 rounded-lg px-3 py-2 text-[12px] font-bold"
@@ -163,8 +166,8 @@ export default function IplDisbursementPanel({
                       <button
                         type="button"
                         disabled={isPending}
-                        onClick={() => {
-                          if (!confirm('Batalkan setoran ini?')) return
+                        onClick={async () => {
+                          if (!(await confirmModal('Batalkan setoran ini?', { danger: true }))) return
                           run(() => cancelDisbursement(i.id))
                         }}
                         className="rounded-lg px-3 py-2 text-[12px] font-bold"

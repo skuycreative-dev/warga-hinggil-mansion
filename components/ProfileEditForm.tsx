@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfile, cancelChangeRequest, type UpdateProfileState } from '@/app/profile/actions'
+import { useAlertModal } from '@/components/ModalProvider'
 
 const initialState: UpdateProfileState = { error: '', success: false }
 
@@ -94,6 +95,7 @@ export default function ProfileEditForm({
   const [editing, setEditing] = useState(false)
   const [state, formAction, isPending] = useActionState(updateProfile, initialState)
   const [isCancelling, startCancel] = useTransition()
+  const alertModal = useAlertModal()
 
   const pendingName = pendingRequests.find((r) => r.field === 'full_name')
   const pendingOccupancy = pendingRequests.find((r) => r.field === 'occupancy_status')
@@ -105,7 +107,7 @@ export default function ProfileEditForm({
   function handleCancel(id: string) {
     startCancel(async () => {
       const result = await cancelChangeRequest(id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

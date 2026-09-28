@@ -95,3 +95,78 @@ export async function deleteFamilyItem(id: string) {
   revalidatePath('/keluarga')
   return { error: null }
 }
+
+// ---------------------------------------------------------------------
+// Anggota Keluarga Tanpa Akun (anak kecil, ART, dsb yang tidak mendaftar akun sendiri).
+// Hanya Kepala/Ibu Rumah Tangga (is_household_manager) yang boleh menambah/mengubah/menghapus;
+// seluruh penghuni rumah boleh melihat. Dihitung di statistik jumlah penghuni dan jadi kontak
+// darurat rumah tersebut.
+// ---------------------------------------------------------------------
+export type FamilyMemberInput = {
+  name: string
+  relation: string
+  birthDate: string
+  note: string
+}
+
+const RELATION_OPTIONS = ['anak', 'asisten_rumah_tangga', 'orang_tua', 'kerabat', 'lainnya']
+
+function validateMember(input: FamilyMemberInput): string | null {
+  if (!input.name.trim()) return 'Nama wajib diisi.'
+  if (input.name.trim().length > 100) return 'Nama maksimal 100 karakter.'
+  if (!RELATION_OPTIONS.includes(input.relation)) return 'Hubungan tidak valid.'
+  if (input.birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(input.birthDate)) return 'Tanggal lahir tidak valid.'
+  if (input.note.trim().length > 200) return 'Catatan maksimal 200 karakter.'
+  return null
+}
+
+export async function saveFamilyMember(id: string | null, input: FamilyMemberInput): Promise<{ error: string | null }> {
+  const ctx = await getMyHousehold()
+  if (!ctx.isManager || !ctx.houseId) {
+    return { error: 'Hanya Kepala/Ibu Rumah Tangga yang bisa mengelola anggota keluarga tanpa akun.' }
+  }
+
+  const invalid = validateMember(input)
+  if (invalid) return { error: invalid }
+
+  const row = {
+    name: input.name.trim(),
+    relation: input.relation,
+    birth_date: input.birthDate || null,
+    note: input.note.trim() || null,
+  }
+
+  if (id) {
+    const { data, error } = await ctx.supabase
+      .from('family_members')
+      .update(row)
+      .eq('id', id)
+      .eq('house_id', ctx.houseId)
+      .select('id')
+    if (error) return { error: publicError(error) }
+    if (!data || data.length === 0) return { error: 'Data ini tidak ditemukan di rumahmu.' }
+  } else {
+    const { error } = await ctx.supabase.from('family_members').insert({ ...row, house_id: ctx.houseId, added_by: ctx.userId })
+    if (error) {
+      await logError('keluarga: simpan anggota', error.message, { userId: ctx.userId })
+      return { error: publicError(error) }
+    }
+  }
+
+  revalidatePath('/keluarga')
+  revalidatePath('/statistik')
+  return { error: null }
+}
+
+export async function deleteFamilyMember(id: string) {
+  const ctx = await getMyHousehold()
+  if (!ctx.isManager || !ctx.houseId) return { error: 'Hanya Kepala/Ibu Rumah Tangga yang bisa menghapus data ini.' }
+
+  const { data, error } = await ctx.supabase.from('family_members').delete().eq('id', id).eq('house_id', ctx.houseId).select('id')
+  if (error) return { error: publicError(error) }
+  if (!data || data.length === 0) return { error: 'Data ini tidak ditemukan di rumahmu.' }
+
+  revalidatePath('/keluarga')
+  revalidatePath('/statistik')
+  return { error: null }
+}

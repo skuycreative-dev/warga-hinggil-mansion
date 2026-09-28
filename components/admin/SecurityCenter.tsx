@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBranding } from '@/components/BrandingProvider'
 import { createResetLink, resetAdmin2fa, setResetStatus, unlockLogin } from '@/app/superadmin/keamanan/actions'
+import { useConfirm } from '@/components/ModalProvider'
 
 export type ResetRow = {
   id: string
@@ -66,6 +67,7 @@ function ResetCard({ r }: { r: ResetRow }) {
   const brand = useBranding()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [link, setLink] = useState<{ url: string; email: string | null; phone: string | null; name: string | null } | null>(null)
   const [msg, setMsg] = useState('')
   const st = STATUS[r.status] ?? STATUS.baru
@@ -104,8 +106,8 @@ function ResetCard({ r }: { r: ResetRow }) {
     })
   }
 
-  function mark(status: 'selesai' | 'ditolak') {
-    if (status === 'ditolak' && !confirm('Tolak permintaan ini? Gunakan kalau permintaan mencurigakan atau bukan dari pemilik akun.')) return
+  async function mark(status: 'selesai' | 'ditolak') {
+    if (status === 'ditolak' && !(await confirmModal('Tolak permintaan ini? Gunakan kalau permintaan mencurigakan atau bukan dari pemilik akun.', { danger: true }))) return
     startTransition(async () => {
       await setResetStatus(r.id, status, null)
       router.refresh()
@@ -178,6 +180,7 @@ function ResetCard({ r }: { r: ResetRow }) {
 export default function SecurityCenter({ resets, locks, admins }: { resets: ResetRow[]; locks: LockRow[]; admins: AdminFactorRow[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [msg, setMsg] = useState('')
   const openResets = resets.filter((r) => r.status === 'baru' || r.status === 'dikirim')
   const doneResets = resets.filter((r) => !(r.status === 'baru' || r.status === 'dikirim')).slice(0, 20)
@@ -263,8 +266,8 @@ export default function SecurityCenter({ resets, locks, admins }: { resets: Rese
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!confirm(`Reset 2FA milik ${a.name}? Pastikan kamu sudah menghubungi orangnya langsung.`)) return
+                  onClick={async () => {
+                    if (!(await confirmModal(`Reset 2FA milik ${a.name}? Pastikan kamu sudah menghubungi orangnya langsung.`, { danger: true }))) return
                     run(() => resetAdmin2fa(a.id), `2FA ${a.name} direset.`)
                   }}
                   className="rounded-lg px-3 py-1.5 text-[12px] font-bold"

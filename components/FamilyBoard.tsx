@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveFamilyItem, deleteFamilyItem, type FamilyItemInput } from '@/app/keluarga/actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type FamilyMember = { id: string; name: string; familyRole: string | null }
 
@@ -70,6 +71,8 @@ export default function FamilyBoard({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const [tab, setTab] = useState<'catatan' | 'event'>('catatan')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -150,11 +153,11 @@ export default function FamilyBoard({
     })
   }
 
-  function remove(item: FamilyItem) {
-    if (!confirm(`Hapus "${item.title}"?`)) return
+  async function remove(item: FamilyItem) {
+    if (!(await confirmModal(`Hapus "${item.title}"?`, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteFamilyItem(item.id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

@@ -213,6 +213,7 @@ export default function AppNavbar() {
             type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Buka menu"
+            title="Buka menu"
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
             style={{ color: 'var(--brand-accent)' }}
           >
@@ -255,6 +256,7 @@ export default function AppNavbar() {
                   key={item.href}
                   type="button"
                   aria-label={`${item.title} (terkunci)`}
+                  title={`${item.title} (terkunci)`}
                   onClick={() => setLockedTitle(item.title)}
                   className="flex h-9 w-9 items-center justify-center rounded-full"
                   style={style}
@@ -266,6 +268,7 @@ export default function AppNavbar() {
                   key={item.href}
                   href={item.href}
                   aria-label={item.title}
+                  title={item.title}
                   className="flex h-9 w-9 items-center justify-center rounded-full transition"
                   style={style}
                 >
@@ -307,7 +310,7 @@ export default function AppNavbar() {
                   HINGGIL MANSION
                 </span>
               </div>
-              <button type="button" onClick={() => setSidebarOpen(false)} style={{ color: '#c7c9d2' }} aria-label="Tutup menu">
+              <button type="button" onClick={() => setSidebarOpen(false)} style={{ color: '#c7c9d2' }} aria-label="Tutup menu" title="Tutup menu">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>

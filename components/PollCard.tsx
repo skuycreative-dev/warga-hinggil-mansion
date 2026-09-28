@@ -3,6 +3,7 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { votePoll, closePoll } from '@/app/polling/actions'
+import { useConfirm } from '@/components/ModalProvider'
 
 type Option = { id: string; option_text: string; voteCount: number }
 type Poll = {
@@ -18,6 +19,7 @@ type Poll = {
 export default function PollCard({ poll, canManage }: { poll: Poll; canManage: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const hasVoted = !!poll.votedOptionId
 
   function handleVote(optionId: string) {
@@ -28,8 +30,8 @@ export default function PollCard({ poll, canManage }: { poll: Poll; canManage: b
     })
   }
 
-  function handleClose() {
-    if (!confirm('Tutup polling ini? Warga tidak bisa vote lagi setelah ditutup.')) return
+  async function handleClose() {
+    if (!(await confirmModal('Tutup polling ini? Warga tidak bisa vote lagi setelah ditutup.'))) return
     startTransition(async () => {
       await closePoll(poll.id)
       router.refresh()

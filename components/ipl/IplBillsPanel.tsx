@@ -13,6 +13,7 @@ import {
   updateIplBill,
   type IplFormState,
 } from '@/app/iuran-ipl/actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 import { IplProofButton, IplStatusBadge } from '@/components/ipl/IplBits'
 import { billOutstanding, billTotal, IPL_METHOD_LABEL, isOverdue, sortHouse, type IplBill } from '@/lib/ipl'
 import { cardStyle, dateLabel, formatAmountInput, inputStyle, labelStyle, parseAmount, periodLabel, rupiah, todayWib } from '@/lib/format'
@@ -58,6 +59,8 @@ export default function IplBillsPanel({
   const today = todayWib()
   const [state, formAction, isCreating] = useActionState(createIplPeriod, initialState)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const [openId, setOpenId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [rowError, setRowError] = useState('')
@@ -126,17 +129,17 @@ export default function IplBillsPanel({
     })
   }
 
-  function quickPaid(b: IplBill) {
-    if (!confirm(`Tandai Rumah ${b.nomor_rumah} lunas ${rupiah(billTotal(b))} (${periodLabel(b.period)})?`)) return
+  async function quickPaid(b: IplBill) {
+    if (!(await confirmModal(`Tandai Rumah ${b.nomor_rumah} lunas ${rupiah(billTotal(b))} (${periodLabel(b.period)})?`))) return
     startTransition(async () => {
       const result = await markIplPaid(b.id, 'transfer')
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }
 
-  function remove(b: IplBill) {
-    if (!confirm(`Hapus tagihan Rumah ${b.nomor_rumah} ${periodLabel(b.period)}?`)) return
+  async function remove(b: IplBill) {
+    if (!(await confirmModal(`Hapus tagihan Rumah ${b.nomor_rumah} ${periodLabel(b.period)}?`, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteIplBill(b.id)
       if (result.error) {
@@ -148,12 +151,12 @@ export default function IplBillsPanel({
     })
   }
 
-  function lateFees() {
-    if (!confirm(`Terapkan denda ke semua tagihan ${periodLabel(period)} yang lewat jatuh tempo & belum lunas?`)) return
+  async function lateFees() {
+    if (!(await confirmModal(`Terapkan denda ke semua tagihan ${periodLabel(period)} yang lewat jatuh tempo & belum lunas?`))) return
     startTransition(async () => {
       const result = await applyLateFees(period)
-      if (result.error) alert(result.error)
-      else alert(result.count > 0 ? `Denda diterapkan ke ${result.count} tagihan.` : 'Tidak ada tagihan yang perlu dikenai denda.')
+      if (result.error) await alertModal(result.error)
+      else await alertModal(result.count > 0 ? `Denda diterapkan ke ${result.count} tagihan.` : 'Tidak ada tagihan yang perlu dikenai denda.')
       router.refresh()
     })
   }
@@ -199,8 +202,8 @@ export default function IplBillsPanel({
     router.refresh()
   }
 
-  function removeProof(b: IplBill) {
-    if (!confirm('Hapus bukti bayar ini?')) return
+  async function removeProof(b: IplBill) {
+    if (!(await confirmModal('Hapus bukti bayar ini?', { danger: true }))) return
     startTransition(async () => {
       const result = await setIplProof(b.id, null)
       if (result.error) setRowError(result.error)

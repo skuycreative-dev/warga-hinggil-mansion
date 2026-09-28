@@ -4,22 +4,25 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import TukangForm, { type TukangFormValues } from '@/components/TukangForm'
 import { deleteTukang } from '@/app/tukang/actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 // Pemosting: ubah & hapus. Admin (Manajemen/Paguyuban/Superadmin): hapus postingan bermasalah.
 export default function TukangOwnerBar({ values, isOwner, isAdmin }: { values: TukangFormValues; isOwner: boolean; isAdmin: boolean }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
-  function remove() {
+  async function remove() {
     const msg = isOwner
       ? `Hapus ${values.name} dari katalog? Ulasan & foto ikut terhapus.`
       : `Hapus postingan ${values.name} karena bermasalah? Ulasan & foto ikut terhapus.`
-    if (!confirm(msg)) return
+    if (!(await confirmModal(msg, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteTukang(values.id)
       if (result.error) {
-        alert(result.error)
+        await alertModal(result.error)
         return
       }
       router.push('/tukang')

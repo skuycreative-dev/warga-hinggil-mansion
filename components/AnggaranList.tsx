@@ -3,6 +3,7 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteTransaction } from '@/app/anggaran/actions'
+import { useConfirm } from '@/components/ModalProvider'
 
 type Trx = {
   id: string
@@ -21,9 +22,10 @@ function formatRupiah(n: number) {
 export default function AnggaranList({ transactions, canManage }: { transactions: Trx[]; canManage: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
 
-  function handleDelete(id: string) {
-    if (!confirm('Hapus transaksi ini?')) return
+  async function handleDelete(id: string) {
+    if (!(await confirmModal('Hapus transaksi ini?', { danger: true }))) return
     startTransition(async () => {
       await deleteTransaction(id)
       router.refresh()

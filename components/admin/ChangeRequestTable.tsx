@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAlertModal, useConfirm, usePromptModal } from '@/components/ModalProvider'
 
 type ChangeRequest = {
   id: string
@@ -53,12 +54,15 @@ export default function ChangeRequestTable({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const confirmModal = useConfirm()
+  const promptModal = usePromptModal()
+  const alertModal = useAlertModal()
 
   function run(id: string, fn: () => Promise<{ error: string | null }>) {
     setBusyId(id)
     startTransition(async () => {
       const result = await fn()
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })
@@ -96,8 +100,8 @@ export default function ChangeRequestTable({
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => {
-                      const note = window.prompt('Alasan menolak (opsional):', '')
+                    onClick={async () => {
+                      const note = await promptModal('Alasan menolak (opsional):')
                       if (note === null) return
                       run(r.id, () => rejectAction(r.id, note))
                     }}
@@ -109,8 +113,8 @@ export default function ChangeRequestTable({
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => {
-                      if (!confirm(`Setujui perubahan ${FIELD_LABEL[r.field] ?? r.field} menjadi "${show(r.field, r.new_value)}"?`)) return
+                    onClick={async () => {
+                      if (!(await confirmModal(`Setujui perubahan ${FIELD_LABEL[r.field] ?? r.field} menjadi "${show(r.field, r.new_value)}"?`))) return
                       run(r.id, () => approveAction(r.id))
                     }}
                     className="text-[12px] font-bold"

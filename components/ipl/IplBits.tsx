@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { getIplProofUrl } from '@/app/iuran-ipl/actions'
 import { IPL_STATUS_LABEL } from '@/lib/ipl'
+import { useAlertModal } from '@/components/ModalProvider'
 
 export function IplStatusBadge({ status, overdue = false }: { status: string; overdue?: boolean }) {
   const style =
@@ -26,6 +27,7 @@ export function IplStatusBadge({ status, overdue = false }: { status: string; ov
 // Buka bukti bayar lewat link sementara (1 jam). Jendela dibuka lebih dulu supaya tidak diblokir browser HP.
 export function IplProofButton({ billId, label = 'Lihat bukti' }: { billId: string; label?: string }) {
   const [busy, setBusy] = useState(false)
+  const alertModal = useAlertModal()
 
   async function open() {
     setBusy(true)
@@ -34,7 +36,7 @@ export function IplProofButton({ billId, label = 'Lihat bukti' }: { billId: stri
     setBusy(false)
     if (!result.url) {
       win?.close()
-      alert(result.error ?? 'Bukti bayar tidak bisa dibuka.')
+      await alertModal(result.error ?? 'Bukti bayar tidak bisa dibuka.')
       return
     }
     if (win) win.location.href = result.url

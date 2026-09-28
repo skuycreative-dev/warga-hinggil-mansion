@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addAnnouncementComment, deleteAnnouncementComment, toggleReaction } from '@/app/pengumuman/actions'
+import { useConfirm } from '@/components/ModalProvider'
 
 export type AnnComment = { id: string; user_id: string; name: string; body: string; created_at: string }
 
@@ -44,6 +45,7 @@ export default function AnnouncementEngagement({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [error, setError] = useState('')
@@ -109,8 +111,8 @@ export default function AnnouncementEngagement({
                   <button
                     type="button"
                     disabled={isPending}
-                    onClick={() => {
-                      if (!confirm('Hapus komentar ini?')) return
+                    onClick={async () => {
+                      if (!(await confirmModal('Hapus komentar ini?', { danger: true }))) return
                       run(() => deleteAnnouncementComment(c.id))
                     }}
                     className="text-[11px] font-bold"

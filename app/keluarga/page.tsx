@@ -2,6 +2,8 @@
 import { getMyHousehold } from '@/lib/household-access'
 import { displayName } from '@/lib/display-name'
 import FamilyBoard, { type FamilyItem, type FamilyMember } from '@/components/FamilyBoard'
+import FamilyMemberList, { type NonAccountMember } from '@/components/FamilyMemberList'
+import { saveFamilyMember, deleteFamilyMember } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +24,7 @@ export default async function KeluargaPage() {
     )
   }
 
-  const [{ data: membersRaw }, { data: itemsRaw }] = await Promise.all([
+  const [{ data: membersRaw }, { data: itemsRaw }, { data: nonAccountRaw }] = await Promise.all([
     ctx.supabase
       .from('profiles')
       .select('id, full_name, nickname, family_role')
@@ -38,6 +40,12 @@ export default async function KeluargaPage() {
       .eq('house_id', ctx.houseId)
       .order('updated_at', { ascending: false })
       .limit(500),
+    // Anggota keluarga tanpa akun (anak kecil, ART, dsb) -- Kebutuhan #11
+    ctx.supabase
+      .from('family_members')
+      .select('id, name, relation, birth_date, note, created_at')
+      .eq('house_id', ctx.houseId)
+      .order('created_at', { ascending: true }),
   ])
 
   const members: FamilyMember[] = (membersRaw ?? []).map((m: any) => ({
@@ -63,6 +71,14 @@ export default async function KeluargaPage() {
     }
   })
 
+  const nonAccountMembers: NonAccountMember[] = (nonAccountRaw ?? []).map((m: any) => ({
+    id: m.id,
+    name: m.name,
+    relation: m.relation,
+    birth_date: m.birth_date,
+    note: m.note,
+  }))
+
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
       <div className="mx-auto w-full max-w-2xl px-6 py-10 md:px-10 md:py-14">
@@ -79,7 +95,16 @@ export default async function KeluargaPage() {
           <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
 
-        <FamilyBoard items={items} members={members} myId={ctx.userId} houseLabel={ctx.houseLabel} />
+        <FamilyMemberList
+          members={nonAccountMembers}
+          isManager={ctx.isManager}
+          saveAction={saveFamilyMember}
+          deleteAction={deleteFamilyMember}
+        />
+
+        <div className="mt-9">
+          <FamilyBoard items={items} members={members} myId={ctx.userId} houseLabel={ctx.houseLabel} />
+        </div>
       </div>
     </main>
   )

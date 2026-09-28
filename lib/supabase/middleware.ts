@@ -133,10 +133,17 @@ export async function updateSession(request: NextRequest) {
       url.search = lockedFeature ? `?terkunci=${lockedFeature}` : ''
       const redirect = NextResponse.redirect(url)
       supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie))
+      redirect.headers.set('Cache-Control', 'no-store, must-revalidate')
       return redirect
     }
   }
 
+  // "no-store" mencegah browser menyimpan halaman ini di bfcache (cache tombol Back/Forward).
+  // Tanpa ini, menekan Back berkali-kali bisa menampilkan halaman lama dari SEBELUM login
+  // (atau punya orang lain di HP bersama) tanpa dicek ulang statusnya — terasa seperti
+  // "otomatis keluar" padahal sesi aslinya masih aktif. Dengan header ini, Back/Forward
+  // selalu memuat ulang dari server dan status login dicek ulang setiap saat.
+  supabaseResponse.headers.set('Cache-Control', 'no-store, must-revalidate')
   return supabaseResponse
 }
 

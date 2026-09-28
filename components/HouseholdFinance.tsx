@@ -10,6 +10,7 @@ import {
   type HouseholdTxInput,
 } from '@/app/keuangan-rumah/actions'
 import type { HhAccount } from '@/lib/household-finance'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type HouseholdTx = {
   id: string
@@ -88,6 +89,8 @@ export default function HouseholdFinance({
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isSaving] = useActionState(addHouseholdTransaction, initialState)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const [newType, setNewType] = useState<TxType>('pengeluaran')
   const [newAmount, setNewAmount] = useState('')
   const [selectedMonth, setSelectedMonth] = useState(monthKey(todayWib()))
@@ -178,12 +181,12 @@ export default function HouseholdFinance({
     })
   }
 
-  function remove(t: HouseholdTx) {
+  async function remove(t: HouseholdTx) {
     const extra = t.debt_id ? ' Pembayaran hutang/piutang ini juga akan dibatalkan.' : ''
-    if (!confirm(`Hapus ${t.category} ${rupiah(Number(t.amount))}?${extra}`)) return
+    if (!(await confirmModal(`Hapus ${t.category} ${rupiah(Number(t.amount))}?${extra}`, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteHouseholdTransaction(t.id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

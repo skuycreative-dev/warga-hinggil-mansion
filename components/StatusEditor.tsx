@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { setMyStatus, clearMyStatus } from '@/app/profile/actions'
+import { useAlertModal } from '@/components/ModalProvider'
 
 const MAX = 150
 // Emoji ditulis sebagai kode Unicode supaya aman saat skrip di-paste ke PowerShell Windows
@@ -26,6 +27,7 @@ export default function StatusEditor({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const alertModal = useAlertModal()
 
   const active = current && new Date(current.expires_at).getTime() > Date.now() ? current : null
   const length = [...text].length
@@ -47,7 +49,7 @@ export default function StatusEditor({
   function clear() {
     startTransition(async () => {
       const result = await clearMyStatus()
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

@@ -3,6 +3,7 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { reactivatePost, deletePostPermanently } from '@/app/paguyuban/moderasi-forum/actions'
+import { useConfirm } from '@/components/ModalProvider'
 
 type HiddenPost = {
   id: string
@@ -15,6 +16,7 @@ type HiddenPost = {
 export default function ModerasiForumTable({ posts }: { posts: HiddenPost[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
 
   function handleReactivate(id: string) {
     startTransition(async () => {
@@ -23,8 +25,8 @@ export default function ModerasiForumTable({ posts }: { posts: HiddenPost[] }) {
     })
   }
 
-  function handleDelete(id: string) {
-    if (!confirm('Hapus postingan ini secara permanen? Tindakan ini tidak bisa dibatalkan.')) return
+  async function handleDelete(id: string) {
+    if (!(await confirmModal('Hapus postingan ini secara permanen? Tindakan ini tidak bisa dibatalkan.', { danger: true }))) return
     startTransition(async () => {
       await deletePostPermanently(id)
       router.refresh()

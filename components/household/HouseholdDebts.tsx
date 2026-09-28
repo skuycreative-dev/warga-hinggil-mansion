@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { deleteDebt, deleteHouseholdTransaction, payDebt, saveDebt, type HhFormState } from '@/app/keuangan-rumah/actions'
 import { daysUntil, debtRatio, nextDueDate, paidForDue, type HhAccount, type HhDebt } from '@/lib/household-finance'
 import { cardStyle, dateLabel, formatAmountInput, inputStyle, labelStyle, parseAmount, rupiah, todayWib } from '@/lib/format'
+import { useConfirm } from '@/components/ModalProvider'
 
 const initialState: HhFormState = { error: '', success: false }
 
@@ -31,6 +32,7 @@ export default function HouseholdDebts({
   const router = useRouter()
   const today = todayWib()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [state, formAction, isSaving] = useActionState(saveDebt, initialState)
   const [form, setForm] = useState<{ open: boolean; debt: HhDebt | null; direction: 'hutang' | 'piutang' }>({ open: false, debt: null, direction: 'hutang' })
   const [principal, setPrincipal] = useState('')
@@ -78,10 +80,10 @@ export default function HouseholdDebts({
     })
   }
 
-  function submitPay(d: HhDebt) {
+  async function submitPay(d: HhDebt) {
     if (!pay) return
     const amount = parseAmount(pay.amount)
-    if (amount > d.remaining && !confirm(`Nominal melebihi sisa ${rupiah(d.remaining)}. Tetap simpan?`)) return
+    if (amount > d.remaining && !(await confirmModal(`Nominal melebihi sisa ${rupiah(d.remaining)}. Tetap simpan?`))) return
     run(() => payDebt(d.id, amount, pay.date, pay.accountId, pay.note), () => setPay(null))
   }
 
@@ -342,8 +344,8 @@ export default function HouseholdDebts({
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!confirm(`Hapus ${d.name}? Riwayat pembayarannya tetap ada di Transaksi.`)) return
+                  onClick={async () => {
+                    if (!(await confirmModal(`Hapus ${d.name}? Riwayat pembayarannya tetap ada di Transaksi.`, { danger: true }))) return
                     run(() => deleteDebt(d.id))
                   }}
                   className="text-[12px] font-bold"
@@ -368,8 +370,8 @@ export default function HouseholdDebts({
                           type="button"
                           aria-label="Batalkan pembayaran"
                           disabled={isPending}
-                          onClick={() => {
-                            if (!confirm('Batalkan pembayaran ini? Transaksinya juga dihapus.')) return
+                          onClick={async () => {
+                            if (!(await confirmModal('Batalkan pembayaran ini? Transaksinya juga dihapus.', { danger: true }))) return
                             run(() => deleteHouseholdTransaction(p.id))
                           }}
                           className="text-[11px] font-bold"

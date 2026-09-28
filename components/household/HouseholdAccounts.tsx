@@ -15,6 +15,7 @@ import {
 } from '@/app/keuangan-rumah/actions'
 import { ACCOUNT_KIND_LABEL, GOAL_CATEGORY_LABEL, type HhAccount, type HhGoal } from '@/lib/household-finance'
 import { cardStyle, dateLabel, formatAmountInput, inputStyle, labelStyle, monthsBetween, parseAmount, rupiah, todayWib } from '@/lib/format'
+import { useConfirm } from '@/components/ModalProvider'
 
 const initialState: HhFormState = { error: '', success: false }
 
@@ -50,6 +51,7 @@ export default function HouseholdAccounts({
   const router = useRouter()
   const today = todayWib()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [accState, accAction, accSaving] = useActionState(saveAccount, initialState)
   const [goalState, goalAction, goalSaving] = useActionState(saveGoal, initialState)
 
@@ -211,8 +213,8 @@ export default function HouseholdAccounts({
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!confirm(`Hapus rekening ${a.name}? Rekening yang sudah punya transaksi tidak bisa dihapus (arsipkan saja).`)) return
+                  onClick={async () => {
+                    if (!(await confirmModal(`Hapus rekening ${a.name}? Rekening yang sudah punya transaksi tidak bisa dihapus (arsipkan saja).`, { danger: true }))) return
                     run(() => deleteAccount(a.id))
                   }}
                   className="text-[11.5px] font-bold"
@@ -406,8 +408,8 @@ export default function HouseholdAccounts({
                   <button
                     type="button"
                     disabled={isPending}
-                    onClick={() => {
-                      if (!confirm(`Hapus pos ${g.name} beserta riwayat setorannya? Saldo rekening tidak berubah.`)) return
+                    onClick={async () => {
+                      if (!(await confirmModal(`Hapus pos ${g.name} beserta riwayat setorannya? Saldo rekening tidak berubah.`, { danger: true }))) return
                       run(() => deleteGoal(g.id))
                     }}
                     className="text-[12px] font-bold"
@@ -435,8 +437,8 @@ export default function HouseholdAccounts({
                             type="button"
                             aria-label="Hapus setoran"
                             disabled={isPending}
-                            onClick={() => {
-                              if (!confirm('Hapus catatan setoran ini?')) return
+                            onClick={async () => {
+                              if (!(await confirmModal('Hapus catatan setoran ini?', { danger: true }))) return
                               run(() => deleteGoalEntry(e.id))
                             }}
                             className="text-[11px] font-bold"

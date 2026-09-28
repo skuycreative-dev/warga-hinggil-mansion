@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { deleteAnnouncement, updateAnnouncement, setAnnouncementPinned } from '@/app/pengumuman/actions'
 import AnnouncementEngagement, { type AnnComment } from '@/components/AnnouncementEngagement'
 import { ANNOUNCEMENT_CATEGORIES, findCategory } from '@/lib/categories'
+import { useConfirm } from '@/components/ModalProvider'
 
 type Announcement = {
   id: string
@@ -48,6 +49,7 @@ export default function AnnouncementList({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -186,8 +188,8 @@ export default function AnnouncementList({
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!confirm('Hapus pengumuman ini?')) return
+                  onClick={async () => {
+                    if (!(await confirmModal('Hapus pengumuman ini?', { danger: true }))) return
                     run(() => deleteAnnouncement(a.id))
                   }}
                   className="text-[12px] font-bold"

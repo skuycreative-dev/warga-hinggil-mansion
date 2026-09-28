@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { reviewRoleRequest } from '@/app/dashboard/family-actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type RoleRequest = { id: string; name: string; created_at: string }
 
@@ -19,18 +20,20 @@ export default function RoleRequestList({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
   if (requests.length === 0) return null
 
-  function decide(r: RoleRequest, approve: boolean) {
+  async function decide(r: RoleRequest, approve: boolean) {
     const question = approve
       ? `Setujui ${r.name} sebagai Ibu Rumah Tangga di Rumah ${houseLabel ?? ''}? Ibu Rumah Tangga bisa melihat & mengelola Keuangan Rumah Tangga.`
       : `Tolak pengajuan ${r.name} menjadi Ibu Rumah Tangga?`
-    if (!confirm(question)) return
+    if (!(await confirmModal(question))) return
     setBusyId(r.id)
     startTransition(async () => {
       const result = await reviewRoleRequest(r.id, approve)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })

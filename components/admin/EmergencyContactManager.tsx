@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ContactFormState, ContactInput } from '@/app/kelola-nomor-darurat/actions'
 import { useBranding } from '@/components/BrandingProvider'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 type Contact = {
   id: string
@@ -53,6 +54,8 @@ export default function EmergencyContactManager({
   const brand = useBranding()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ContactInput>({ name: '', phone: '', description: '', sortOrder: 0 })
   const [rowError, setRowError] = useState('')
@@ -82,16 +85,16 @@ export default function EmergencyContactManager({
   function toggleActive(c: Contact) {
     startTransition(async () => {
       const result = await setActiveAction(c.id, !c.is_active)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }
 
-  function remove(c: Contact) {
-    if (!confirm(`Hapus nomor "${c.name}" (${c.phone})? Kalau hanya sementara, lebih baik pakai tombol Sembunyikan.`)) return
+  async function remove(c: Contact) {
+    if (!(await confirmModal(`Hapus nomor "${c.name}" (${c.phone})? Kalau hanya sementara, lebih baik pakai tombol Sembunyikan.`, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteAction(c.id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

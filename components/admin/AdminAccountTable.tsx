@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useConfirm } from '@/components/ModalProvider'
 
 type Account = { id: string; full_name: string; role: string; created_at: string }
 type RoleOption = { value: string; label: string }
@@ -33,6 +34,7 @@ export default function AdminAccountTable({
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
 
   function startEdit(a: Account) {
     setEditingId(a.id)
@@ -48,8 +50,8 @@ export default function AdminAccountTable({
     })
   }
 
-  function handleDelete(id: string, fullName: string) {
-    if (!confirm(`Hapus akun ${fullName}? Tindakan ini permanen.`)) return
+  async function handleDelete(id: string, fullName: string) {
+    if (!(await confirmModal(`Hapus akun ${fullName}? Tindakan ini permanen.`, { danger: true }))) return
     startTransition(async () => {
       await deleteAction(id)
       router.refresh()

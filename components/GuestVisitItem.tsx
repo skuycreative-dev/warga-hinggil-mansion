@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cancelGuestVisit } from '@/app/qr-tamu/actions'
 import GuestQr from '@/components/tamu/GuestQr'
+import { useConfirm } from '@/components/ModalProvider'
 
 type GuestVisit = {
   id: string
@@ -35,10 +36,11 @@ export default function GuestVisitItem({ item, houseLabel = null }: { item: Gues
   const [showQr, setShowQr] = useState(false)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const statusStyle = STATUS_STYLE[item.status] ?? STATUS_STYLE.menunggu
 
-  function handleCancel() {
-    if (!confirm(`Batalkan undangan untuk ${item.guest_name}?`)) return
+  async function handleCancel() {
+    if (!(await confirmModal(`Batalkan undangan untuk ${item.guest_name}?`, { danger: true }))) return
     startTransition(async () => {
       await cancelGuestVisit(item.id)
       router.refresh()

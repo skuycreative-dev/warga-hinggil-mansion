@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getServiceFileUrl, markServiceRead, sendServiceMessage, setServiceStatus } from '@/app/layanan/actions'
 import { ACCEPT_ATTR, DOC_TYPES, LAYANAN_STATUS, MAX_DOC_BYTES, fileSizeLabel, guessType, safeFileName } from '@/lib/layanan'
 import { compressImage, extFor, isImage } from '@/lib/image-upload'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type ThreadMessage = {
   id: string
@@ -55,6 +56,8 @@ export default function ServiceThread({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const endRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -68,7 +71,7 @@ export default function ServiceThread({
     const r = await getServiceFileUrl(id, download)
     if (!r.url) {
       win?.close()
-      alert(r.error ?? 'File tidak bisa dibuka.')
+      await alertModal(r.error ?? 'File tidak bisa dibuka.')
       return
     }
     if (win) win.location.href = r.url
@@ -125,14 +128,14 @@ export default function ServiceThread({
     }
   }
 
-  function changeStatus(next: string) {
+  async function changeStatus(next: string) {
     const msg =
       next === 'dibatalkan'
         ? 'Batalkan permintaan ini? Percakapan tidak bisa dilanjutkan.'
         : next === 'selesai'
           ? 'Tandai selesai? Pastikan surat sudah dikirim ke warga.'
           : null
-    if (msg && !confirm(msg)) return
+    if (msg && !(await confirmModal(msg, { danger: next === 'dibatalkan' }))) return
     startTransition(async () => {
       const r = await setServiceStatus(requestId, next)
       if (r.error) setError(r.error)

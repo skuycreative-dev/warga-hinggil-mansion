@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { triggerEmergency, resolveOwnEmergency, addReporterInfo } from '@/app/darurat/actions'
 import AlertTimeline from '@/components/darurat/AlertTimeline'
 import type { EmergencyEvent } from '@/lib/emergency'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 type Alert = {
   id: string
@@ -75,6 +76,8 @@ export default function EmergencyPanel({
   const [error, setError] = useState('')
   const [justSent, setJustSent] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
   const sentRef = useRef(false)
   const [infoFor, setInfoFor] = useState<string | null>(null)
   const [infoText, setInfoText] = useState('')
@@ -133,7 +136,7 @@ export default function EmergencyPanel({
   function runAction(fn: (id: string) => Promise<{ error: string | null }>, id: string) {
     startTransition(async () => {
       const result = await fn(id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }
@@ -158,8 +161,8 @@ export default function EmergencyPanel({
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!confirm(`Reset alert ${typeLabel(a.emergency_type)}? Tekan OK kalau kamu sudah aman atau alert ini tidak sengaja terkirim.`)) return
+                  onClick={async () => {
+                    if (!(await confirmModal(`Reset alert ${typeLabel(a.emergency_type)}? Tekan OK kalau kamu sudah aman atau alert ini tidak sengaja terkirim.`))) return
                     runAction(resolveOwnEmergency, a.id)
                   }}
                   className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
@@ -193,7 +196,7 @@ export default function EmergencyPanel({
                           startTransition(async () => {
                             const r = await addReporterInfo(a.id, infoText)
                             if (r.error) {
-                              alert(r.error)
+                              await alertModal(r.error)
                               return
                             }
                             setInfoText('')

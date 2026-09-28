@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { deleteTukang } from '@/app/tukang/actions'
 import { categoryLabel } from '@/lib/tukang'
 import { inputStyle } from '@/lib/format'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 export type KelolaTukang = {
   id: string
@@ -26,6 +27,8 @@ export default function TukangKelolaTable({ items }: { items: KelolaTukang[] }) 
   const [isPending, startTransition] = useTransition()
   const [query, setQuery] = useState('')
   const [onlyFlagged, setOnlyFlagged] = useState(false)
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -34,11 +37,11 @@ export default function TukangKelolaTable({ items }: { items: KelolaTukang[] }) 
       .filter((t) => !q || `${t.name} ${t.specialty} ${t.submitter_name}`.toLowerCase().includes(q))
   }, [items, query, onlyFlagged])
 
-  function remove(t: KelolaTukang) {
-    if (!confirm(`Hapus ${t.name} dari katalog? Ulasan & foto ikut terhapus.`)) return
+  async function remove(t: KelolaTukang) {
+    if (!(await confirmModal(`Hapus ${t.name} dari katalog? Ulasan & foto ikut terhapus.`, { danger: true }))) return
     startTransition(async () => {
       const result = await deleteTukang(t.id)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
     })
   }

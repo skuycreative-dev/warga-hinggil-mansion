@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { confirmFamilyMember } from '@/app/dashboard/family-actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 type FamilyRequest = {
   id: string
@@ -30,18 +31,20 @@ export default function FamilyRequestList({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
   if (requests.length === 0) return null
 
-  function decide(r: FamilyRequest, approve: boolean) {
+  async function decide(r: FamilyRequest, approve: boolean) {
     const question = approve
       ? `Konfirmasi ${r.name} sebagai penghuni Rumah ${houseLabel ?? ''}?`
       : `Tolak ${r.name}? Tolak hanya kalau orang ini BUKAN penghuni rumahmu.`
-    if (!confirm(question)) return
+    if (!(await confirmModal(question))) return
     setBusyId(r.id)
     startTransition(async () => {
       const result = await confirmFamilyMember(r.id, approve)
-      if (result.error) alert(result.error)
+      if (result.error) await alertModal(result.error)
       router.refresh()
       setBusyId(null)
     })

@@ -4,6 +4,7 @@ import './globals.css'
 import AppFooter from '@/components/AppFooter'
 import AppNavbar from '@/components/AppNavbar'
 import BrandingProvider from '@/components/BrandingProvider'
+import ModalProvider from '@/components/ModalProvider'
 import { getBranding } from '@/lib/branding'
 
 const fraunces = Fraunces({
@@ -55,9 +56,11 @@ export default async function RootLayout({
         } as React.CSSProperties}
       >
         <BrandingProvider value={branding}>
-          <AppNavbar />
-          <div className="flex-1">{children}</div>
-          <AppFooter />
+          <ModalProvider>
+            <AppNavbar />
+            <div className="flex-1">{children}</div>
+            <AppFooter />
+          </ModalProvider>
         </BrandingProvider>
       </body>
     </html>

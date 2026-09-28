@@ -6,6 +6,7 @@ import ShiftWeek from '@/components/patroli/ShiftWeek'
 import { addShifts, copyPreviousWeek, deleteShift } from '@/app/keamanan/jadwal-jaga/actions'
 import type { SecurityPerson, Shift } from '@/lib/patrol'
 import { inputStyle, labelStyle } from '@/lib/format'
+import { useConfirm } from '@/components/ModalProvider'
 
 const PRESETS = [
   { label: 'Pagi 06-18', start: '06:00', end: '18:00' },
@@ -32,6 +33,7 @@ export default function ShiftManager({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
   const [date, setDate] = useState(days.includes(today) ? today : days[0])
   const [repeat, setRepeat] = useState(1)
   const [start, setStart] = useState('06:00')
@@ -122,8 +124,8 @@ export default function ShiftManager({
         <button
           type="button"
           disabled={isPending}
-          onClick={() => {
-            if (!confirm('Salin semua jadwal minggu lalu ke minggu ini? Jadwal yang sudah ada tidak dobel.')) return
+          onClick={async () => {
+            if (!(await confirmModal('Salin semua jadwal minggu lalu ke minggu ini? Jadwal yang sudah ada tidak dobel.'))) return
             run(() => copyPreviousWeek(weekStart), (n) => `${n} jadwal disalin dari minggu lalu.`)
           }}
           className="rounded-lg px-3 py-1.5 text-[12px] font-bold"
@@ -143,8 +145,8 @@ export default function ShiftManager({
             type="button"
             aria-label="Hapus jadwal"
             disabled={isPending}
-            onClick={() => {
-              if (!confirm(`Hapus jadwal ${s.security_name} ${s.start_time}-${s.end_time}?`)) return
+            onClick={async () => {
+              if (!(await confirmModal(`Hapus jadwal ${s.security_name} ${s.start_time}-${s.end_time}?`, { danger: true }))) return
               run(() => deleteShift(s.id), () => 'Jadwal dihapus.')
             }}
             className="flex-shrink-0 text-[12px] font-bold"

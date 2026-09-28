@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import PhotoLightbox from '@/components/tukang/PhotoLightbox'
 import { addPortfolioPhoto, deletePortfolioPhoto } from '@/app/tukang/actions'
 import { uploadPhoto } from '@/lib/image-upload'
+import { useConfirm } from '@/components/ModalProvider'
 
 export type PortfolioPhoto = { id: string; url: string; caption: string | null }
 
@@ -24,6 +25,7 @@ export default function TukangPortfolio({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const confirmModal = useConfirm()
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return
@@ -66,8 +68,8 @@ export default function TukangPortfolio({
                 type="button"
                 aria-label="Hapus foto"
                 disabled={isPending}
-                onClick={() => {
-                  if (!confirm('Hapus foto ini?')) return
+                onClick={async () => {
+                  if (!(await confirmModal('Hapus foto ini?'))) return
                   startTransition(async () => {
                     const r = await deletePortfolioPhoto(p.id)
                     if (r.error) setError(r.error)

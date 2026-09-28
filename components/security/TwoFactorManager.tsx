@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useBranding } from '@/components/BrandingProvider'
+import { useConfirm } from '@/components/ModalProvider'
 
 type Factor = { id: string; friendly_name?: string | null; status: string; created_at?: string }
 
@@ -27,6 +28,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [showSecret, setShowSecret] = useState(false)
+  const confirmModal = useConfirm()
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -96,7 +98,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
       setMsg({ ok: false, text: 'Akun admin wajib punya minimal 1 perangkat 2FA. Tambahkan perangkat baru dulu, baru hapus yang lama.' })
       return
     }
-    if (!confirm(`Hapus perangkat "${f.friendly_name ?? 'tanpa nama'}"? Kode dari perangkat itu tidak bisa dipakai lagi.`)) return
+    if (!(await confirmModal(`Hapus perangkat "${f.friendly_name ?? 'tanpa nama'}"? Kode dari perangkat itu tidak bisa dipakai lagi.`, { danger: true }))) return
     setBusy(true)
     const supabase = createClient()
     const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id })

@@ -50,6 +50,10 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginUser, initialState)
   const left = useCountdown(state?.lockedUntil)
   const locked = left > 0
+  // Diketik terkendali (controlled) supaya isian TIDAK ikut terhapus saat form
+  // di-reset otomatis oleh React setelah gagal login (salah email/password).
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   return (
     <main
@@ -100,6 +104,8 @@ export default function LoginPage() {
               autoComplete="username"
               autoCapitalize="none"
               inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={inputStyle}
             />
           </div>
@@ -111,7 +117,14 @@ export default function LoginPage() {
                 Lupa Password?
               </Link>
             </div>
-            <PasswordInput id="login-password" name="password" autoComplete="current-password" style={inputStyle} />
+            <PasswordInput
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              style={inputStyle}
+            />
           </div>
 
           {state?.error ? (

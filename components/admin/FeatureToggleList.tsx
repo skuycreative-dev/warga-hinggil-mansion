@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { setFeatureEnabled } from '@/app/superadmin/fitur/actions'
+import { useConfirm, useAlertModal } from '@/components/ModalProvider'
 
 type Row = { key: string; label: string; description: string; enabled: boolean; updatedAt: string | null }
 
@@ -11,18 +12,20 @@ export default function FeatureToggleList({ rows }: { rows: Row[] }) {
   const [isPending, startTransition] = useTransition()
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [local, setLocal] = useState<Record<string, boolean>>({})
+  const confirmModal = useConfirm()
+  const alertModal = useAlertModal()
 
-  function toggle(row: Row) {
+  async function toggle(row: Row) {
     const next = !(local[row.key] ?? row.enabled)
     if (row.key === 'darurat' && !next) {
-      if (!confirm('Menonaktifkan Tombol Darurat berarti warga tidak bisa mengirim alert darurat. Yakin?')) return
+      if (!(await confirmModal('Menonaktifkan Tombol Darurat berarti warga tidak bisa mengirim alert darurat. Yakin?', { danger: true }))) return
     }
     setLocal((l) => ({ ...l, [row.key]: next }))
     setBusyKey(row.key)
     startTransition(async () => {
       const result = await setFeatureEnabled(row.key, next)
       if (result.error) {
-        alert(result.error)
+        await alertModal(result.error)
         setLocal((l) => ({ ...l, [row.key]: !next }))
       }
       router.refresh()
