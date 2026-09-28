@@ -202,6 +202,14 @@ export default function NotificationBell() {
                 </Link>
               ))
             )}
+            <Link
+              href="/pengaturan-notifikasi"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-3 text-center text-[12px] font-bold"
+              style={{ color: '#9c7a3f', background: '#faf7f0' }}
+            >
+              Atur notifikasi ke HP
+            </Link>
           </div>
         </>
       ) : null}

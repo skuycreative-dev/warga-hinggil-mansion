@@ -2,7 +2,7 @@
 // Sengaja TIDAK menyimpan data warga di HP: halaman & data pribadi (keuangan, chat, dll.) selalu diambil
 // langsung dari server. Yang disimpan hanya file tampilan umum yang sama untuk semua orang
 // (kode aplikasi, ikon, logo) supaya aplikasi terbuka lebih cepat dan hemat kuota.
-const CACHE = 'hinggil-v2'
+const CACHE = 'hinggil-v3'
 const STATIC_CACHE = 'hinggil-static-v2'
 const OFFLINE_URL = '/offline.html'
 const MAX_STATIC = 150
@@ -59,6 +59,51 @@ self.addEventListener('fetch', (event) => {
         cache.put(req, res.clone()).then(() => trim(cache))
       }
       return res
+    })
+  )
+})
+
+// ---------- Notifikasi ke HP (Web Push) ----------
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch (e) {
+    data = { title: 'Notifikasi baru', body: event.data ? event.data.text() : '' }
+  }
+  const urgent = data.category === 'darurat'
+  const title = data.title || 'Notifikasi baru'
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: data.tag || undefined,
+      renotify: urgent,
+      requireInteraction: urgent,
+      vibrate: urgent ? [500, 200, 500, 200, 900] : [120, 60, 120],
+      data: { url: typeof data.url === 'string' ? data.url : '/dashboard' },
+    })
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  let target = '/dashboard'
+  try {
+    const u = new URL((event.notification.data && event.notification.data.url) || '/dashboard', self.location.origin)
+    if (u.origin === self.location.origin) target = u.pathname + u.search + u.hash
+  } catch (e) {
+    target = '/dashboard'
+  }
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.startsWith(self.location.origin) && 'focus' in client) {
+          return client.focus().then((c) => (c && 'navigate' in c ? c.navigate(target) : undefined))
+        }
+      }
+      return self.clients.openWindow(target)
     })
   )
 })

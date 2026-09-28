@@ -9,6 +9,7 @@ import { displayName as nameOf } from '@/lib/display-name'
 import FamilyRequestList from '@/components/FamilyRequestList'
 import RoleRequestList from '@/components/RoleRequestList'
 import InstallAppBanner from '@/components/InstallAppBanner'
+import PushPromptBanner from '@/components/push/PushPromptBanner'
 import DashboardTile, { type TileState } from '@/components/DashboardTile'
 import LockedFeatureNotice from '@/components/LockedFeatureNotice'
 import { CCTV_URL, disabledSet, type FeatureKey } from '@/lib/features'
@@ -359,6 +360,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           ) : null}
 
           <InstallAppBanner />
+          <PushPromptBanner />
 
           <LockedFeatureNotice featureKey={terkunci ?? null} />
 

@@ -85,7 +85,7 @@ export async function uploadPhoto(bucket: string, userId: string, folder: string
   const path = `${userId}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extFor(blob.type)}`
   const supabase = createClient()
   const { error } = await supabase.storage.from(bucket).upload(path, blob, { contentType: blob.type, upsert: false })
-  if (error) throw new Error(`Gagal mengunggah foto: ${error.message}`)
+  if (error) throw new Error('Gagal mengunggah foto. Periksa internet lalu coba lagi.')
   return path
 }
 

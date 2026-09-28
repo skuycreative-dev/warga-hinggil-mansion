@@ -3,6 +3,11 @@
 import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { ANNOUNCEMENT_CATEGORIES } from '@/lib/categories'
+
+function cleanCategory(v: unknown) {
+  return ANNOUNCEMENT_CATEGORIES.some((c) => c.key === v) ? (v as string) : 'umum'
+}
 
 const ADMIN_ROLES = ['manajemen', 'paguyuban', 'superadmin']
 
@@ -31,11 +36,18 @@ export async function createAnnouncement(formData: FormData) {
     return { error: 'Judul dan isi pengumuman wajib diisi.' }
   }
 
+  if (title.length > 150) return { error: 'Judul maksimal 150 karakter.' }
+  if (content.length > 5000) return { error: 'Isi maksimal 5000 karakter.' }
+
   const { supabase, userId } = await requireAnnouncementAdmin()
+  const rawImage = String(formData.get('image_path') ?? '')
+  const imagePath = rawImage && rawImage.startsWith(`${userId}/`) && !rawImage.includes('..') ? rawImage : null
 
   const { error } = await supabase.from('announcements').insert({
     title,
     content,
+    category: cleanCategory(formData.get('category')),
+    image_path: imagePath,
     is_pinned: formData.get('is_pinned') === 'on',
     created_by: userId,
   })
@@ -52,11 +64,13 @@ export async function createAnnouncement(formData: FormData) {
 export async function deleteAnnouncement(id: string) {
   const { supabase } = await requireAnnouncementAdmin()
 
+  const { data: row } = await supabase.from('announcements').select('image_path').eq('id', id).maybeSingle()
   const { error } = await supabase.from('announcements').delete().eq('id', id)
 
   if (error) {
     return { error: publicError(error) }
   }
+  if (row?.image_path) await supabase.storage.from('announcement-images').remove([row.image_path as string])
 
   revalidatePath('/pengumuman')
   revalidatePath('/dashboard')
@@ -72,7 +86,7 @@ async function tryAnnouncementAdmin() {
   }
 }
 
-export async function updateAnnouncement(id: string, title: string, content: string) {
+export async function updateAnnouncement(id: string, title: string, content: string, category?: string) {
   const cleanTitle = title.trim()
   const cleanContent = content.trim()
   if (!cleanTitle || !cleanContent) return { error: 'Judul dan isi pengumuman wajib diisi.' }
@@ -81,7 +95,7 @@ export async function updateAnnouncement(id: string, title: string, content: str
   const ctx = await tryAnnouncementAdmin()
   if (!ctx) return { error: 'Tidak punya akses untuk mengubah pengumuman.' }
 
-  const { error } = await ctx.supabase.from('announcements').update({ title: cleanTitle, content: cleanContent }).eq('id', id)
+  const { error } = await ctx.supabase.from('announcements').update({ title: cleanTitle, content: cleanContent, ...(category ? { category: cleanCategory(category) } : {}) }).eq('id', id)
   if (error) return { error: publicError(error) }
 
   revalidatePath('/pengumuman')

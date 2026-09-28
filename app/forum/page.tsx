@@ -1,95 +1,75 @@
 ﻿import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { displayName } from '@/lib/display-name'
-import { forumLevel } from '@/lib/forum-level'
-import ForumPostForm from '@/components/ForumPostForm'
-import ForumFeed from '@/components/ForumFeed'
+import { loadForumPosts } from '@/lib/forum-data'
+import { FORUM_CATEGORIES } from '@/lib/categories'
+import ForumComposer from '@/components/forum/ForumComposer'
+import PostCard from '@/components/forum/PostCard'
 import NotificationBell from '@/components/NotificationBell'
 
-export default async function ForumPage() {
-  const supabase = await createClient()
+export const dynamic = 'force-dynamic'
 
+const MODERATORS = ['paguyuban', 'manajemen', 'superadmin']
+
+export default async function ForumPage({ searchParams }: { searchParams: Promise<{ k?: string }> }) {
+  const sp = await searchParams
+  const category = FORUM_CATEGORIES.some((c) => c.key === sp.k) ? (sp.k as string) : null
+
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const { data: rawPosts } = await supabase
-    .from('forum_posts')
-    .select('id, content, created_at, author:profiles(full_name, nickname, forum_points)')
-    .eq('is_hidden', false)
-    .order('created_at', { ascending: false })
-    .limit(50)
-
-  const postIds = (rawPosts ?? []).map((p) => p.id)
-
-  const [{ data: likes }, { data: comments }] = await Promise.all([
-    postIds.length
-      ? supabase.from('forum_likes').select('post_id, user_id').in('post_id', postIds)
-      : Promise.resolve({ data: [] as any[] }),
-    postIds.length
-      ? supabase
-          .from('forum_comments')
-          .select('id, post_id, content, created_at, author:profiles(full_name, nickname, forum_points)')
-          .in('post_id', postIds)
-          .order('created_at', { ascending: true })
-      : Promise.resolve({ data: [] as any[] }),
+  const [{ data: me }, posts] = await Promise.all([
+    supabase.from('profiles').select('role').eq('id', user.id).maybeSingle(),
+    loadForumPosts(supabase, user.id, { category, limit: 30 }),
   ])
+  const canModerate = MODERATORS.includes((me?.role as string) ?? '')
 
-  const posts = (rawPosts ?? []).map((p: any) => {
-    const postLikes = (likes ?? []).filter((l: any) => l.post_id === p.id)
-    const postComments = (comments ?? [])
-      .filter((c: any) => c.post_id === p.id)
-      .map((c: any) => ({
-        id: c.id,
-        content: c.content,
-        created_at: c.created_at,
-        author_name: displayName(c.author),
-        author_level: forumLevel(c.author?.forum_points).name,
-      }))
-
-    return {
-      id: p.id,
-      content: p.content,
-      created_at: p.created_at,
-      author_name: displayName(p.author),
-      author_level: forumLevel(p.author?.forum_points).name,
-      likeCount: postLikes.length,
-      likedByMe: !!user && postLikes.some((l: any) => l.user_id === user.id),
-      comments: postComments,
-    }
-  })
+  const chip = (active: boolean): React.CSSProperties =>
+    active ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }
 
   return (
-    <main className="w-full" style={{ background: '#faf7f0' }}>
-      <div className="mx-auto w-full max-w-2xl px-6 py-10 md:px-10 md:py-14">
+    <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>
+      <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 md:px-10 md:py-14">
         <div className="mb-6 flex items-center justify-between md:mb-8">
           <div>
-            <span
-              className="text-xs font-bold uppercase tracking-widest md:text-sm"
-              style={{ color: '#9c7a3f' }}
-            >
-              Komunitas
-            </span>
-            <h1
-              className="mt-1 text-2xl font-bold md:text-3xl"
-              style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}
-            >
+            <span className="text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>Komunitas</span>
+            <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
               Forum Warga
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <NotificationBell />
-            <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>
-              Beranda
-            </Link>
+            <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
           </div>
         </div>
 
-        <div className="mb-6">
-          <ForumPostForm />
-        </div>
+        <ForumComposer userId={user.id} defaultCategory={category ?? undefined} />
 
-        <ForumFeed posts={posts} />
+        <nav aria-label="Kategori forum" className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+          <Link href="/forum" className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={chip(!category)}>
+            Semua
+          </Link>
+          {FORUM_CATEGORIES.map((c) => (
+            <Link key={c.key} href={`/forum?k=${c.key}`} className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={chip(category === c.key)}>
+              {c.label}
+            </Link>
+          ))}
+        </nav>
+
+        {posts.length === 0 ? (
+          <p className="rounded-2xl px-5 py-8 text-center text-sm font-medium" style={{ background: '#ffffff', color: '#5b543f' }}>
+            Belum ada postingan{category ? ' di kategori ini' : ''}. Jadilah yang pertama menulis!
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {posts.map((p) => (
+              <PostCard key={p.id} post={p} myId={user.id} canModerate={canModerate} />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   )

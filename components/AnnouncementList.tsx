@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteAnnouncement, updateAnnouncement, setAnnouncementPinned } from '@/app/pengumuman/actions'
 import AnnouncementEngagement, { type AnnComment } from '@/components/AnnouncementEngagement'
+import { ANNOUNCEMENT_CATEGORIES, findCategory } from '@/lib/categories'
 
 type Announcement = {
   id: string
@@ -12,6 +13,8 @@ type Announcement = {
   created_at: string
   is_pinned: boolean
   author_name: string
+  category?: string
+  image_url?: string | null
   is_new?: boolean
   my_reaction?: string | null
   reaction_counts?: Record<string, number>
@@ -48,6 +51,7 @@ export default function AnnouncementList({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [category, setCategory] = useState('umum')
   const [error, setError] = useState('')
 
   function run(fn: () => Promise<{ error: string | null } | undefined>, after?: () => void) {
@@ -77,7 +81,12 @@ export default function AnnouncementList({
       {items.map((a) =>
         editingId === a.id ? (
           <div key={a.id} className="flex flex-col gap-2.5 rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
-            <input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} style={fieldStyle} />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Kategori" style={fieldStyle}>
+              {ANNOUNCEMENT_CATEGORIES.map((c) => (
+                <option key={c.key} value={c.key}>{c.label}</option>
+              ))}
+            </select>
+            <input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} aria-label="Judul" style={fieldStyle} />
             <textarea value={content} rows={5} onChange={(e) => setContent(e.target.value)} style={{ ...fieldStyle, resize: 'vertical' }} />
             <div className="flex gap-2">
               <button
@@ -91,7 +100,7 @@ export default function AnnouncementList({
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => run(() => updateAnnouncement(a.id, title, content), () => setEditingId(null))}
+                onClick={() => run(() => updateAnnouncement(a.id, title, content, category), () => setEditingId(null))}
                 className="flex-1 rounded-xl py-2.5 text-sm font-bold"
                 style={{ background: '#1a1305', color: '#e6c98a' }}
               >
@@ -113,11 +122,25 @@ export default function AnnouncementList({
                 </span>
               ) : null}
               {a.is_new ? (
-                <span className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#b3392f', color: '#ffffff' }}>
+                <span className="mb-1.5 mr-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#b3392f', color: '#ffffff' }}>
                   Baru
                 </span>
               ) : null}
+              {(() => {
+                const c = findCategory(ANNOUNCEMENT_CATEGORIES, a.category)
+                return (
+                  <span className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: c.bg, color: c.color }}>
+                    {c.label}
+                  </span>
+                )
+              })()}
               <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{a.title}</div>
+              {a.image_url ? (
+                <a href={a.image_url} target="_blank" rel="noopener noreferrer" className="mt-2 block overflow-hidden rounded-xl" style={{ background: '#faf7f0' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={a.image_url} alt={`Gambar: ${a.title}`} loading="lazy" decoding="async" className="max-h-96 w-full object-cover" />
+                </a>
+              ) : null}
               <p className="mt-1.5 whitespace-pre-wrap text-[13px]" style={{ color: '#5b543f' }}>{a.content}</p>
               <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>
                 {a.author_name} · {new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -152,6 +175,7 @@ export default function AnnouncementList({
                     setEditingId(a.id)
                     setTitle(a.title)
                     setContent(a.content)
+                    setCategory(a.category ?? 'umum')
                     setError('')
                   }}
                   className="text-[12px] font-bold"
