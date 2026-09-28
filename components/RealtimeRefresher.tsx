@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 // dan tidak memuat ulang apa pun saat aplikasi sedang di latar belakang.
 // Hanya data yang memang boleh dilihat pengguna yang dikirim database (aturan RLS tetap berlaku).
 const ROUTE_TABLES: [string, string[]][] = [
+  ['/peta', ['emergency_alerts', 'house_absences', 'houses', 'map_facilities', 'site_plan']],
   ['/dashboard', ['announcements', 'emergency_alerts', 'polls', 'poll_votes', 'house_absences', 'iuran_payment_status', 'profile_change_requests', 'service_requests', 'security_shifts', 'friendships']],
   ['/forum', ['forum_posts', 'forum_comments', 'forum_likes']],
   ['/paguyuban/moderasi-forum', ['forum_posts', 'forum_comments']],

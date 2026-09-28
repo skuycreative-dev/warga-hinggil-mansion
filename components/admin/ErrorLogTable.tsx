@@ -60,7 +60,7 @@ export default function ErrorLogTable({ logs }: { logs: ErrorLog[] }) {
                       disabled={isPending}
                       onClick={() => handleResolve(log.id)}
                       className="rounded-lg px-2.5 py-1 text-[11px] font-bold"
-                      style={{ background: '#e6c98a', color: '#1a1305' }}
+                      style={{ background: 'var(--brand-accent)', color: '#1a1305' }}
                     >
                       Tandai Selesai
                     </button>

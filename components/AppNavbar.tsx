@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -29,6 +29,7 @@ const sidebarLinks: NavLink[] = [
   { title: 'Rumah Kosong', href: '/rumah-kosong', feature: 'rumah_kosong' },
   { title: 'Status Hunian', href: '/status-hunian', feature: 'status_hunian' },
   { title: 'Jadwal Jaga', href: '/jadwal-jaga', feature: null },
+  { title: 'Peta Perumahan', href: '/peta', feature: null },
   { title: 'Catatan & Kalender Keluarga', href: '/keluarga', feature: 'keluarga' },
   { title: 'CCTV Jogja', href: CCTV_URL, feature: 'cctv', external: true },
 ]
@@ -213,7 +214,7 @@ export default function AppNavbar() {
             onClick={() => setSidebarOpen(true)}
             aria-label="Buka menu"
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
-            style={{ color: '#e6c98a' }}
+            style={{ color: 'var(--brand-accent)' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 7h16M4 12h16M4 17h16" />
@@ -222,7 +223,7 @@ export default function AppNavbar() {
 
           <div className="mr-auto flex min-w-0 items-center gap-2.5">
             <Link href="/dashboard" className="flex flex-shrink-0 items-center">
-              <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={24} height={24} className="rounded-md object-cover" />
+              <BrandLogo size={24} className="rounded-md object-cover" />
             </Link>
             <LiveClock variant="dark" />
           </div>
@@ -237,7 +238,7 @@ export default function AppNavbar() {
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={item.danger ? '#ffffff' : active ? '#e6c98a' : '#c7c9d2'}
+                  stroke={item.danger ? '#ffffff' : active ? 'var(--brand-accent)' : '#c7c9d2'}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -301,7 +302,7 @@ export default function AppNavbar() {
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(230,201,138,0.12)' }}>
               <div className="flex items-center gap-2">
-                <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={26} height={26} className="rounded-md object-cover" />
+                <BrandLogo size={26} className="rounded-md object-cover" />
                 <span className="text-[12.5px] font-bold tracking-wide" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}>
                   HINGGIL MANSION
                 </span>
@@ -318,7 +319,7 @@ export default function AppNavbar() {
                 const active = pathname === l.href
                 const itemStyle: React.CSSProperties = {
                   background: active ? 'rgba(212,175,106,0.14)' : 'transparent',
-                  color: active ? '#e6c98a' : '#c7c9d2',
+                  color: active ? 'var(--brand-accent)' : '#c7c9d2',
                 }
                 if (isLocked(l)) {
                   return (
@@ -371,7 +372,7 @@ export default function AppNavbar() {
                         key={l.href}
                         href={l.href}
                         className="rounded-xl px-3.5 py-2.5 text-[13.5px] font-bold transition"
-                        style={{ background: active ? 'rgba(212,175,106,0.14)' : 'transparent', color: active ? '#e6c98a' : '#c7c9d2' }}
+                        style={{ background: active ? 'rgba(212,175,106,0.14)' : 'transparent', color: active ? 'var(--brand-accent)' : '#c7c9d2' }}
                       >
                         {l.title}
                       </Link>

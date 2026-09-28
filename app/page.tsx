@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import AppHeader from '@/components/AppHeader'
+import { useBranding } from '@/components/BrandingProvider'
 
 const features = [
   {
@@ -37,6 +38,7 @@ const facilities = [
 ]
 
 export default function LandingPage() {
+  const brand = useBranding()
   const [showDetail, setShowDetail] = useState(false)
 
   return (
@@ -54,7 +56,7 @@ export default function LandingPage() {
             className="max-w-3xl text-[34px] font-bold leading-[1.15] md:text-[56px]"
             style={{ fontFamily: 'var(--font-fraunces), serif', color: '#ffffff' }}
           >
-            Komunitas Hinggil Mansion, dalam satu genggaman.
+            {brand.tagline || `Komunitas ${brand.community_name}, dalam satu genggaman.`}
           </h1>
           <p
             className="mt-5 max-w-xl text-base font-medium leading-relaxed md:text-lg"
@@ -68,7 +70,7 @@ export default function LandingPage() {
               href="/login"
               className="rounded-xl px-10 py-4 text-center text-base font-bold sm:min-w-[168px]"
               style={{
-                background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+                background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
                 color: '#1a1305',
                 boxShadow: '0 10px 26px -10px rgba(205,161,90,0.6)',
               }}

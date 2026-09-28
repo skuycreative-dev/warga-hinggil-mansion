@@ -15,7 +15,8 @@ const csp = [
   // 'unsafe-eval' hanya saat npm run dev (dibutuhkan fitur hot reload), tidak pernah di produksi
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${supabaseHttp}`,
+  // tile.openstreetmap.org: gambar peta jalan (menu Peta Perumahan)
+  `img-src 'self' data: blob: ${supabaseHttp} https://tile.openstreetmap.org`,
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseHttp} ${supabaseWs}${isDev ? ' ws: http://localhost:*' : ''}`,
   "media-src 'self' blob:",

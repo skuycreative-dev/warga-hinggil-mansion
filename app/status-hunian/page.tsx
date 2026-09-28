@@ -80,7 +80,7 @@ export default async function StatusHunianPage() {
           <section className="mb-8 flex flex-col gap-4">
             <div className="rounded-2xl px-5 py-5" style={{ background: '#1a1305' }}>
               <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Rumah {myHouse.nomor_rumah}</div>
-              <div className="mt-1 text-[22px] font-bold" style={{ color: '#e6c98a', fontFamily: 'var(--font-fraunces), serif' }}>{info.label}</div>
+              <div className="mt-1 text-[22px] font-bold" style={{ color: 'var(--brand-accent)', fontFamily: 'var(--font-fraunces), serif' }}>{info.label}</div>
               <div className="mt-1 text-[12.5px]" style={{ color: '#d8cfb8' }}>
                 Pemilik: {owners.length ? owners.map((o: any) => displayName(o)).join(', ') : 'belum ditetapkan Pengurus'}
               </div>

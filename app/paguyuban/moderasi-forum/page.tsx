@@ -77,7 +77,7 @@ export default async function ModerasiForumPage() {
         <StatCard
           label="Total Laporan"
           value={totalLaporan}
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 8v4l3 3"
         />
       </div>

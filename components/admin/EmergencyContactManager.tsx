@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ContactFormState, ContactInput } from '@/app/kelola-nomor-darurat/actions'
+import { useBranding } from '@/components/BrandingProvider'
 
 type Contact = {
   id: string
@@ -30,8 +31,8 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = { fontSize: '11px', fontWeight: 700, color: '#5b543f' }
 
-const PRESETS = [
-  { name: 'Pos Security Hinggil Mansion', description: 'Jaga 24 jam' },
+const presetsFor = (community: string) => [
+  { name: `Pos Security ${community}`, description: 'Jaga 24 jam' },
   { name: 'Ketua RT / Ketua Paguyuban', description: 'Pengurus warga' },
   { name: 'Sekretaris Paguyuban', description: 'Pengurus warga' },
 ]
@@ -49,6 +50,7 @@ export default function EmergencyContactManager({
   setActiveAction: (id: string, isActive: boolean) => Promise<{ error: string | null }>
   deleteAction: (id: string) => Promise<{ error: string | null }>
 }) {
+  const brand = useBranding()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -186,7 +188,7 @@ export default function EmergencyContactManager({
                           disabled={isPending}
                           onClick={() => saveEdit(c.id)}
                           className="flex-1 rounded-lg py-2 text-[12.5px] font-bold"
-                          style={{ background: '#1a1305', color: '#e6c98a' }}
+                          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
                         >
                           {isPending ? 'Menyimpan...' : 'Simpan'}
                         </button>
@@ -254,7 +256,7 @@ export default function EmergencyContactManager({
           <div className="mb-3 text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Tambah Nomor</div>
 
           <div className="mb-3 flex flex-wrap gap-1.5">
-            {PRESETS.map((p) => (
+            {presetsFor(brand.community_name).map((p) => (
               <button
                 key={p.name}
                 type="button"
@@ -294,7 +296,7 @@ export default function EmergencyContactManager({
               type="submit"
               disabled={isPending}
               className="w-full rounded-xl py-3 text-sm font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.7 : 1 }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
             >
               {isPending ? 'Menyimpan...' : '+ Tambah Nomor'}
             </button>

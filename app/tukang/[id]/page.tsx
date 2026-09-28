@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { getBranding } from '@/lib/branding'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getMyAccess } from '@/lib/access'
 import { createClient } from '@/lib/supabase/server'
@@ -16,6 +17,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export default async function TukangDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const brand = await getBranding()
   const { id } = await params
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
 
@@ -84,7 +86,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
 
         <div className="mt-4 overflow-hidden rounded-3xl" style={{ background: '#1a1305' }}>
           <div className="flex items-start gap-4 px-5 py-6">
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold" style={{ background: '#e6c98a', color: '#1a1305' }}>
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold" style={{ background: 'var(--brand-accent)', color: '#1a1305' }}>
               {initials(t.name)}
             </div>
             <div className="min-w-0">
@@ -112,7 +114,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
             </div>
           </div>
           {t.price_range ? (
-            <div className="px-5 py-3 text-[13px] font-bold" style={{ background: 'rgba(230,201,138,0.12)', color: '#e6c98a' }}>
+            <div className="px-5 py-3 text-[13px] font-bold" style={{ background: 'rgba(230,201,138,0.12)', color: 'var(--brand-accent)' }}>
               Perkiraan harga: {t.price_range}
             </div>
           ) : null}
@@ -185,7 +187,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
         <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-4 pt-3" style={{ background: 'linear-gradient(to top, #faf7f0 70%, rgba(250,247,240,0))' }}>
           <div className="mx-auto grid max-w-2xl grid-cols-[1fr_auto] gap-2">
             <a
-              href={`https://wa.me/${wa}?text=${encodeURIComponent(`Halo ${t.name}, saya warga Hinggil Mansion. Saya dapat kontak dari Katalog Tukang, ingin tanya jasa ${t.specialty}.`)}`}
+              href={`https://wa.me/${wa}?text=${encodeURIComponent(`Halo ${t.name}, saya warga ${brand.community_name}. Saya dapat kontak dari Katalog Tukang, ingin tanya jasa ${t.specialty}.`)}`}
               target="_blank"
               rel="noreferrer"
               className="rounded-xl py-3 text-center text-[14px] font-bold"
@@ -193,7 +195,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
             >
               Chat WhatsApp
             </a>
-            <a href={`tel:+${wa}`} className="rounded-xl px-5 py-3 text-center text-[14px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+            <a href={`tel:+${wa}`} className="rounded-xl px-5 py-3 text-center text-[14px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
               Telepon
             </a>
           </div>

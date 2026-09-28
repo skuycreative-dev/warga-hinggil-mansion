@@ -3,6 +3,7 @@
 import { publicError } from '@/lib/safe-error'
 import { getMyAccess } from '@/lib/access'
 import { revalidatePath } from 'next/cache'
+import { logAdminAction } from '@/lib/audit'
 import { passwordProblem } from '@/lib/security'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -83,6 +84,7 @@ export async function createAdminAccount(prevState: AdminAccountState, formData:
       return { error: `Akun dibuat tapi gagal set profil: ${publicError(profileError)}`, success: false }
     }
 
+    await logAdminAction(user.id, 'tambah', 'akun', created.user.id, `Membuat akun ${role} "${fullName}"`, { email, role })
     revalidatePath('/superadmin')
     return { error: '', success: true }
   } catch (err) {
@@ -113,6 +115,7 @@ export async function updateAdminAccount(id: string, fullName: string, role: str
     const { error } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', id)
     if (error) return { error: publicError(error) }
 
+    await logAdminAction(requester.userId, 'ubah', 'akun', id, `Mengubah akun admin "${fullName}"`, { role })
     revalidatePath('/superadmin')
     return { error: null }
   } catch (err) {
@@ -128,7 +131,9 @@ export async function deleteAdminAccount(id: string) {
 
   try {
     const admin = createAdminClient()
+    const { data: gone } = await admin.from('profiles').select('full_name, role').eq('id', id).maybeSingle()
     await admin.auth.admin.deleteUser(id)
+    await logAdminAction(requester.userId, 'hapus', 'akun', id, `Menghapus akun admin "${gone?.full_name ?? '-'}"`, { role: gone?.role ?? null })
     revalidatePath('/superadmin')
   } catch (err) {
     await logError('kelola-admin: deleteAdminAccount', err)

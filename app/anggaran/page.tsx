@@ -5,6 +5,7 @@ import { displayName } from '@/lib/display-name'
 import AnggaranForm from '@/components/AnggaranForm'
 import AnggaranList from '@/components/AnggaranList'
 import FinanceChart, { type MonthlyFinance } from '@/components/FinanceChart'
+import ExportPanel from '@/components/ExportPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,6 +130,12 @@ export default async function AnggaranPage() {
             <AnggaranForm />
           </div>
         ) : null}
+
+        <ExportPanel
+          kinds={[{ key: 'anggaran', label: 'Kas Paguyuban' }]}
+          defaultFrom={`${new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 4)}-01`}
+          defaultTo={new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 7)}
+        />
 
         <div className="mb-4 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
           Riwayat Transaksi

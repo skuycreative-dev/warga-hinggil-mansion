@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useBranding } from '@/components/BrandingProvider'
 import { createResetLink, resetAdmin2fa, setResetStatus, unlockLogin } from '@/app/superadmin/keamanan/actions'
 
 export type ResetRow = {
@@ -47,11 +48,11 @@ function waNumber(phone: string | null) {
   return d
 }
 
-function template(name: string | null, link: string) {
+function template(name: string | null, link: string, appName: string) {
   return [
     `Halo ${name || 'Warga'},`,
     '',
-    'Ini Superadmin aplikasi Warga Hinggil Mansion. Kami menerima permintaan atur ulang password akunmu.',
+    `Ini Superadmin aplikasi ${appName}. Kami menerima permintaan atur ulang password akunmu.`,
     '',
     'Buka link berikut, tekan "Lanjutkan", lalu buat password baru:',
     link,
@@ -62,6 +63,7 @@ function template(name: string | null, link: string) {
 }
 
 function ResetCard({ r }: { r: ResetRow }) {
+  const brand = useBranding()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [link, setLink] = useState<{ url: string; email: string | null; phone: string | null; name: string | null } | null>(null)
@@ -83,7 +85,7 @@ function ResetCard({ r }: { r: ResetRow }) {
 
   function send(via: 'whatsapp' | 'gmail') {
     if (!link) return
-    const text = template(link.name, link.url)
+    const text = template(link.name, link.url, brand.app_name)
     let url = ''
     if (via === 'whatsapp') {
       const n = waNumber(link.phone)
@@ -92,7 +94,7 @@ function ResetCard({ r }: { r: ResetRow }) {
       url =
         'https://mail.google.com/mail/?view=cm&fs=1' +
         `&to=${encodeURIComponent(link.email ?? '')}` +
-        `&su=${encodeURIComponent('Atur ulang password - Warga Hinggil Mansion')}` +
+        `&su=${encodeURIComponent(`Atur ulang password - ${brand.app_name}`)}` +
         `&body=${encodeURIComponent(text)}`
     }
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -144,7 +146,7 @@ function ResetCard({ r }: { r: ResetRow }) {
             Cocokkan dulu: pastikan yang meminta memang pemilik akun (mis. telepon balik ke nomor di atas) sebelum mengirim link.
           </p>
           {!link ? (
-            <button type="button" disabled={isPending} onClick={makeLink} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.6 : 1 }}>
+            <button type="button" disabled={isPending} onClick={makeLink} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.6 : 1 }}>
               {isPending ? 'Membuat link...' : 'Buat Link Reset (sekali pakai)'}
             </button>
           ) : (
@@ -233,7 +235,7 @@ export default function SecurityCenter({ resets, locks, admins }: { resets: Rese
                   </div>
                 </div>
                 {locked ? (
-                  <button type="button" disabled={isPending} onClick={() => run(() => unlockLogin(l.key), 'Kunci dibuka.')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                  <button type="button" disabled={isPending} onClick={() => run(() => unlockLogin(l.key), 'Kunci dibuka.')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                     Buka kunci
                   </button>
                 ) : null}

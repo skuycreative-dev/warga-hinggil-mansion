@@ -46,10 +46,10 @@ export default function PushPromptBanner() {
   return (
     <div className="mb-4 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ background: '#1a1305', border: '1px solid rgba(230,201,138,0.3)' }}>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] font-bold" style={{ color: '#e6c98a' }}>Aktifkan notifikasi di HP ini</div>
+        <div className="text-[13px] font-bold" style={{ color: 'var(--brand-accent)' }}>Aktifkan notifikasi di HP ini</div>
         <div className="text-[11.5px]" style={{ color: '#d8cfb8' }}>Alert darurat & pesan tetap masuk walau aplikasi ditutup.</div>
       </div>
-      <Link href="/pengaturan-notifikasi" className="flex-shrink-0 rounded-xl px-3 py-2 text-[12px] font-bold" style={{ background: '#e6c98a', color: '#1a1305' }}>
+      <Link href="/pengaturan-notifikasi" className="flex-shrink-0 rounded-xl px-3 py-2 text-[12px] font-bold" style={{ background: 'var(--brand-accent)', color: '#1a1305' }}>
         Aktifkan
       </Link>
       <button type="button" onClick={later} aria-label="Nanti saja" className="flex-shrink-0 text-[12px] font-bold" style={{ color: '#9c7a3f' }}>

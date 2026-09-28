@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { getBranding } from '@/lib/branding'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
 import PrintButton from '@/components/PrintButton'
@@ -12,6 +13,7 @@ function dateLong(d: string) {
 
 // Jadwal patroli untuk serah terima shift (cetak / simpan PDF)
 export default async function PatrolPrintPage() {
+  const brand = await getBranding()
   const access = await getMyAccess()
   const supabase = await createClient()
   const today = todayWib()
@@ -32,7 +34,7 @@ export default async function PatrolPrintPage() {
         </div>
 
         <header className="mb-4 border-b-2 pb-2" style={{ borderColor: '#1a1305' }}>
-          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Warga Hinggil Mansion · Rahasia</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>{brand.app_name} · Rahasia</div>
           <h1 className="text-[20px] font-bold" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>Jadwal Patroli Rumah Kosong</h1>
           <div style={{ color: '#5b543f' }}>
             {dateLong(today)} · dicetak oleh {access.fullName}

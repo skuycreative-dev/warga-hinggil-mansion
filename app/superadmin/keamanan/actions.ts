@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getMyAccess } from '@/lib/access'
 import { siteOrigin } from '@/lib/security'
 import { MFA_ROLES } from '@/lib/mfa'
+import { logAdminAction } from '@/lib/audit'
 
 type Result = { ok: boolean; error: string | null }
 export type ResetLinkResult = Result & { link?: string; email?: string | null; phone?: string | null; name?: string | null }
@@ -17,7 +18,8 @@ async function requireSuperadmin() {
 
 // Membuat link atur ulang sekali pakai. Link TIDAK dikirim otomatis: Superadmin memilih WhatsApp atau Gmail.
 export async function createResetLink(requestId: string): Promise<ResetLinkResult> {
-  if (!(await requireSuperadmin())) return { ok: false, error: 'Hanya Superadmin.' }
+  const me = await requireSuperadmin()
+  if (!me) return { ok: false, error: 'Hanya Superadmin.' }
   const supabase = await createClient()
   // Fungsi database ini ikut memeriksa Superadmin + 2FA
   const { data, error } = await supabase.rpc('get_reset_target', { p_request: requestId })
@@ -29,6 +31,7 @@ export async function createResetLink(requestId: string): Promise<ResetLinkResul
   if (linkError || !hashed) return { ok: false, error: 'Gagal membuat link. Coba lagi.' }
 
   const url = `${await siteOrigin()}/reset-password?token_hash=${encodeURIComponent(hashed)}`
+  await logAdminAction(me.userId, 'ubah', 'keamanan', requestId, `Membuat link reset password untuk ${String(target.name ?? target.email)}`)
   return {
     ok: true,
     error: null,
@@ -48,9 +51,11 @@ export async function setResetStatus(requestId: string, status: 'dikirim' | 'sel
 }
 
 export async function unlockLogin(key: string): Promise<Result> {
-  if (!(await requireSuperadmin())) return { ok: false, error: 'Hanya Superadmin.' }
+  const me = await requireSuperadmin()
+  if (!me) return { ok: false, error: 'Hanya Superadmin.' }
   const supabase = await createClient()
   const { error } = await supabase.rpc('unlock_auth_lockout', { p_key: key })
+  if (!error) await logAdminAction(me.userId, 'ubah', 'keamanan', null, 'Membuka kunci login')
   revalidatePath('/superadmin/keamanan')
   return error ? { ok: false, error: 'Gagal membuka kunci.' } : { ok: true, error: null }
 }
@@ -79,6 +84,7 @@ export async function resetAdmin2fa(userId: string): Promise<Result> {
     body: 'Pasang ulang 2FA di menu Keamanan Akun. Kalau kamu tidak memintanya, segera hubungi Superadmin.',
     link: '/keamanan-akun',
   })
+  await logAdminAction(me.userId, 'ubah', 'keamanan', userId, 'Mereset 2FA akun admin')
   revalidatePath('/superadmin/keamanan')
   return { ok: true, error: null }
 }

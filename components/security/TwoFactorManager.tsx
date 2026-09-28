@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useBranding } from '@/components/BrandingProvider'
 
 type Factor = { id: string; friendly_name?: string | null; status: string; created_at?: string }
 
@@ -18,6 +19,7 @@ const input: React.CSSProperties = {
 }
 
 export default function TwoFactorManager({ required, forced }: { required: boolean; forced: boolean }) {
+  const brand = useBranding()
   const [factors, setFactors] = useState<Factor[] | null>(null)
   const [enroll, setEnroll] = useState<{ id: string; qr: string; secret: string } | null>(null)
   const [deviceName, setDeviceName] = useState('')
@@ -47,7 +49,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
       await supabase.auth.mfa.unenroll({ factorId: f.id })
     }
     const name = (deviceName.trim() || `HP ${verified.length + 1}`).slice(0, 40) + ` (${new Date().toLocaleDateString('id-ID')})`
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: name, issuer: 'Hinggil Mansion' })
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: name, issuer: brand.short_name })
     setBusy(false)
     if (error || !data) {
       setMsg({ ok: false, text: 'Gagal memulai. Tunggu sebentar lalu coba lagi. Kalau terus gagal, hubungi Superadmin.' })
@@ -155,7 +157,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
             disabled={busy || factors === null}
             onClick={startEnroll}
             className="mt-3 w-full rounded-xl py-3 text-[13.5px] font-bold"
-            style={{ background: '#1a1305', color: '#e6c98a', opacity: busy ? 0.6 : 1 }}
+            style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy ? 0.6 : 1 }}
           >
             {busy ? 'Menyiapkan...' : 'Tampilkan QR'}
           </button>
@@ -190,7 +192,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
               <button type="button" onClick={cancelEnroll} className="flex-1 rounded-xl py-3 text-[13px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
                 Batal
               </button>
-              <button type="submit" disabled={busy || code.length !== 6} className="flex-[2] rounded-xl py-3 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: busy || code.length !== 6 ? 0.6 : 1 }}>
+              <button type="submit" disabled={busy || code.length !== 6} className="flex-[2] rounded-xl py-3 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy || code.length !== 6 ? 0.6 : 1 }}>
                 {busy ? 'Memeriksa...' : 'Aktifkan 2FA'}
               </button>
             </div>

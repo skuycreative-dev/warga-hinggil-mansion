@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { verify2fa } from './actions'
+import { useBranding } from '@/components/BrandingProvider'
 
 type Factor = { id: string; friendly_name?: string | null }
 
@@ -21,6 +22,7 @@ function safeNext() {
 }
 
 export default function TwoFactorLoginPage() {
+  const brand = useBranding()
   const [factors, setFactors] = useState<Factor[] | null>(null)
   const [factorId, setFactorId] = useState('')
   const [code, setCode] = useState('')
@@ -102,7 +104,7 @@ export default function TwoFactorLoginPage() {
           Verifikasi 2 Langkah
         </h1>
         <p className="mt-1.5 text-[13px]" style={{ color: '#9a9ca8' }}>
-          Buka aplikasi Authenticator di HP, lalu masukkan 6 digit kode untuk Hinggil Mansion.
+          Buka aplikasi Authenticator di HP, lalu masukkan 6 digit kode untuk {brand.community_name}.
         </p>
       </div>
 
@@ -161,7 +163,7 @@ export default function TwoFactorLoginPage() {
             className="rounded-xl py-3.5 text-[14.5px] font-bold"
             style={{
               border: 'none',
-              background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+              background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
               color: '#1a1305',
               opacity: busy || waiting || code.length !== 6 ? 0.6 : 1,
             }}
@@ -174,7 +176,7 @@ export default function TwoFactorLoginPage() {
           </p>
           <div className="flex items-center justify-center gap-5">
             <a href="/darurat" className="text-[12.5px] font-bold" style={{ color: '#e08a8a' }}>Tombol Darurat</a>
-            <button type="button" onClick={logout} className="text-[12.5px] font-bold" style={{ color: '#e6c98a', background: 'none', border: 'none' }}>
+            <button type="button" onClick={logout} className="text-[12.5px] font-bold" style={{ color: 'var(--brand-accent)', background: 'none', border: 'none' }}>
               Keluar
             </button>
           </div>

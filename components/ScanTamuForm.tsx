@@ -59,7 +59,7 @@ export default function ScanTamuForm() {
         type="submit"
         disabled={isPending}
         className="rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-        style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.7 : 1 }}
+        style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
       >
         {isPending ? 'Memverifikasi...' : 'Verifikasi Masuk'}
       </button>

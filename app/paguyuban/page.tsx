@@ -126,7 +126,7 @@ export default async function PaguyubanDashboardPage() {
           label="Rumah Kosong"
           value={rumahKosong ?? 0}
           caption="Diaktifkan warga"
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
         />
         <StatCard
@@ -141,7 +141,7 @@ export default async function PaguyubanDashboardPage() {
           value={setoranIplMenunggu ?? 0}
           badge={setoranIplMenunggu ? 'KONFIRMASI' : undefined}
           caption="Menunggu konfirmasi di menu Iuran IPL"
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 19V5M5 12l7-7 7 7"
         />
         <StatCard
@@ -199,7 +199,7 @@ export default async function PaguyubanDashboardPage() {
             <Link
               href="/polling"
               className="block rounded-xl py-2.5 text-center text-[12.5px] font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a' }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
             >
               Kelola Polling
             </Link>

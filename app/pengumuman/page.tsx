@@ -104,7 +104,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
         }}
       >
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5 md:px-10">
-          <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#e6c98a' }}>
+          <Link href="/dashboard" className="text-sm font-bold" style={{ color: 'var(--brand-accent)' }}>
             ← Beranda
           </Link>
         </div>
@@ -126,7 +126,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
             <Link
               href="/pengumuman"
               className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-              style={!category ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+              style={!category ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
             >
               Semua
             </Link>
@@ -135,7 +135,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
                 key={c.key}
                 href={`/pengumuman?k=${c.key}`}
                 className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                style={category === c.key ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+                style={category === c.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
               >
                 {c.label}
               </Link>

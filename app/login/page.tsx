@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useActionState, useEffect, useState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { loginUser, type LoginState } from './actions'
 import PasswordInput from '@/components/PasswordInput'
@@ -46,6 +46,7 @@ function mmss(seconds: number) {
 }
 
 export default function LoginPage() {
+  const brand = useBranding()
   const [state, formAction, isPending] = useActionState(loginUser, initialState)
   const left = useCountdown(state?.lockedUntil)
   const locked = left > 0
@@ -73,14 +74,7 @@ export default function LoginPage() {
 
       <div className="flex flex-1 flex-col justify-center px-7 pb-16 pt-4">
         <div className="mb-8 flex flex-col items-center gap-3.5">
-          <Image
-            src="/logo-hinggil-mansion.jpg"
-            alt="Hinggil Mansion"
-            width={56}
-            height={56}
-            priority
-            className="rounded-2xl object-cover"
-          />
+          <BrandLogo size={56} className="rounded-2xl object-cover" />
           <div className="text-center">
             <h1
               className="mb-1.5 text-2xl font-medium"
@@ -89,7 +83,7 @@ export default function LoginPage() {
               Selamat Datang Kembali
             </h1>
             <p className="text-[13px]" style={{ color: '#9a9ca8' }}>
-              Masuk ke akun warga Hinggil Mansion
+              Masuk ke akun warga {brand.community_name}
             </p>
           </div>
         </div>
@@ -113,7 +107,7 @@ export default function LoginPage() {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="login-password" style={labelStyle}>Password</label>
-              <Link href="/lupa-password" style={{ fontSize: '12px', color: '#e6c98a', fontWeight: 600 }}>
+              <Link href="/lupa-password" style={{ fontSize: '12px', color: 'var(--brand-accent)', fontWeight: 600 }}>
                 Lupa Password?
               </Link>
             </div>
@@ -132,7 +126,7 @@ export default function LoginPage() {
             className="mt-1.5 rounded-xl py-3.5 text-[14.5px] font-bold"
             style={{
               border: 'none',
-              background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+              background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
               color: '#1a1305',
               boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
               opacity: isPending || locked ? 0.6 : 1,
@@ -144,7 +138,7 @@ export default function LoginPage() {
 
           <p className="mt-1.5 text-center text-[13px]" style={{ color: '#9a9ca8' }}>
             Belum punya akun?{' '}
-            <Link href="/register" style={{ color: '#e6c98a', fontWeight: 600 }}>
+            <Link href="/register" style={{ color: 'var(--brand-accent)', fontWeight: 600 }}>
               Daftar
             </Link>
           </p>

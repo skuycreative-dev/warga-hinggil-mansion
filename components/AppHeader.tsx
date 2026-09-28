@@ -1,4 +1,4 @@
-﻿import Image from 'next/image'
+﻿import { BrandLogo } from '@/components/BrandingProvider'
 import Link from 'next/link'
 
 export default function AppHeader() {
@@ -9,13 +9,7 @@ export default function AppHeader() {
     >
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4 md:px-10">
         <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/logo-hinggil-mansion.jpg"
-            alt="Hinggil Mansion"
-            width={32}
-            height={32}
-            className="rounded-lg object-cover"
-          />
+          <BrandLogo size={32} className="rounded-lg object-cover" />
           <span
             className="text-sm font-bold tracking-wide md:text-base"
             style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}

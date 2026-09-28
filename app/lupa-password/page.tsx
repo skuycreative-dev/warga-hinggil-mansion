@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useActionState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { requestPasswordReset, type ResetRequestState } from './actions'
 
@@ -39,7 +39,7 @@ export default function LupaPasswordPage() {
 
       <div className="flex flex-1 flex-col justify-center px-7 pb-16 pt-4">
         <div className="mb-8 flex flex-col items-center gap-3.5">
-          <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={52} height={52} className="rounded-2xl object-cover" />
+          <BrandLogo size={52} className="rounded-2xl object-cover" />
           <div className="text-center">
             <h1 className="mb-1.5 text-2xl font-medium" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}>
               Lupa Password
@@ -63,7 +63,7 @@ export default function LupaPasswordPage() {
               Kalau data cocok dengan akun terdaftar, Superadmin akan mengirim link lewat WhatsApp atau email. Link hanya bisa dipakai sekali
               dan berlaku terbatas. Jangan berikan link itu ke siapa pun.
             </p>
-            <Link href="/login" className="mt-5 inline-block text-[13px] font-bold" style={{ color: '#e6c98a' }}>
+            <Link href="/login" className="mt-5 inline-block text-[13px] font-bold" style={{ color: 'var(--brand-accent)' }}>
               Kembali ke Masuk
             </Link>
           </div>
@@ -99,7 +99,7 @@ export default function LupaPasswordPage() {
               className="mt-1.5 rounded-xl py-3.5 text-[14.5px] font-bold"
               style={{
                 border: 'none',
-                background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+                background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
                 color: '#1a1305',
                 boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
                 opacity: isPending ? 0.7 : 1,

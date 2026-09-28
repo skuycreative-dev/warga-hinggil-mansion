@@ -20,7 +20,7 @@ export default function NewRequestForm() {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="w-full rounded-xl py-3 text-sm font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+      <button type="button" onClick={() => setOpen(true)} className="w-full rounded-xl py-3 text-sm font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
         + Ajukan Surat / Chat Pengurus
       </button>
     )
@@ -58,7 +58,7 @@ export default function NewRequestForm() {
         <button type="button" onClick={() => setOpen(false)} className="flex-1 rounded-xl py-3 text-sm font-bold" style={{ background: '#faf7f0', color: '#1f1a10', border: '1px solid rgba(26,19,5,0.12)' }}>
           Batal
         </button>
-        <button type="submit" disabled={isPending} className="flex-1 rounded-xl py-3 text-sm font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.7 : 1 }}>
+        <button type="submit" disabled={isPending} className="flex-1 rounded-xl py-3 text-sm font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
           {isPending ? 'Mengirim...' : 'Kirim ke Pengurus'}
         </button>
       </div>

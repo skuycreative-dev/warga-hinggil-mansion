@@ -10,6 +10,7 @@ import IplDisbursementPanel from '@/components/ipl/IplDisbursementPanel'
 import { IplProofButton, IplStatusBadge } from '@/components/ipl/IplBits'
 import { billOutstanding, billTotal, IPL_METHOD_LABEL, isOverdue, sortHouse, type IplBill, type IplDisbursement, type IplHouseRate } from '@/lib/ipl'
 import { cardStyle, dateLabel, periodLabel, rupiah, todayWib } from '@/lib/format'
+import ExportPanel from '@/components/ExportPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,7 +83,7 @@ export default async function IuranIplPage({ searchParams }: { searchParams: Pro
           <div className="mb-6 grid grid-cols-2 gap-2.5">
             <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
               <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Belum Lunas</div>
-              <div className="mt-1 text-xl font-bold" style={{ color: '#e6c98a' }}>{unpaidCount} bulan</div>
+              <div className="mt-1 text-xl font-bold" style={{ color: 'var(--brand-accent)' }}>{unpaidCount} bulan</div>
             </div>
             <div className="rounded-2xl px-5 py-4" style={cardStyle}>
               <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Total Tunggakan</div>
@@ -207,13 +208,22 @@ export default async function IuranIplPage({ searchParams }: { searchParams: Pro
         <div className="mb-5 grid grid-cols-2 gap-2.5">
           <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
             <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Tagihan Belum Lunas</div>
-            <div className="mt-1 text-xl font-bold" style={{ color: '#e6c98a' }}>{unpaidCount}</div>
+            <div className="mt-1 text-xl font-bold" style={{ color: 'var(--brand-accent)' }}>{unpaidCount}</div>
           </div>
           <div className="rounded-2xl px-5 py-4" style={cardStyle}>
             <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Total Tunggakan</div>
             <div className="mt-1 text-xl font-bold" style={{ color: '#b3392f' }}>{rupiah(totalOutstanding)}</div>
           </div>
         </div>
+
+        <ExportPanel
+          kinds={[
+            { key: 'ipl', label: 'Tagihan IPL' },
+            { key: 'tunggakan', label: 'Tunggakan' },
+          ]}
+          defaultFrom={`${new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 4)}-01`}
+          defaultTo={new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 7)}
+        />
 
         <TabNav basePath="/iuran-ipl" tabs={tabs} active={tab} />
 

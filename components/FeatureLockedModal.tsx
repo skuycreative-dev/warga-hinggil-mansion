@@ -38,7 +38,7 @@ export default function FeatureLockedModal({
           type="button"
           onClick={onClose}
           className="mt-5 w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: '#e6c98a' }}
+          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
         >
           Mengerti
         </button>

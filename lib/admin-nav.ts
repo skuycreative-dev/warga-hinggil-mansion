@@ -7,6 +7,10 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
     return [
       { title: 'Dashboard Superadmin', href: '/superadmin/dashboard' },
       { title: 'Keamanan & Reset Password', href: '/superadmin/keamanan' },
+      { title: 'Log Aktivitas Admin', href: '/superadmin/log' },
+      { title: 'Backup Data', href: '/superadmin/backup' },
+      { title: 'Identitas Perumahan', href: '/superadmin/identitas' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Layanan Surat Warga', href: '/layanan' },
       { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Kelola Admin', href: '/superadmin' },
@@ -32,6 +36,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Layanan Surat Warga', href: '/layanan' },
       { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
       { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
@@ -52,6 +57,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Layanan Surat Warga', href: '/layanan' },
       { title: 'Status Hunian', href: '/status-hunian' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
@@ -64,6 +70,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Dashboard', href: '/manajemen' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
       { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },
@@ -74,6 +81,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
     return [
       { title: 'Dashboard', href: '/security' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },
       { title: 'Jadwal Jaga', href: '/keamanan/jadwal-jaga' },
       { title: 'Verifikasi Tamu', href: '/keamanan/scan-tamu' },
@@ -84,6 +92,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   if (access.isBendahara) {
     return [
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
+      { title: 'Peta Perumahan', href: '/peta' },
       { title: 'Anggaran Paguyuban', href: '/anggaran' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Keamanan Akun (2FA)', href: '/keamanan-akun' },

@@ -88,7 +88,7 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
     <article className="rounded-2xl px-5 py-4 md:px-6 md:py-5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
             {post.author_name.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -178,7 +178,7 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
                   onClick={() => setViewer(i)}
                   aria-label={`Foto ${i + 1}`}
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: i === viewer ? '#e6c98a' : 'rgba(255,255,255,0.35)' }}
+                  style={{ background: i === viewer ? 'var(--brand-accent)' : 'rgba(255,255,255,0.35)' }}
                 />
               ))}
             </div>

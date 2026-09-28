@@ -33,7 +33,7 @@ export default function DashboardTile({
 
   const icon = (
     <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: danger ? '#b3392f' : '#1a1305' }}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={danger ? '#ffffff' : '#e6c98a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={danger ? '#ffffff' : 'var(--brand-accent)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d={path} />
       </svg>
     </div>

@@ -74,7 +74,7 @@ export default async function ItSupportPage() {
         <StatCard
           label="Log 24 Jam Terakhir"
           value={errorLogs24h}
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 6v6l4 2"
         />
       </div>

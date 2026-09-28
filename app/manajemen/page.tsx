@@ -93,7 +93,7 @@ export default async function ManajemenDashboardPage() {
         <StatCard
           label="Sedang Diproses"
           value={pengaduanDiproses}
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 8v4l3 3"
         />
         <StatCard
@@ -117,12 +117,12 @@ export default async function ManajemenDashboardPage() {
       >
         <div>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Iuran IPL bulan ini</div>
-          <div className="mt-1 text-lg font-bold" style={{ color: '#e6c98a' }}>{belumBayarIpl ?? 0} rumah belum lunas</div>
+          <div className="mt-1 text-lg font-bold" style={{ color: 'var(--brand-accent)' }}>{belumBayarIpl ?? 0} rumah belum lunas</div>
           <div className="text-[12px] font-medium" style={{ color: '#d8cfb8' }}>
             {setoranMenunggu ? `${setoranMenunggu} setoran menunggu konfirmasi Paguyuban · ` : ''}Kelola tagihan, denda, bukti bayar
           </div>
         </div>
-        <span className="text-sm font-bold" style={{ color: '#e6c98a' }}>Buka →</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--brand-accent)' }}>Buka →</span>
       </Link>
 
       <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>

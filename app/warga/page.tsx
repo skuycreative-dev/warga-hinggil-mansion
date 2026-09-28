@@ -1,9 +1,11 @@
-﻿import Link from 'next/link'
+﻿import { getBranding } from '@/lib/branding'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { displayName } from '@/lib/display-name'
 
 export default async function WargaDirectoryPage() {
+  const brand = await getBranding()
   const supabase = await createClient()
 
   const {
@@ -52,7 +54,7 @@ export default async function WargaDirectoryPage() {
           <div>
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Komunitas</span>
             <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
-              Warga Hinggil Mansion
+              Warga {brand.community_name}
             </h1>
           </div>
           <Link href="/dashboard" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>

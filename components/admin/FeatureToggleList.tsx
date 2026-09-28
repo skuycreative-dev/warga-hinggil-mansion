@@ -60,7 +60,7 @@ export default function FeatureToggleList({ rows }: { rows: Row[] }) {
             >
               <span
                 className="absolute top-1 h-5 w-5 rounded-full transition-all"
-                style={{ left: on ? 26 : 4, background: on ? '#e6c98a' : '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
+                style={{ left: on ? 26 : 4, background: on ? 'var(--brand-accent)' : '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
               />
             </button>
           </div>

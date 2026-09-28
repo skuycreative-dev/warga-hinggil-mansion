@@ -80,7 +80,7 @@ export default async function ScanTamuPage({ searchParams }: { searchParams: Pro
         <StatCard
           label="Menunggu Verifikasi"
           value={tamuMenunggu}
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 8v4l3 3"
         />
         <StatCard

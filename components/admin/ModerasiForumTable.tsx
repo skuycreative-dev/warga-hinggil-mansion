@@ -74,7 +74,7 @@ export default function ModerasiForumTable({ posts }: { posts: HiddenPost[] }) {
                 disabled={isPending}
                 onClick={() => handleReactivate(p.id)}
                 className="rounded-lg px-3 py-1.5 text-[12px] font-bold"
-                style={{ background: '#1a1305', color: '#e6c98a' }}
+                style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
               >
                 Aktifkan Kembali
               </button>

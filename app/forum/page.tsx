@@ -28,7 +28,7 @@ export default async function ForumPage({ searchParams }: { searchParams: Promis
   const canModerate = MODERATORS.includes((me?.role as string) ?? '')
 
   const chip = (active: boolean): React.CSSProperties =>
-    active ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }
+    active ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }
 
   return (
     <main className="w-full" style={{ background: '#faf7f0', minHeight: '100vh' }}>

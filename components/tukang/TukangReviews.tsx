@@ -200,7 +200,7 @@ export default function TukangReviews({
             <button type="button" onClick={() => void cancel()} className="rounded-lg px-4 py-2 text-[12.5px] font-bold" style={{ background: '#fff', color: '#5b543f' }}>
               Batal
             </button>
-            <button type="button" disabled={isPending || uploading} onClick={submit} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending || uploading ? 0.7 : 1 }}>
+            <button type="button" disabled={isPending || uploading} onClick={submit} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || uploading ? 0.7 : 1 }}>
               {isPending ? 'Menyimpan...' : mine ? 'Simpan Ulasan' : 'Kirim Ulasan'}
             </button>
           </div>

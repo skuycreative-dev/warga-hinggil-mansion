@@ -83,7 +83,7 @@ export default async function TukangKelolaPage() {
 
       <div className="mb-7 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total Tukang" value={items.length} iconBg="#a8d8c8" iconPath="m9 12 2 2 4-4M21 12c0 4.5-3.5 8.5-9 10-5.5-1.5-9-5.5-9-10V5l9-3 9 3v7Z" />
-        <StatCard label="Rating Rata-rata" value={avgAll ? `${avgAll.toFixed(1)} ★` : '-'} caption={`Dari ${totalReviews} ulasan`} iconBg="#e6c98a" iconPath="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z" />
+        <StatCard label="Rating Rata-rata" value={avgAll ? `${avgAll.toFixed(1)} ★` : '-'} caption={`Dari ${totalReviews} ulasan`} iconBg="var(--brand-accent)" iconPath="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z" />
         <StatCard label="Ulasan" value={totalReviews} iconBg="#a8c8f0" iconPath="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
         <StatCard label="Perlu Dicek" value={flagged} badge={flagged ? 'CEK' : undefined} caption="Punya ulasan bintang 1-2" iconBg="#f2b8b0" iconPath="M12 8v4M12 16h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
       </div>

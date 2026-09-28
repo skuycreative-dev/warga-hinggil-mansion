@@ -60,7 +60,7 @@ export default function ShiftManager({
         ) : null}
         <div className="flex flex-wrap gap-1.5">
           {PRESETS.map((p) => (
-            <button key={p.label} type="button" onClick={() => { setStart(p.start); setEnd(p.end) }} className="rounded-full px-3 py-1 text-[11.5px] font-bold" style={start === p.start && end === p.end ? { background: '#1a1305', color: '#e6c98a' } : { background: '#faf7f0', color: '#5b543f' }}>
+            <button key={p.label} type="button" onClick={() => { setStart(p.start); setEnd(p.end) }} className="rounded-full px-3 py-1 text-[11.5px] font-bold" style={start === p.start && end === p.end ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f' }}>
               {p.label}
             </button>
           ))}
@@ -93,7 +93,7 @@ export default function ShiftManager({
             {security.map((s) => {
               const on = people.includes(s.id)
               return (
-                <button key={s.id} type="button" onClick={() => setPeople(on ? people.filter((x) => x !== s.id) : [...people, s.id])} className="rounded-full px-3 py-1 text-[12px] font-bold" style={on ? { background: '#1a1305', color: '#e6c98a' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }}>
+                <button key={s.id} type="button" onClick={() => setPeople(on ? people.filter((x) => x !== s.id) : [...people, s.id])} className="rounded-full px-3 py-1 text-[12px] font-bold" style={on ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }}>
                   {on ? '✓ ' : ''}
                   {s.name}
                 </button>
@@ -110,7 +110,7 @@ export default function ShiftManager({
           disabled={isPending || !people.length}
           onClick={() => run(() => addShifts({ date, repeatDays: repeat, startTime: start, endTime: end, securityIds: people, post, note }), (n) => `${n} jadwal ditambahkan.`)}
           className="rounded-xl py-2.5 text-[13px] font-bold"
-          style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending || !people.length ? 0.6 : 1 }}
+          style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || !people.length ? 0.6 : 1 }}
         >
           {isPending ? 'Menyimpan...' : 'Simpan Jadwal'}
         </button>

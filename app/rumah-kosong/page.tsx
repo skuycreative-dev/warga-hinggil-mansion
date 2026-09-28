@@ -127,10 +127,10 @@ export default async function RumahKosongPage() {
             style={{ background: '#1a1305' }}
           >
             <div>
-              <div className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>Dashboard Rumah Kosong & Patroli</div>
+              <div className="text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>Dashboard Rumah Kosong & Patroli</div>
               <div className="text-[12px]" style={{ color: '#d8cfb8' }}>Daftar rumah kosong, target patroli, catat patroli, cetak jadwal.</div>
             </div>
-            <span className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>→</span>
+            <span className="text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>→</span>
           </Link>
         ) : null}
       </div>

@@ -120,7 +120,7 @@ export default function AbsenceCard({
 
       <div className="mt-3 flex flex-wrap gap-2">
         {!upcoming ? (
-          <button type="button" onClick={() => setMode(mode === 'check' ? 'none' : 'check')} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <button type="button" onClick={() => setMode(mode === 'check' ? 'none' : 'check')} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
             ✓ Catat Patroli
           </button>
         ) : null}
@@ -151,7 +151,7 @@ export default function AbsenceCard({
           <p className="text-[11px]" style={{ color: '#9c7a3f' }}>
             Penghuni rumah langsung mendapat notifikasi. {result === 'mencurigakan' ? 'Pengurus & Security lain juga diberi tahu.' : ''}
           </p>
-          <button type="button" disabled={isPending} onClick={() => run(() => recordPatrol(absence.id, absence.house_id, result, note), () => { setMode('none'); setNote(''); setResult('aman') })} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <button type="button" disabled={isPending} onClick={() => run(() => recordPatrol(absence.id, absence.house_id, result, note), () => { setMode('none'); setNote(''); setResult('aman') })} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
             {isPending ? 'Menyimpan...' : 'Simpan Patroli'}
           </button>
         </div>
@@ -173,7 +173,7 @@ export default function AbsenceCard({
             {security.map((s) => {
               const on = assignees.includes(s.id)
               return (
-                <button key={s.id} type="button" onClick={() => setAssignees(on ? assignees.filter((x) => x !== s.id) : [...assignees, s.id])} className="rounded-full px-3 py-1 text-[12px] font-bold" style={on ? { background: '#1a1305', color: '#e6c98a' } : { background: '#fff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }}>
+                <button key={s.id} type="button" onClick={() => setAssignees(on ? assignees.filter((x) => x !== s.id) : [...assignees, s.id])} className="rounded-full px-3 py-1 text-[12px] font-bold" style={on ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#fff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }}>
                   {on ? '✓ ' : ''}
                   {s.name}
                 </button>
@@ -181,7 +181,7 @@ export default function AbsenceCard({
             })}
           </div>
           <input value={planNote} maxLength={300} onChange={(e) => setPlanNote(e.target.value)} placeholder="Catatan internal tim (mis. cek pagar samping)" style={{ ...inputStyle, background: '#fff' }} />
-          <button type="button" disabled={isPending} onClick={() => run(() => savePatrolPlan(absence.id, perDay, assignees, planNote), () => setMode('none'))} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <button type="button" disabled={isPending} onClick={() => run(() => savePatrolPlan(absence.id, perDay, assignees, planNote), () => setMode('none'))} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
             Simpan
           </button>
         </div>

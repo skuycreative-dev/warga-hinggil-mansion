@@ -237,7 +237,7 @@ export default function IplBillsPanel({
           </div>
           {state.error ? <p className="text-[12px] font-semibold" style={{ color: '#b3392f' }}>{state.error}</p> : null}
           {state.success && state.message ? <p className="text-[12px] font-semibold" style={{ color: '#2f6b4f' }}>{state.message}</p> : null}
-          <button type="submit" disabled={isCreating} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isCreating ? 0.7 : 1 }}>
+          <button type="submit" disabled={isCreating} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isCreating ? 0.7 : 1 }}>
             {isCreating ? 'Membuat...' : 'Buat Tagihan untuk Semua Rumah'}
           </button>
         </form>
@@ -285,7 +285,7 @@ export default function IplBillsPanel({
                 type="button"
                 onClick={() => setFilter(f)}
                 className="rounded-full px-3 py-1 text-[11.5px] font-bold"
-                style={filter === f ? { background: '#1a1305', color: '#e6c98a' } : { background: '#faf7f0', color: '#5b543f' }}
+                style={filter === f ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f' }}
               >
                 {f === 'semua' ? 'Semua' : f === 'belum' ? 'Belum lunas' : f === 'telat' ? 'Telat' : 'Lunas'}
               </button>
@@ -328,7 +328,7 @@ export default function IplBillsPanel({
                     </button>
                     <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
                       {canManage && b.status !== 'lunas' ? (
-                        <button type="button" disabled={isPending} onClick={() => quickPaid(b)} className="rounded-lg px-3 py-1.5 text-[11.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                        <button type="button" disabled={isPending} onClick={() => quickPaid(b)} className="rounded-lg px-3 py-1.5 text-[11.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                           Tandai Lunas
                         </button>
                       ) : null}
@@ -425,7 +425,7 @@ export default function IplBillsPanel({
                             Hapus Tagihan
                           </button>
                         ) : null}
-                        <button type="button" disabled={isPending} onClick={() => save(b)} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.7 : 1 }}>
+                        <button type="button" disabled={isPending} onClick={() => save(b)} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
                           {isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
                       </div>

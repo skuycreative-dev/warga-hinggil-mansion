@@ -132,7 +132,7 @@ export default function HouseholdDebts({
               {showDone ? 'Sembunyikan yang lunas' : `Lihat yang lunas (${doneCount})`}
             </button>
           ) : null}
-          <button type="button" onClick={() => openForm(null, 'hutang')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <button type="button" onClick={() => openForm(null, 'hutang')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
             + Hutang / Cicilan
           </button>
           <button type="button" onClick={() => openForm(null, 'piutang')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#ffffff', color: '#2f6b4f', border: '1px solid rgba(47,107,79,0.3)' }}>
@@ -218,7 +218,7 @@ export default function HouseholdDebts({
             <button type="button" onClick={() => setForm({ ...form, open: false, debt: null })} className="rounded-lg px-4 py-2 text-[12.5px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
               Batal
             </button>
-            <button type="submit" disabled={isSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+            <button type="submit" disabled={isSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
               {isSaving ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>

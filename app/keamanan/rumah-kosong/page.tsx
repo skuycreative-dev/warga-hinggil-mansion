@@ -44,19 +44,19 @@ export default async function RumahKosongDashboardPage() {
             {active.length} rumah sedang kosong · {upcoming.length} akan kosong. Penghuni dapat notifikasi setiap patroli dicatat.
           </p>
         </div>
-        <Link href="/keamanan/rumah-kosong/cetak" className="rounded-lg px-4 py-2 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+        <Link href="/keamanan/rumah-kosong/cetak" className="rounded-lg px-4 py-2 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
           {'\u{1F5A8}'} Cetak Jadwal Patroli
         </Link>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Kosong Sekarang" value={active.length} caption={`${upcoming.length} akan kosong`} iconBg="#e6c98a" iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />
+        <StatCard label="Kosong Sekarang" value={active.length} caption={`${upcoming.length} akan kosong`} iconBg="var(--brand-accent)" iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />
         <StatCard label="Patroli Hari Ini" value={`${doneToday}/${targetToday}`} badge={doneToday < targetToday ? 'BELUM LENGKAP' : undefined} caption="Tercatat / target" iconBg="#a8d8c8" iconPath="m9 12 2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         <StatCard label="Berakhir Minggu Ini" value={endingSoon.length} caption={endingSoon.map((a) => a.nomor_rumah).join(', ') || '-'} iconBg="#a8c8f0" iconPath="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
         <StatCard label="Mencurigakan" value={suspicious ?? 0} caption="Bulan ini" iconBg="#f2b8b0" iconPath="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
       </div>
 
-      <div className="mb-6 rounded-2xl px-4 py-3 text-[12.5px]" style={{ background: '#1a1305', color: '#e6c98a' }}>
+      <div className="mb-6 rounded-2xl px-4 py-3 text-[12.5px]" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
         <b>Sedang jaga:</b> {onDuty.length ? onDuty.map((s) => `${s.security_name} (${s.post}, ${s.start_time}–${s.end_time})`).join(' · ') : 'belum ada jadwal jaga untuk jam ini'}
         {' · '}
         <Link href="/keamanan/jadwal-jaga" className="underline">Atur jadwal jaga</Link>

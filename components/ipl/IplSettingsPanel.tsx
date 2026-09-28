@@ -71,7 +71,7 @@ export default function IplSettingsPanel({ settings, rates }: { settings: IplSet
         </div>
         {state.error ? <p className="text-[12px] font-semibold" style={{ color: '#b3392f' }}>{state.error}</p> : null}
         {state.success && state.message ? <p className="text-[12px] font-semibold" style={{ color: '#2f6b4f' }}>{state.message}</p> : null}
-        <button type="submit" disabled={isSaving} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isSaving ? 0.7 : 1 }}>
+        <button type="submit" disabled={isSaving} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isSaving ? 0.7 : 1 }}>
           {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
         </button>
       </form>
@@ -101,7 +101,7 @@ export default function IplSettingsPanel({ settings, rates }: { settings: IplSet
                       Pakai standar
                     </button>
                   ) : null}
-                  <button type="button" disabled={isPending} onClick={() => saveRate(r.house_id)} className="flex-1 rounded-lg py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                  <button type="button" disabled={isPending} onClick={() => saveRate(r.house_id)} className="flex-1 rounded-lg py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                     Simpan
                   </button>
                 </div>

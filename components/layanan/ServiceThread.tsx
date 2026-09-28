@@ -192,8 +192,8 @@ export default function ServiceThread({
                       </div>
                     </div>
                     <div className="flex gap-3 text-[12px] font-bold">
-                      <button type="button" onClick={() => void openFile(m.id, false)} style={{ color: mine ? '#e6c98a' : '#9c7a3f' }}>Buka</button>
-                      <button type="button" onClick={() => void openFile(m.id, true)} style={{ color: mine ? '#e6c98a' : '#9c7a3f' }}>Unduh</button>
+                      <button type="button" onClick={() => void openFile(m.id, false)} style={{ color: mine ? 'var(--brand-accent)' : '#9c7a3f' }}>Buka</button>
+                      <button type="button" onClick={() => void openFile(m.id, true)} style={{ color: mine ? 'var(--brand-accent)' : '#9c7a3f' }}>Unduh</button>
                     </div>
                   </div>
                 ) : null}
@@ -242,7 +242,7 @@ export default function ServiceThread({
               disabled={busy || (!text.trim() && !file)}
               onClick={() => void send()}
               className="ml-auto rounded-lg px-5 py-2 text-[13px] font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a', opacity: busy || (!text.trim() && !file) ? 0.6 : 1 }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy || (!text.trim() && !file) ? 0.6 : 1 }}
             >
               {busy ? 'Mengirim...' : 'Kirim'}
             </button>

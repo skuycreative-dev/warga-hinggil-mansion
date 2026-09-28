@@ -1,7 +1,9 @@
 ﻿'use server'
 
+import { getBranding } from '@/lib/branding'
 import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
+import { logAdminAction } from '@/lib/audit'
 import { getMyAccess, type MyAccess } from '@/lib/access'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logError } from '@/lib/log-error'
@@ -59,6 +61,7 @@ export async function approveAccount(id: string, force = false): Promise<{ error
 
     await notify(admin, id, 'Akun kamu sudah diverifikasi', 'Selamat datang! Semua fitur aplikasi warga sekarang sudah bisa dipakai.', '/dashboard')
 
+    await logAdminAction(requester!.userId, 'ubah', 'akun', id, `Menyetujui akun warga${force ? ' (tanpa konfirmasi Kepala Keluarga)' : ''}`)
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
@@ -71,7 +74,7 @@ export async function rejectAccount(id: string, reason: string) {
   const requester = await requireVerifier()
   if (!requester) return { error: 'Kamu tidak punya akses untuk menolak akun.' }
 
-  const finalReason = reason.trim() || 'Data tidak sesuai / bukan warga Hinggil Mansion.'
+  const finalReason = reason.trim() || `Data tidak sesuai / bukan warga ${(await getBranding()).community_name}.`
 
   try {
     const admin = createAdminClient()
@@ -95,6 +98,7 @@ export async function rejectAccount(id: string, reason: string) {
 
     await notify(admin, id, 'Pendaftaran belum disetujui', `Alasan: ${finalReason}`, '/dashboard')
 
+    await logAdminAction(requester!.userId, 'ubah', 'akun', id, 'Menolak akun warga')
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
@@ -116,6 +120,7 @@ export async function deleteWargaAccount(id: string) {
     }
 
     await admin.auth.admin.deleteUser(id)
+    await logAdminAction(requester.userId, 'hapus', 'akun', id, 'Menghapus akun warga (untuk daftar ulang)')
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
@@ -190,6 +195,7 @@ export async function approveChangeRequest(id: string) {
       '/profile'
     )
 
+    await logAdminAction(access!.userId, 'ubah', 'pengajuan data', id, 'Menyetujui pengajuan perubahan data')
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {
@@ -229,6 +235,7 @@ export async function rejectChangeRequest(id: string, note: string) {
       '/profile'
     )
 
+    await logAdminAction(access!.userId, 'ubah', 'pengajuan data', id, 'Menolak pengajuan perubahan data')
     revalidatePath('/verifikasi-akun')
     return { error: null }
   } catch (err) {

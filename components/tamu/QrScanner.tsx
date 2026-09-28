@@ -97,18 +97,18 @@ export default function QrScanner({ onResult, paused }: { onResult: (text: strin
         <video ref={videoRef} playsInline muted className="h-full w-full object-cover" style={{ display: active ? 'block' : 'none' }} />
         <canvas ref={canvasRef} className="hidden" />
         {active ? (
-          <div aria-hidden className="pointer-events-none absolute inset-[18%] rounded-2xl" style={{ border: '3px solid #e6c98a', boxShadow: '0 0 0 9999px rgba(10,11,15,0.35)' }} />
+          <div aria-hidden className="pointer-events-none absolute inset-[18%] rounded-2xl" style={{ border: '3px solid var(--brand-accent)', boxShadow: '0 0 0 9999px rgba(10,11,15,0.35)' }} />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
             <p className="text-[13px]" style={{ color: '#d8cfb8' }}>Arahkan kamera ke QR undangan tamu.</p>
-            <button type="button" onClick={() => void start()} className="rounded-xl px-5 py-2.5 text-[13.5px] font-bold" style={{ background: '#e6c98a', color: '#1a1305' }}>
+            <button type="button" onClick={() => void start()} className="rounded-xl px-5 py-2.5 text-[13.5px] font-bold" style={{ background: 'var(--brand-accent)', color: '#1a1305' }}>
               Buka Kamera
             </button>
           </div>
         )}
         {active && paused ? (
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(10,11,15,0.6)' }}>
-            <span className="text-[13px] font-bold" style={{ color: '#e6c98a' }}>QR terbaca</span>
+            <span className="text-[13px] font-bold" style={{ color: 'var(--brand-accent)' }}>QR terbaca</span>
           </div>
         ) : null}
       </div>

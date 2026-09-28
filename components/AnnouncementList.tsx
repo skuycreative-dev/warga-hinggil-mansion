@@ -102,7 +102,7 @@ export default function AnnouncementList({
                 disabled={isPending}
                 onClick={() => run(() => updateAnnouncement(a.id, title, content, category), () => setEditingId(null))}
                 className="flex-1 rounded-xl py-2.5 text-sm font-bold"
-                style={{ background: '#1a1305', color: '#e6c98a' }}
+                style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
               >
                 {isPending ? 'Menyimpan...' : 'Simpan'}
               </button>
@@ -117,7 +117,7 @@ export default function AnnouncementList({
           >
             <div className="min-w-0">
               {a.is_pinned ? (
-                <span className="mb-1.5 mr-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                <span className="mb-1.5 mr-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                   Disematkan
                 </span>
               ) : null}

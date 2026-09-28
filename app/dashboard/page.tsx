@@ -1,4 +1,4 @@
-﻿import Image from 'next/image'
+﻿import { BrandLogo } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
@@ -289,13 +289,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       >
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5 md:px-10">
           <div className="flex items-center gap-2.5">
-            <Image
-              src="/logo-hinggil-mansion.jpg"
-              alt="Hinggil Mansion"
-              width={32}
-              height={32}
-              className="rounded-lg object-cover"
-            />
+            <BrandLogo size={32} className="rounded-lg object-cover" />
             <span
               className="text-sm font-bold tracking-wide"
               style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}
@@ -700,7 +694,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       </div>
                       <span
                         className="flex-shrink-0 rounded-full px-3 py-1 text-[11.5px] font-bold"
-                        style={voted ? { background: 'rgba(47,138,79,0.12)', color: '#2f8a4f' } : { background: '#1a1305', color: '#e6c98a' }}
+                        style={voted ? { background: 'rgba(47,138,79,0.12)', color: '#2f8a4f' } : { background: '#1a1305', color: 'var(--brand-accent)' }}
                       >
                         {voted ? 'Sudah memilih' : 'Pilih sekarang'}
                       </span>
@@ -733,7 +727,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   >
                     <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>
                       {a.is_pinned ? (
-                        <span className="mr-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                        <span className="mr-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                           Disematkan
                         </span>
                       ) : null}

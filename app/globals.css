@@ -149,3 +149,10 @@ summary {
     font-size: max(16px, 1em) !important;
   }
 }
+
+/* ---------- Warna identitas perumahan (white label) ---------- */
+:root {
+  --brand-accent: #e6c98a;
+  --brand-accent-dark: #cda15a;
+  --brand-theme: #0a0b0f;
+}

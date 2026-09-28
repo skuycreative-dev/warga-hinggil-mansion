@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import { getBranding } from '@/lib/branding'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
@@ -15,6 +16,7 @@ function full(iso: string | null) {
 
 // Laporan insiden untuk arsip Paguyuban (cetak / simpan PDF dari browser)
 export default async function IncidentReportPage({ params }: { params: Promise<{ id: string }> }) {
+  const brand = await getBranding()
   const { id } = await params
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
 
@@ -44,7 +46,7 @@ export default async function IncidentReportPage({ params }: { params: Promise<{
         </div>
 
         <header className="mb-5 border-b-2 pb-3" style={{ borderColor: '#1a1305' }}>
-          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Warga Hinggil Mansion · Laporan Insiden</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>{brand.app_name} · Laporan Insiden</div>
           <h1 className="mt-1 text-[22px] font-bold" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
             {typeLabel(alert.emergency_type)} — #{alert.id.slice(0, 8).toUpperCase()}
           </h1>

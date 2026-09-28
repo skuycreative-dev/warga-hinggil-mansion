@@ -56,7 +56,7 @@ export default function GuestInviteForm({ houseLabel = null }: { houseLabel?: st
         ) : (
           <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: '#1a1305' }}>
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Kode Tamu</span>
-            <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#e6c98a' }}>{generated.code}</span>
+            <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: 'var(--brand-accent)' }}>{generated.code}</span>
           </div>
         )}
         <p className="text-center text-[12.5px] font-medium" style={{ color: '#5b543f' }}>

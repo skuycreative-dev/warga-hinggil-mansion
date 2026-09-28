@@ -37,12 +37,12 @@ export default async function JadwalJagaPage({ searchParams }: { searchParams: P
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Sedang jaga sekarang</div>
           {onDuty.length ? (
             onDuty.map((s) => (
-              <div key={s.id} className="mt-1 text-[15px] font-bold" style={{ color: '#e6c98a' }}>
+              <div key={s.id} className="mt-1 text-[15px] font-bold" style={{ color: 'var(--brand-accent)' }}>
                 {s.security_name} <span className="text-[12.5px] font-medium" style={{ color: '#d8cfb8' }}>· {s.post} · {s.start_time}–{s.end_time}</span>
               </div>
             ))
           ) : (
-            <div className="mt-1 text-[14px] font-bold" style={{ color: '#e6c98a' }}>Belum ada jadwal untuk jam ini</div>
+            <div className="mt-1 text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>Belum ada jadwal untuk jam ini</div>
           )}
           <Link href="/darurat" className="mt-3 inline-block text-[12.5px] font-bold underline" style={{ color: '#f2b8b0' }}>Butuh bantuan segera? Buka Tombol Darurat</Link>
         </div>

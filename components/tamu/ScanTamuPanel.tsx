@@ -84,7 +84,7 @@ export default function ScanTamuPanel({ initialToken }: { initialToken: string |
           className="min-w-0 flex-1 rounded-xl px-3 py-2.5 text-center text-lg font-bold tracking-[0.3em]"
           style={{ background: '#f2f1ec', border: '1px solid rgba(26,19,5,0.12)', color: '#1f1a10', outline: 'none' }}
         />
-        <button type="submit" disabled={isPending} className="rounded-xl px-4 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+        <button type="submit" disabled={isPending} className="rounded-xl px-4 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
           Cek
         </button>
       </form>
@@ -120,7 +120,7 @@ export default function ScanTamuPanel({ initialToken }: { initialToken: string |
                 {isPending ? 'Menyimpan...' : 'Tandai MASUK'}
               </button>
             ) : guest.status === 'masuk' ? (
-              <button type="button" disabled={isPending} onClick={() => act('keluar')} className="flex-1 rounded-xl py-2.5 text-[14px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+              <button type="button" disabled={isPending} onClick={() => act('keluar')} className="flex-1 rounded-xl py-2.5 text-[14px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                 {isPending ? 'Menyimpan...' : 'Tandai KELUAR'}
               </button>
             ) : null}

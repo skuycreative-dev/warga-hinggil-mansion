@@ -217,7 +217,7 @@ export default function FamilyBoard({
               setFormOpen(false)
             }}
             className="rounded-xl py-2.5 text-[13.5px] font-bold"
-            style={tab === k ? { background: '#1a1305', color: '#e6c98a' } : { color: '#5b543f' }}
+            style={tab === k ? { background: '#1a1305', color: 'var(--brand-accent)' } : { color: '#5b543f' }}
           >
             {k === 'catatan' ? `Catatan (${notes.length})` : `Kalender Event (${events.length})`}
           </button>
@@ -311,7 +311,7 @@ export default function FamilyBoard({
               disabled={isPending}
               onClick={submit}
               className="flex-1 rounded-xl py-3 text-sm font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.7 : 1 }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </button>
@@ -322,7 +322,7 @@ export default function FamilyBoard({
           type="button"
           onClick={() => openNew(tab)}
           className="w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: '#e6c98a' }}
+          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
         >
           + {tab === 'event' ? 'Tambah Event' : 'Tambah Catatan'}
         </button>
@@ -365,12 +365,12 @@ export default function FamilyBoard({
                     className="flex aspect-square flex-col items-center justify-center rounded-lg text-[13px] font-bold"
                     style={{
                       background: selectedDate === date ? '#1a1305' : date === today ? 'rgba(212,175,106,0.2)' : 'transparent',
-                      color: selectedDate === date ? '#e6c98a' : '#1f1a10',
+                      color: selectedDate === date ? 'var(--brand-accent)' : '#1f1a10',
                     }}
                   >
                     {Number(date.slice(8))}
                     {eventDates.has(date) ? (
-                      <span className="mt-0.5 h-1.5 w-1.5 rounded-full" style={{ background: selectedDate === date ? '#e6c98a' : '#b3392f' }} />
+                      <span className="mt-0.5 h-1.5 w-1.5 rounded-full" style={{ background: selectedDate === date ? 'var(--brand-accent)' : '#b3392f' }} />
                     ) : (
                       <span className="mt-0.5 h-1.5 w-1.5" />
                     )}

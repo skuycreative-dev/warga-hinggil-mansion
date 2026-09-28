@@ -83,7 +83,7 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
             <div className="text-[12.5px]" style={{ color: '#5b543f' }}>{alert.nomor_rumah ? `Rumah ${alert.nomor_rumah}` : 'Nomor rumah tidak tercatat'}</div>
             {alert.reporter_phone ? (
               <div className="mt-2 flex gap-2">
-                <a href={`tel:${alert.reporter_phone.replace(/[^0-9+]/g, '')}`} className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>☎ Telepon</a>
+                <a href={`tel:${alert.reporter_phone.replace(/[^0-9+]/g, '')}`} className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>☎ Telepon</a>
                 <a href={`https://wa.me/${alert.reporter_phone.replace(/[^0-9]/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1f7a45', color: '#fff' }}>
                   WhatsApp
                 </a>
@@ -107,6 +107,12 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
                 </p>
               ))}
           </section>
+
+          {alert.house_id ? (
+            <Link href={`/peta?rumah=${alert.house_id}`} className="rounded-xl py-3 text-center text-[13px] font-bold" style={{ background: '#d62828', color: '#ffffff' }}>
+              Lihat lokasi rumah di Peta
+            </Link>
+          ) : null}
 
           <Link href={`/keamanan/darurat/${alert.id}/laporan`} className="rounded-xl py-3 text-center text-[13px] font-bold" style={{ background: '#ffffff', color: '#1f1a10', border: '1px solid rgba(26,19,5,0.15)' }}>
             {'\u{1F5A8}'} Cetak / Simpan PDF Laporan Insiden

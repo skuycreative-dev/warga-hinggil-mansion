@@ -2,6 +2,7 @@
 
 import { publicError } from '@/lib/safe-error'
 import { revalidatePath } from 'next/cache'
+import { logAdminAction } from '@/lib/audit'
 import { passwordProblem } from '@/lib/security'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logError } from '@/lib/log-error'
@@ -80,6 +81,7 @@ export async function createStaffAccount(prevState: StaffAccountState, formData:
       return { error: `Akun dibuat tapi gagal set profil: ${publicError(profileError)}`, success: false }
     }
 
+    await logAdminAction(requester.userId, 'tambah', 'akun', created.user.id, `Membuat akun staff "${fullName}"`, { email, role: option.role, jabatan: option.staff_position })
     revalidatePath('/paguyuban/kelola-staff')
     return { error: '', success: true }
   } catch (err) {
@@ -118,6 +120,7 @@ export async function updateStaffAccount(id: string, fullName: string, roleValue
       .eq('id', id)
     if (error) return { error: publicError(error) }
 
+    await logAdminAction(requester.userId, 'ubah', 'akun', id, `Mengubah akun staff "${fullName}"`, { role: option.role, jabatan: option.staff_position })
     revalidatePath('/paguyuban/kelola-staff')
     return { error: null }
   } catch (err) {
@@ -138,6 +141,8 @@ export async function deleteStaffAccount(id: string) {
     if (target.role === 'it_support' && !requester.canCreateItSupport) return
 
     await admin.auth.admin.deleteUser(id)
+
+    await logAdminAction(requester.userId, 'hapus', 'akun', id, 'Menghapus akun staff', { role: target.role })
     revalidatePath('/paguyuban/kelola-staff')
   } catch (err) {
     await logError('kelola-staff: deleteStaffAccount', err)

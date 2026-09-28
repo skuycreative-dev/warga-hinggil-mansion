@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
@@ -28,7 +28,7 @@ function SidebarContent({
     <>
       <div className="flex items-center justify-between gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid rgba(230,201,138,0.1)' }}>
         <div className="flex items-center gap-2.5">
-          <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={34} height={34} className="rounded-lg object-cover" />
+          <BrandLogo size={34} className="rounded-lg object-cover" />
           <div>
             <div className="text-[13px] font-bold" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#efe4c8' }}>
               {portalLabel}
@@ -55,7 +55,7 @@ function SidebarContent({
               className="rounded-xl px-3.5 py-2.5 text-[13.5px] font-bold transition"
               style={{
                 background: active ? 'rgba(212,175,106,0.16)' : 'transparent',
-                color: active ? '#e6c98a' : '#c7c9d2',
+                color: active ? 'var(--brand-accent)' : '#c7c9d2',
               }}
             >
               {item.title}
@@ -148,7 +148,7 @@ export default function AdminLayout({
               onClick={() => setMenuOpen(true)}
               aria-label="Buka menu portal"
               className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg md:hidden"
-              style={{ background: '#1a1305', color: '#e6c98a' }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 7h16M4 12h16M4 17h16" />
@@ -172,7 +172,7 @@ export default function AdminLayout({
             </div>
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a' }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
             >
               {userName.charAt(0).toUpperCase()}
             </div>

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useActionState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import { completeProfile, type CompleteProfileState } from '@/app/lengkapi-profil/actions'
 import HouseholdFields, { type HouseOption } from '@/components/HouseholdFields'
 
@@ -38,13 +38,7 @@ export default function LengkapiProfilForm({ houses }: { houses: HouseOption[] }
     >
       <div className="flex-1 px-7 pb-14 pt-10">
         <div className="mb-6 flex flex-col items-center gap-3">
-          <Image
-            src="/logo-hinggil-mansion.jpg"
-            alt="Hinggil Mansion"
-            width={48}
-            height={48}
-            className="rounded-xl object-cover"
-          />
+          <BrandLogo size={48} className="rounded-xl object-cover" />
           <div className="text-center">
             <h1
               className="mb-1.5 text-[21px] font-medium"
@@ -98,7 +92,7 @@ export default function LengkapiProfilForm({ houses }: { houses: HouseOption[] }
             className="mt-2 rounded-xl py-3.5 text-[14.5px] font-bold"
             style={{
               border: 'none',
-              background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+              background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
               color: '#1a1305',
               boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
               opacity: isPending ? 0.7 : 1,

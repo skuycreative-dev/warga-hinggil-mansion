@@ -115,7 +115,7 @@ export default async function SecurityDashboardPage() {
           label="Rumah Kosong"
           value={rumahKosong ?? 0}
           caption="Perlu patroli ekstra"
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
         />
         <StatCard
@@ -146,7 +146,7 @@ export default async function SecurityDashboardPage() {
           <div className="text-[12px]" style={{ color: '#5b543f' }}>Target patroli, catat patroli, cetak jadwal</div>
         </Link>
         <Link href="/keamanan/jadwal-jaga" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#1a1305' }}>
-          <div className="text-[14px] font-bold" style={{ color: '#e6c98a' }}>Jadwal Jaga →</div>
+          <div className="text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>Jadwal Jaga →</div>
           <div className="text-[12px]" style={{ color: '#d8cfb8' }}>
             {onDuty.length ? `Sedang jaga: ${onDuty.map((s) => s.security_name).join(', ')}` : 'Belum ada yang dijadwalkan jam ini'}
           </div>
@@ -191,7 +191,7 @@ export default async function SecurityDashboardPage() {
             <Link
               href="/keamanan/rumah-kosong"
               className="rounded-xl py-2.5 text-center text-[12.5px] font-bold"
-              style={{ background: '#1a1305', color: '#e6c98a' }}
+              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
             >
               Lihat Semua
             </Link>

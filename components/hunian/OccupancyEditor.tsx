@@ -46,7 +46,7 @@ export default function OccupancyEditor({ current, houseId = null, compact = fal
         ))}
       </div>
       <input value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} placeholder="Catatan (opsional), mis. disewakan mulai 1 Oktober" aria-label="Catatan" style={inputStyle} />
-      <button type="button" disabled={isPending || status === current} onClick={save} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending || status === current ? 0.6 : 1 }}>
+      <button type="button" disabled={isPending || status === current} onClick={save} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || status === current ? 0.6 : 1 }}>
         {isPending ? 'Menyimpan...' : 'Simpan Status'}
       </button>
       {msg ? <p className="text-[12.5px] font-bold" style={{ color: msg.ok ? '#2f6b4f' : '#b3392f' }}>{msg.text}</p> : null}

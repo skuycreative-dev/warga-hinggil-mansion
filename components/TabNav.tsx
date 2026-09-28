@@ -40,7 +40,7 @@ export default function TabNav({
                 startTransition(() => router.push(href, { scroll: false }))
               }}
               className="flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] font-bold transition"
-              style={isActive ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+              style={isActive ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
             >
               {t.label}
               {t.badge ? (

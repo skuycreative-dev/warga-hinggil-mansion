@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import PasswordInput from '@/components/PasswordInput'
@@ -22,7 +22,7 @@ const inputStyle: React.CSSProperties = {
 
 const goldButton: React.CSSProperties = {
   border: 'none',
-  background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+  background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
   color: '#1a1305',
   boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
 }
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
     >
       <div className="flex flex-1 flex-col justify-center px-7 pb-16 pt-4">
         <div className="mb-8 flex flex-col items-center gap-3.5">
-          <Image src="/logo-hinggil-mansion.jpg" alt="Hinggil Mansion" width={52} height={52} className="rounded-2xl object-cover" />
+          <BrandLogo size={52} className="rounded-2xl object-cover" />
           <div className="text-center">
             <h1 className="mb-1.5 text-2xl font-medium" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#f7f4ec' }}>
               Atur Password Baru
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
             <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: '#9a9ca8' }}>
               {error || 'Link sudah dipakai, kedaluwarsa, atau tidak lengkap.'}
             </p>
-            <Link href="/lupa-password" className="mt-5 inline-block text-[13px] font-bold" style={{ color: '#e6c98a' }}>
+            <Link href="/lupa-password" className="mt-5 inline-block text-[13px] font-bold" style={{ color: 'var(--brand-accent)' }}>
               Minta link baru
             </Link>
           </div>

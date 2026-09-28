@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { registerUser, type RegisterState } from '@/app/register/actions'
 import HouseholdFields, { type HouseOption } from '@/components/HouseholdFields'
@@ -29,6 +29,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
+  const brand = useBranding()
   const [state, formAction, isPending] = useActionState(registerUser, initialState)
   const router = useRouter()
   const [countdown, setCountdown] = useState(3)
@@ -86,7 +87,7 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
               href="/login"
               className="mt-5 inline-block w-full rounded-xl py-3 text-sm font-bold"
               style={{
-                background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+                background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
                 color: '#1a1305',
               }}
             >
@@ -111,13 +112,7 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
 
       <div className="flex-1 px-7 pb-14 pt-4">
         <div className="mb-6 flex flex-col items-center gap-3">
-          <Image
-            src="/logo-hinggil-mansion.jpg"
-            alt="Hinggil Mansion"
-            width={48}
-            height={48}
-            className="rounded-xl object-cover"
-          />
+          <BrandLogo size={48} className="rounded-xl object-cover" />
           <div className="text-center">
             <h1
               className="mb-1.5 text-[21px] font-medium"
@@ -126,7 +121,7 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
               Daftar Warga
             </h1>
             <p className="text-[12.5px]" style={{ color: '#9a9ca8' }}>
-              Bergabung dengan komunitas Hinggil Mansion
+              Bergabung dengan komunitas {brand.community_name}
             </p>
           </div>
         </div>
@@ -187,7 +182,7 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
             className="mt-2 rounded-xl py-3.5 text-[14.5px] font-bold"
             style={{
               border: 'none',
-              background: 'linear-gradient(180deg, #e6c98a 0%, #cda15a 100%)',
+              background: 'linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-accent-dark) 100%)',
               color: '#1a1305',
               boxShadow: '0 10px 24px -10px rgba(205,161,90,0.6)',
               opacity: isPending ? 0.7 : 1,
@@ -199,7 +194,7 @@ export default function RegisterForm({ houses }: { houses: HouseOption[] }) {
 
           <p className="mt-1 text-center text-[12.5px]" style={{ color: '#9a9ca8' }}>
             Sudah punya akun?{' '}
-            <Link href="/login" style={{ color: '#e6c98a', fontWeight: 600 }}>
+            <Link href="/login" style={{ color: 'var(--brand-accent)', fontWeight: 600 }}>
               Masuk
             </Link>
           </p>

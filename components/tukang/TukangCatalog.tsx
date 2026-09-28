@@ -5,10 +5,12 @@ import { useMemo, useState } from 'react'
 import Stars from '@/components/tukang/Stars'
 import { TUKANG_CATEGORIES, categoryIcon, categoryLabel, initials, waNumber, type TukangSummary } from '@/lib/tukang'
 import { inputStyle } from '@/lib/format'
+import { useBranding } from '@/components/BrandingProvider'
 
 type Sort = 'rating' | 'terbaru' | 'ulasan'
 
 export default function TukangCatalog({ items, myId }: { items: TukangSummary[]; myId: string }) {
+  const brand = useBranding()
   const [category, setCategory] = useState('semua')
   const [sort, setSort] = useState<Sort>('rating')
   const [query, setQuery] = useState('')
@@ -40,7 +42,7 @@ export default function TukangCatalog({ items, myId }: { items: TukangSummary[];
             type="button"
             onClick={() => setCategory(c.key)}
             className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-bold"
-            style={category === c.key ? { background: '#1a1305', color: '#e6c98a' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+            style={category === c.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
           >
             {c.label}
             {c.key !== 'semua' ? ` (${counts.get(c.key)})` : ` (${items.length})`}
@@ -68,7 +70,7 @@ export default function TukangCatalog({ items, myId }: { items: TukangSummary[];
             return (
               <div key={t.id} className="rounded-2xl px-4 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
                 <Link href={`/tukang/${t.id}`} className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-[15px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-[15px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                     {initials(t.name)}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -102,7 +104,7 @@ export default function TukangCatalog({ items, myId }: { items: TukangSummary[];
                 {wa ? (
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <a
-                      href={`https://wa.me/${wa}?text=${encodeURIComponent(`Halo ${t.name}, saya warga Hinggil Mansion. Saya dapat kontak dari Katalog Tukang.`)}`}
+                      href={`https://wa.me/${wa}?text=${encodeURIComponent(`Halo ${t.name}, saya warga ${brand.community_name}. Saya dapat kontak dari Katalog Tukang.`)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg py-2 text-center text-[12.5px] font-bold"

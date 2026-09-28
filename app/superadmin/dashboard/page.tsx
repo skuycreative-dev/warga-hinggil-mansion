@@ -174,9 +174,9 @@ export default async function SuperadminDashboardPage() {
         <StatCard label="Pengguna" value={all.length} caption={`Warga aktif ${activeWarga} · Admin ${admins}`} iconBg="#a8c8f0" iconPath="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
         <StatCard label="Saldo Kas Paguyuban" value={rupiah(saldo)} caption={`+${rupiah(masukBulanIni)} bulan ini`} iconBg="#a8d8c8" iconPath="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         <StatCard label="Alert Darurat 30 Hari" value={alerts.length} caption={`Rata-rata respons ${minutesLabel(avgResponse)}`} iconBg="#f2b8b0" iconPath="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-        <StatCard label="Error 24 Jam" value={errors24 ?? 0} badge={(errors24 ?? 0) > 0 ? 'CEK' : undefined} caption="Dari Error Logs" iconBg="#e6c98a" iconPath="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+        <StatCard label="Error 24 Jam" value={errors24 ?? 0} badge={(errors24 ?? 0) > 0 ? 'CEK' : undefined} caption="Dari Error Logs" iconBg="var(--brand-accent)" iconPath="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
         <StatCard label="Menunggu Verifikasi" value={waitingVerify} badge={waitingVerify ? 'PERLU AKSI' : undefined} iconBg="#c9b8f0" iconPath="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        <StatCard label="Pengaduan Terbuka" value={openComplaints ?? 0} iconBg="#e6c98a" iconPath="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
+        <StatCard label="Pengaduan Terbuka" value={openComplaints ?? 0} iconBg="var(--brand-accent)" iconPath="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
         <StatCard label="Tunggakan IPL" value={rupiah(tunggakan)} caption={`${(bills ?? []).length} tagihan belum lunas`} iconBg="#f2b8b0" iconPath="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         <StatCard label="Rumah Kosong" value={emptyHouses ?? 0} caption="Sedang dalam patroli" iconBg="#a8d8c8" iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />
       </div>
@@ -216,7 +216,7 @@ export default async function SuperadminDashboardPage() {
                   </div>
                 ))}
             </div>
-            <Link href="/superadmin" className="mt-3 block rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>+ Tambah Admin</Link>
+            <Link href="/superadmin" className="mt-3 block rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>+ Tambah Admin</Link>
           </section>
 
           <section className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>

@@ -40,7 +40,7 @@ export default async function AlertCommandCenterPage() {
         <StatCard label="Alert Aktif" value={open.length} badge={waiting ? 'BUTUH RESPONS' : undefined} caption={`${waiting} belum diambil`} iconBg="#f2b8b0" iconPath="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
         <StatCard label="Alert 30 Hari" value={recent.length} caption={`${closed.length} selesai`} iconBg="#a8c8f0" iconPath="M3 3v18h18M7 14l4-4 4 4 5-5" />
         <StatCard label="Rata-rata Respons" value={minutesLabel(avgResponse)} caption="Alert masuk → diambil" iconBg="#a8d8c8" iconPath="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        <StatCard label="Alarm Palsu" value={falseAlarm} caption="30 hari terakhir" iconBg="#e6c98a" iconPath="M18 6 6 18M6 6l12 12" />
+        <StatCard label="Alarm Palsu" value={falseAlarm} caption="30 hari terakhir" iconBg="var(--brand-accent)" iconPath="M18 6 6 18M6 6l12 12" />
       </div>
 
       <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#b3392f' }}>Alert Aktif ({open.length})</div>
@@ -82,7 +82,7 @@ export default async function AlertCommandCenterPage() {
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <AlertActions alertId={a.id} status={a.status} handledByMe={a.handled_by === access.userId} handledByName={a.handled_by_name} escalated={!!a.escalated_at} compact />
-                <Link href={`/keamanan/darurat/${a.id}`} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+                <Link href={`/keamanan/darurat/${a.id}`} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
                   Detail & Response Log →
                 </Link>
               </div>

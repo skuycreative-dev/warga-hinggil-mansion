@@ -75,7 +75,7 @@ export default async function KelolaStaffPage() {
           label="Pengurus Paguyuban"
           value={pengurusCount}
           caption="Sekretaris & Bendahara"
-          iconBg="#e6c98a"
+          iconBg="var(--brand-accent)"
           iconPath="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 21c1.5-4 5-6 8-6s6.5 2 8 6"
         />
         <StatCard

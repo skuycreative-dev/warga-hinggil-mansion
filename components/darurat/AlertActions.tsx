@@ -73,7 +73,7 @@ export default function AlertActions({
         <button type="button" onClick={() => setMode(mode === 'escalate' ? 'none' : 'escalate')} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#fdf1ef', color: '#b3392f', border: '1px solid rgba(179,57,47,0.25)' }}>
           ⬆ Eskalasi{escalated ? ' lagi' : ''}
         </button>
-        <button type="button" onClick={() => setMode(mode === 'close' ? 'none' : 'close')} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+        <button type="button" onClick={() => setMode(mode === 'close' ? 'none' : 'close')} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
           ✓ Tandai Selesai
         </button>
       </div>
@@ -93,7 +93,7 @@ export default function AlertActions({
           <div className="text-[12.5px] font-bold" style={{ color: '#1f1a10' }}>Kategori penutupan</div>
           <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
             {(['asli', 'alarm_palsu', 'polisi'] as const).map((r) => (
-              <label key={r} className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[12.5px] font-semibold" style={resolution === r ? { background: '#1a1305', color: '#e6c98a' } : { background: '#fff', color: '#3d3727' }}>
+              <label key={r} className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[12.5px] font-semibold" style={resolution === r ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#fff', color: '#3d3727' }}>
                 <input type="radio" name={`res-${alertId}`} value={r} checked={resolution === r} onChange={() => setResolution(r)} className="sr-only" />
                 {RESOLUTION_LABEL[r]}
               </label>

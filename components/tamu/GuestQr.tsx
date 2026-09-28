@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
+import { useBranding } from '@/components/BrandingProvider'
 
 const PURPOSE_LABEL: Record<string, string> = {
   keluarga: 'Keluarga / Kerabat',
@@ -16,17 +17,17 @@ export function guestQrUrl(token: string) {
 }
 
 // Gambar kartu undangan (QR + nama + kode) untuk dibagikan ke tamu lewat WhatsApp
-async function renderCard(qrDataUrl: string, guestName: string, code: string, houseLabel: string | null, purpose: string) {
+async function renderCard(qrDataUrl: string, guestName: string, code: string, houseLabel: string | null, purpose: string, community: string, accent: string) {
   const canvas = document.createElement('canvas')
   canvas.width = 720
   canvas.height = 1000
   const c = canvas.getContext('2d')!
   c.fillStyle = '#0a0b0f'
   c.fillRect(0, 0, 720, 1000)
-  c.fillStyle = '#e6c98a'
+  c.fillStyle = accent
   c.font = 'bold 30px Georgia, serif'
   c.textAlign = 'center'
-  c.fillText('HINGGIL MANSION', 360, 80)
+  c.fillText(community.toUpperCase().slice(0, 32), 360, 80)
   c.fillStyle = '#b8ad92'
   c.font = '22px sans-serif'
   c.fillText('Undangan Tamu · tunjukkan ke Security di gerbang', 360, 120)
@@ -71,6 +72,7 @@ export default function GuestQr({
   houseLabel: string | null
   compact?: boolean
 }) {
+  const brand = useBranding()
   const [dataUrl, setDataUrl] = useState<string | null>(null)
   const [msg, setMsg] = useState('')
 
@@ -87,16 +89,16 @@ export default function GuestQr({
     }
   }, [token])
 
-  const text = `Halo ${guestName}, ini undangan masuk Hinggil Mansion${houseLabel ? ` ke Rumah ${houseLabel}` : ''}. Tunjukkan QR ini ke Security di gerbang. Kode cadangan: ${code}`
+  const text = `Halo ${guestName}, ini undangan masuk ${brand.community_name}${houseLabel ? ` ke Rumah ${houseLabel}` : ''}. Tunjukkan QR ini ke Security di gerbang. Kode cadangan: ${code}`
 
   async function share() {
     if (!dataUrl) return
     setMsg('')
     try {
-      const blob = await renderCard(dataUrl, guestName, code, houseLabel, purpose)
+      const blob = await renderCard(dataUrl, guestName, code, houseLabel, purpose, brand.community_name, brand.accent_color)
       const file = new File([blob], `undangan-${guestName.replace(/\s+/g, '-').toLowerCase()}.png`, { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], text, title: 'Undangan Tamu Hinggil Mansion' })
+        await navigator.share({ files: [file], text, title: `Undangan Tamu ${brand.community_name}` })
         return
       }
       // Browser tanpa fitur bagikan file (mis. laptop): unduh gambar lalu buka WhatsApp dengan teks
@@ -119,7 +121,7 @@ export default function GuestQr({
 
   async function save() {
     if (!dataUrl) return
-    download(await renderCard(dataUrl, guestName, code, houseLabel, purpose))
+    download(await renderCard(dataUrl, guestName, code, houseLabel, purpose, brand.community_name, brand.accent_color))
   }
 
   return (
