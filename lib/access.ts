@@ -21,6 +21,8 @@ export type MyAccess = {
   canManageEmergencyContacts: boolean
   canManageStaff: boolean
   canCreateItSupport: boolean
+  canManageFinance: boolean
+  canViewFinance: boolean
   roleLabel: string
 }
 
@@ -76,6 +78,11 @@ export async function getMyAccess(): Promise<MyAccess> {
     canManageStaff: isSuperadmin || isKetuaPaguyuban,
     // IT Support hanya dibuat/diubah/dihapus oleh Superadmin (keputusan 28 Sep 2026)
     canCreateItSupport: isSuperadmin,
+    // Kebutuhan #5: input kas & iuran hanya Ketua Paguyuban dan Bendahara (+ Superadmin)
+    canManageFinance: isSuperadmin || isKetuaPaguyuban || isBendahara,
+    // Kebutuhan #6: laporan keuangan untuk warga (terverifikasi) dan pengurus Paguyuban
+    canViewFinance:
+      isSuperadmin || isKetuaPaguyuban || role === 'staff_paguyuban' || (role === 'warga' && (profile?.account_status ?? '') === 'aktif'),
     roleLabel,
   }
 }

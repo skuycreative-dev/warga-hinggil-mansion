@@ -1,5 +1,6 @@
 ﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { featureForPath } from '@/lib/features'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -40,7 +41,10 @@ export async function updateSession(request: NextRequest) {
   const isWargaFeature =
     !portalRule && WARGA_FEATURES.some((prefix) => path === prefix || path.startsWith(prefix + '/'))
 
-  if (user && (portalRule || isWargaFeature)) {
+  // Fitur yang bisa dimatikan Superadmin (white label). Halaman portal admin tidak ikut dikunci.
+  const featureKey = portalRule ? null : featureForPath(path)
+
+  if (user && (portalRule || isWargaFeature || featureKey)) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, staff_position, account_status')
@@ -51,7 +55,16 @@ export async function updateSession(request: NextRequest) {
     const roleKey = role === 'staff_paguyuban' ? `staff_paguyuban:${profile?.staff_position ?? ''}` : role
 
     let target: string | null = null
-    if (portalRule && !portalRule.roles.includes(roleKey)) {
+    let lockedFeature: string | null = null
+
+    if (featureKey && role !== 'superadmin') {
+      const { data: feature } = await supabase.from('app_features').select('enabled').eq('key', featureKey).maybeSingle()
+      if (feature && feature.enabled === false) lockedFeature = featureKey
+    }
+
+    if (lockedFeature) {
+      target = '/dashboard'
+    } else if (portalRule && !portalRule.roles.includes(roleKey)) {
       target = '/dashboard'
     } else if (isWargaFeature && role === 'it_support') {
       target = '/it-support'
@@ -62,7 +75,7 @@ export async function updateSession(request: NextRequest) {
     if (target) {
       const url = request.nextUrl.clone()
       url.pathname = target
-      url.search = ''
+      url.search = lockedFeature ? `?terkunci=${lockedFeature}` : ''
       const redirect = NextResponse.redirect(url)
       supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie))
       return redirect
@@ -90,4 +103,4 @@ const PORTAL_RULES: { prefix: string; roles: string[] }[] = [
 
 // Fitur warga: terkunci untuk warga yang belum diverifikasi, dan untuk IT Support.
 // Tombol Darurat (/darurat) dan Profil (/profile) sengaja TIDAK ada di sini.
-const WARGA_FEATURES = ['/forum', '/warga', '/chat', '/pengumuman', '/pengaduan', '/qr-tamu', '/anggaran', '/polling', '/tukang', '/rumah-kosong', '/keluarga', '/keuangan-rumah']
+const WARGA_FEATURES = ['/forum', '/warga', '/chat', '/pengumuman', '/pengaduan', '/qr-tamu', '/anggaran', '/iuran-ipl', '/polling', '/tukang', '/rumah-kosong', '/keluarga', '/keuangan-rumah']

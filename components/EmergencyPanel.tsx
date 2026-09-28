@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { triggerEmergency, handleEmergency, resolveEmergency } from '@/app/darurat/actions'
+import { triggerEmergency, handleEmergency, resolveEmergency, resolveOwnEmergency } from '@/app/darurat/actions'
 
 type Alert = {
   id: string
@@ -73,7 +73,7 @@ export default function EmergencyPanel({
   const sentRef = useRef(false)
 
   const openAlerts = alerts.filter((a) => a.status === 'aktif' || a.status === 'ditangani')
-  const myOpenAlert = openAlerts.find((a) => a.reporter_id === currentUserId)
+  const myOpenAlerts = openAlerts.filter((a) => a.reporter_id === currentUserId)
 
   function send(type: string) {
     if (sentRef.current) return
@@ -133,45 +133,82 @@ export default function EmergencyPanel({
 
   return (
     <div className="flex flex-col gap-7">
-      {myOpenAlert ? (
-        <div className="rounded-2xl px-5 py-5 text-center" style={{ background: 'rgba(179,57,47,0.1)', border: '1px solid rgba(179,57,47,0.3)' }}>
+      {myOpenAlerts.length > 0 ? (
+        <div className="rounded-2xl px-5 py-4" style={{ background: 'rgba(179,57,47,0.08)', border: '1px solid rgba(179,57,47,0.3)' }}>
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#b3392f' }}>
-            {typeLabel(myOpenAlert.emergency_type)}
+            Alert Darurat Kamu ({myOpenAlerts.length})
           </div>
-          <p className="mt-1 text-sm font-bold" style={{ color: '#b3392f' }}>
-            {myOpenAlert.status === 'ditangani'
-              ? 'Alert kamu sedang ditangani Security / Pengurus.'
-              : 'Alert darurat kamu sudah terkirim ke seluruh warga, Security, dan Pengurus.'}
-          </p>
-          <p className="mt-1 text-[12.5px] font-medium" style={{ color: '#5b543f' }}>
-            Tetap di tempat aman. Kalau perlu, telepon nomor darurat di bawah.
+          <div className="mt-2 flex flex-col gap-2">
+            {myOpenAlerts.map((a) => (
+              <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5" style={{ background: '#ffffff' }}>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold" style={{ color: '#1f1a10' }}>{typeLabel(a.emergency_type)}</div>
+                  <div className="text-[11.5px] font-semibold" style={{ color: a.status === 'ditangani' ? '#2f6b4f' : '#9c7a3f' }}>
+                    {a.status === 'ditangani' ? 'Sedang ditangani Security / Pengurus' : 'Terkirim, menunggu respon'} · {timeAgo(a.created_at)}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => {
+                    if (!confirm(`Reset alert ${typeLabel(a.emergency_type)}? Tekan OK kalau kamu sudah aman atau alert ini tidak sengaja terkirim.`)) return
+                    runAction(resolveOwnEmergency, a.id)
+                  }}
+                  className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
+                  style={{ background: '#1a1305', color: '#e6c98a' }}
+                >
+                  Saya Sudah Aman
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[12px] font-medium" style={{ color: '#5b543f' }}>
+            Ada keadaan darurat lain? Tombol di bawah tetap bisa ditekan lagi.
           </p>
         </div>
-      ) : step === 'idle' ? (
-        <div>
+      ) : null}
+
+      {step === 'idle' ? (
+        <div className="flex flex-col items-center">
           {justSent ? (
-            <p className="mb-3 text-center text-sm font-bold" style={{ color: '#2f6b4f' }}>Alert terkirim.</p>
+            <p className="mb-3 text-center text-sm font-bold" style={{ color: '#2f6b4f' }}>Alert terkirim ke seluruh warga, Security, dan Pengurus.</p>
           ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              setJustSent(false)
-              setError('')
-              setStep('pilih')
-            }}
-            className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-3xl transition hover:opacity-90"
-            style={{ background: '#b3392f', boxShadow: '0 12px 30px rgba(179,57,47,0.35)' }}
-          >
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
-              <line x1="12" y1="8" x2="12" y2="13" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span className="text-lg font-bold text-white">TEKAN JIKA DARURAT</span>
-            <span className="text-[12px] font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Pilih jenis darurat, lalu ada 5 detik untuk membatalkan
-            </span>
-          </button>
+          <div className="relative flex items-center justify-center" style={{ width: 240, height: 240 }}>
+            <span
+              aria-hidden
+              className="absolute inset-0 animate-ping rounded-full"
+              style={{ background: 'rgba(179,57,47,0.22)', animationDuration: '2.2s' }}
+            />
+            <span aria-hidden className="absolute rounded-full" style={{ inset: 12, background: 'rgba(179,57,47,0.14)' }} />
+            <button
+              type="button"
+              aria-label="Tombol darurat. Tekan untuk memilih jenis darurat"
+              onClick={() => {
+                setJustSent(false)
+                setError('')
+                setStep('pilih')
+              }}
+              className="relative flex flex-col items-center justify-center gap-1 rounded-full transition active:scale-95"
+              style={{
+                width: 184,
+                height: 184,
+                border: '6px solid #ffffff',
+                background: 'radial-gradient(circle at 35% 30%, #e25a4d 0%, #b3392f 55%, #7c2118 100%)',
+                boxShadow: '0 16px 36px rgba(179,57,47,0.45), inset 0 -10px 18px rgba(0,0,0,0.25), inset 0 8px 14px rgba(255,255,255,0.25)',
+              }}
+            >
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+              </svg>
+              <span className="text-xl font-bold tracking-wider text-white">DARURAT</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                Tekan
+              </span>
+            </button>
+          </div>
+          <p className="mt-2 text-center text-[12.5px] font-semibold" style={{ color: '#5b543f' }}>
+            Pilih jenis darurat, lalu ada 5 detik untuk membatalkan.
+          </p>
         </div>
       ) : step === 'pilih' ? (
         <div className="rounded-2xl px-5 py-5" style={{ background: '#ffffff', border: '1px solid rgba(179,57,47,0.3)' }}>

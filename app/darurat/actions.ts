@@ -26,16 +26,20 @@ export async function triggerEmergency(prevState: EmergencyState, formData: Form
 
   if (!user) redirect('/login')
 
-  const { data: existing } = await supabase
+  // Boleh mengirim beberapa alert sekaligus (mis. kebakaran + medis). Yang dicegah hanya
+  // jenis yang SAMA dalam 60 detik terakhir, supaya tidak terkirim dobel karena tertekan 2x.
+  const { data: duplicate } = await supabase
     .from('emergency_alerts')
     .select('id')
     .eq('reporter_id', user.id)
-    .in('status', ['aktif', 'ditangani'])
+    .eq('emergency_type', emergencyType)
+    .eq('status', 'aktif')
+    .gte('created_at', new Date(Date.now() - 60 * 1000).toISOString())
     .limit(1)
     .maybeSingle()
 
-  if (existing) {
-    return { error: 'Alert darurat kamu masih aktif dan sedang dipantau Security & Pengurus.', success: false }
+  if (duplicate) {
+    return { error: 'Alert jenis ini baru saja terkirim. Security & Pengurus sudah diberi tahu.', success: false }
   }
 
   const { data: profile } = await supabase.from('profiles').select('house_id').eq('id', user.id).maybeSingle()
@@ -103,6 +107,31 @@ export async function resolveEmergency(id: string) {
     .eq('id', id)
 
   if (error) return { error: error.message }
+
+  revalidatePath('/darurat')
+  revalidatePath('/dashboard')
+  return { error: null }
+}
+
+// Pelapor me-reset alert miliknya sendiri ("saya sudah aman" / tidak sengaja terkirim)
+export async function resolveOwnEmergency(id: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data, error } = await supabase
+    .from('emergency_alerts')
+    .update({ status: 'selesai', resolved_by: user.id, resolved_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('reporter_id', user.id)
+    .in('status', ['aktif', 'ditangani'])
+    .select('id')
+
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Alert tidak ditemukan atau sudah selesai.' }
 
   revalidatePath('/darurat')
   revalidatePath('/dashboard')

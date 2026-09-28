@@ -9,6 +9,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
+      { title: 'Kelola Fitur', href: '/superadmin/fitur' },
       { title: 'Dashboard Paguyuban', href: '/paguyuban' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
@@ -23,7 +24,8 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Kelola Staff', href: '/paguyuban/kelola-staff' },
       { title: 'Moderasi Forum', href: '/paguyuban/moderasi-forum' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
-      { title: 'Anggaran & Iuran', href: '/anggaran' },
+      { title: 'Anggaran Paguyuban', href: '/anggaran' },
+      { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Polling Warga', href: '/polling' },
       { title: 'Pengumuman', href: '/pengumuman' },
     ]
@@ -45,7 +47,10 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
   }
 
   if (access.isBendahara) {
-    return [{ title: 'Anggaran & Iuran', href: '/anggaran' }]
+    return [
+      { title: 'Anggaran Paguyuban', href: '/anggaran' },
+      { title: 'Iuran IPL', href: '/iuran-ipl' },
+    ]
   }
 
   return []

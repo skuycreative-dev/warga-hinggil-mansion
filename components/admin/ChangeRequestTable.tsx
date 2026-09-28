@@ -15,6 +15,15 @@ type ChangeRequest = {
 const FIELD_LABEL: Record<string, string> = {
   full_name: 'Nama Lengkap',
   occupancy_status: 'Status Hunian',
+  family_role: 'Peran Keluarga',
+}
+
+const FAMILY_ROLE_LABEL: Record<string, string> = {
+  kepala_keluarga: 'Kepala Keluarga',
+  ibu_rumah_tangga: 'Ibu Rumah Tangga',
+  anggota_keluarga: 'Anggota Keluarga',
+  asisten_rumah_tangga: 'Asisten Rumah Tangga',
+  lainnya: 'Lainnya',
 }
 
 const OCCUPANCY_LABEL: Record<string, string> = {
@@ -25,7 +34,9 @@ const OCCUPANCY_LABEL: Record<string, string> = {
 
 function show(field: string, value: string | null) {
   if (!value) return '-'
-  return field === 'occupancy_status' ? OCCUPANCY_LABEL[value] ?? value : value
+  if (field === 'occupancy_status') return OCCUPANCY_LABEL[value] ?? value
+  if (field === 'family_role') return FAMILY_ROLE_LABEL[value] ?? value
+  return value
 }
 
 export default function ChangeRequestTable({

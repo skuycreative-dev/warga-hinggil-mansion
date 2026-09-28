@@ -131,11 +131,13 @@ export async function deleteWargaAccount(id: string) {
 const FIELD_LABEL: Record<string, string> = {
   full_name: 'Nama Lengkap',
   occupancy_status: 'Status Hunian',
+  family_role: 'Peran Keluarga',
 }
 
 function canReviewField(access: MyAccess, field: string) {
   if (field === 'full_name') return access.isSuperadmin || access.isKetuaPaguyuban
   if (field === 'occupancy_status') return access.canVerifyAccounts
+  if (field === 'family_role') return access.canVerifyAccounts
   return false
 }
 
@@ -161,9 +163,15 @@ export async function approveChangeRequest(id: string) {
       return { error: `Perubahan ${FIELD_LABEL[request.field] ?? request.field} hanya bisa disetujui Admin Paguyuban atau Superadmin.` }
     }
 
+    // Disetujui Pengurus menjadi Ibu Rumah Tangga = sekaligus terkonfirmasi sebagai penghuni rumah itu
+    const extra =
+      request.field === 'family_role' && request.new_value === 'ibu_rumah_tangga'
+        ? { family_status: 'dikonfirmasi', family_confirmed_by: access.userId, family_confirmed_at: new Date().toISOString() }
+        : {}
+
     const { error: profileError } = await admin
       .from('profiles')
-      .update({ [request.field]: request.new_value })
+      .update({ [request.field]: request.new_value, ...extra })
       .eq('id', request.user_id)
     if (profileError) return { error: profileError.message }
 

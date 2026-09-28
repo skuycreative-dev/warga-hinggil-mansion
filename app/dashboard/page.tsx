@@ -6,74 +6,112 @@ import { signOut } from './actions'
 import NotificationBell from '@/components/NotificationBell'
 import { displayName as nameOf } from '@/lib/display-name'
 import FamilyRequestList from '@/components/FamilyRequestList'
+import RoleRequestList from '@/components/RoleRequestList'
 import InstallAppBanner from '@/components/InstallAppBanner'
+import DashboardTile, { type TileState } from '@/components/DashboardTile'
+import LockedFeatureNotice from '@/components/LockedFeatureNotice'
+import { CCTV_URL, disabledSet, type FeatureKey } from '@/lib/features'
 
-const menu = [
+type MenuItem = {
+  title: string
+  href: string
+  path: string
+  feature: FeatureKey | null
+  danger?: boolean
+  external?: boolean
+}
+
+const menu: MenuItem[] = [
   {
     title: 'Tombol Darurat',
     href: '/darurat',
     path: 'M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z',
+    feature: 'darurat',
     danger: true,
   },
   {
     title: 'Forum Warga',
     href: '/forum',
     path: 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z',
+    feature: 'forum',
   },
   {
     title: 'Warga & Teman',
     href: '/warga',
     path: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+    feature: 'warga',
   },
   {
     title: 'Pesan',
     href: '/chat',
     path: 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z',
+    feature: 'chat',
   },
   {
     title: 'Pengumuman',
     href: '/pengumuman',
     path: 'M3 11h18M3 15h18M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z',
+    feature: 'pengumuman',
   },
   {
     title: 'Pengaduan',
     href: '/pengaduan',
     path: 'M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z',
+    feature: 'pengaduan',
   },
   {
     title: 'QR Tamu',
     href: '/qr-tamu',
     path: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 19h2v2h-2z',
+    feature: 'qr_tamu',
   },
   {
-    title: 'Anggaran & Iuran',
+    title: 'Anggaran Paguyuban',
     href: '/anggaran',
+    path: 'M3 3v18h18M7 14l4-4 4 3 5-6',
+    feature: 'anggaran',
+  },
+  {
+    title: 'Iuran IPL',
+    href: '/iuran-ipl',
     path: 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+    feature: 'iuran_ipl',
   },
   {
     title: 'Polling Warga',
     href: '/polling',
     path: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+    feature: 'polling',
   },
   {
     title: 'Katalog Tukang',
     href: '/tukang',
     path: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+    feature: 'tukang',
   },
   {
     title: 'Rumah Kosong',
     href: '/rumah-kosong',
     path: 'M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z',
+    feature: 'rumah_kosong',
+  },
+  {
+    title: 'CCTV Jogja',
+    href: CCTV_URL,
+    path: 'M3 7h13l5-3v12l-5-3H3zM7 17l-2 4M13 17l2 4',
+    feature: 'cctv',
+    external: true,
   },
   {
     title: 'Profil Saya',
     href: '/profile',
     path: 'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 21c1.5-4 5-6 8-6s6.5 2 8 6',
+    feature: null,
   },
 ]
 
 // Menu yang tetap bisa dipakai walau akun warga belum diverifikasi Pengurus
-const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya']
+const UNLOCKED_WHEN_PENDING = ['Tombol Darurat', 'Profil Saya', 'CCTV Jogja']
 
 const EMERGENCY_LABEL: Record<string, string> = {
   kebakaran: 'Kebakaran',
@@ -85,7 +123,8 @@ const EMERGENCY_LABEL: Record<string, string> = {
   lainnya: 'Darurat',
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ terkunci?: string }> }) {
+  const { terkunci } = await searchParams
   const supabase = await createClient()
 
   const {
@@ -107,6 +146,14 @@ export default async function DashboardPage() {
   if (profile?.role === 'warga' && !profile?.house_id) {
     redirect('/lengkapi-profil')
   }
+
+  // Fitur yang dinonaktifkan Superadmin tetap tampil, tapi terkunci (Superadmin tetap bisa membuka)
+  const { data: featureRows } = await supabase.from('app_features').select('key, enabled')
+  const disabledFeatures = disabledSet(featureRows)
+  const viewerIsSuperadmin = profile?.role === 'superadmin'
+  const isOff = (key: FeatureKey | null) => !!key && disabledFeatures.has(key) && !viewerIsSuperadmin
+  const tileState = (key: FeatureKey | null, pendingLock: boolean): TileState =>
+    key && disabledFeatures.has(key) && !viewerIsSuperadmin ? 'disabled' : pendingLock ? 'pending' : 'open'
 
   // Polling aktif ditampilkan di dashboard (kebutuhan #10)
   const { data: pollsRaw } = await supabase
@@ -178,6 +225,22 @@ export default async function DashboardPage() {
     created_at: r.created_at as string,
   }))
   const familyStatus = profile?.family_status ?? null
+
+  // Kepala Keluarga: penghuni rumahnya yang mengajukan jadi Ibu Rumah Tangga lewat Edit Profil
+  const { data: roleRequestsRaw } = isKepalaKeluarga
+    ? await supabase
+        .from('profile_change_requests')
+        .select('id, created_at, requester:profiles!profile_change_requests_user_id_fkey(full_name, nickname)')
+        .eq('field', 'family_role')
+        .eq('new_value', 'ibu_rumah_tangga')
+        .eq('status', 'menunggu')
+        .order('created_at', { ascending: true })
+    : { data: [] as any[] }
+  const roleRequests = (roleRequestsRaw ?? []).map((r: any) => ({
+    id: r.id as string,
+    name: nameOf(Array.isArray(r.requester) ? r.requester[0] : r.requester),
+    created_at: r.created_at as string,
+  }))
 
   // Fitur khusus keluarga dalam 1 rumah
   const isHouseholdMember =
@@ -268,7 +331,11 @@ export default async function DashboardPage() {
 
           <InstallAppBanner />
 
+          <LockedFeatureNotice featureKey={terkunci ?? null} />
+
           <FamilyRequestList requests={familyRequests} houseLabel={houseLabel ?? null} canConfirm={accountStatus === 'aktif'} />
+
+          <RoleRequestList requests={roleRequests} houseLabel={houseLabel ?? null} canConfirm={accountStatus === 'aktif'} />
 
           {isLocked ? (
             <div
@@ -312,87 +379,41 @@ export default async function DashboardPage() {
             Menu Cepat
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {menu.filter((m) => !isItSupportRole || UNLOCKED_WHEN_PENDING.includes(m.title)).map((m) => {
-              const tileLocked = isLocked && !UNLOCKED_WHEN_PENDING.includes(m.title)
-
-              if (tileLocked) {
-                return (
-                  <div
-                    key={m.title}
-                    className="relative flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center opacity-45"
-                    style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d={m.path} />
-                      </svg>
-                    </div>
-                    <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>{m.title}</div>
-                    <div className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full" style={{ background: '#1a1305' }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="4" y="10" width="16" height="10" rx="2" />
-                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                      </svg>
-                    </div>
-                  </div>
-                )
-              }
-
-              return (
-                <Link
+            {menu
+              .filter((m) => !isItSupportRole || UNLOCKED_WHEN_PENDING.includes(m.title))
+              .map((m) => (
+                <DashboardTile
                   key={m.title}
+                  title={m.title}
                   href={m.href}
-                  className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
-                  style={{
-                    background: '#ffffff',
-                    border: m.danger ? '1px solid rgba(179,57,47,0.25)' : '1px solid rgba(26,19,5,0.08)',
-                  }}
-                >
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
-                    style={{ background: m.danger ? '#b3392f' : '#1a1305' }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={m.danger ? '#ffffff' : '#e6c98a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d={m.path} />
-                    </svg>
-                  </div>
-                  <div className="text-[13.5px] font-bold" style={{ color: m.danger ? '#b3392f' : '#1f1a10' }}>
-                    {m.title}
-                  </div>
-                </Link>
-              )
-            })}
+                  path={m.path}
+                  danger={m.danger}
+                  external={m.external}
+                  state={tileState(m.feature, isLocked && !UNLOCKED_WHEN_PENDING.includes(m.title))}
+                  adminPreview={viewerIsSuperadmin && !!m.feature && disabledFeatures.has(m.feature)}
+                />
+              ))}
 
             {isHouseholdMember ? (
-              <Link
+              <DashboardTile
+                title="Catatan & Kalender Keluarga"
                 href="/keluarga"
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
-                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="17" rx="2" />
-                    <path d="M16 2v4M8 2v4M3 10h18M8 14h3M8 17h6" />
-                  </svg>
-                </div>
-                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Catatan & Kalender Keluarga</div>
-              </Link>
+                path="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2ZM16 2v4M8 2v4M3 10h18M8 14h3M8 17h6"
+                highlight
+                state={tileState('keluarga', false)}
+                adminPreview={viewerIsSuperadmin && disabledFeatures.has('keluarga')}
+              />
             ) : null}
 
             {isHouseholdManager ? (
-              <Link
+              <DashboardTile
+                title="Keuangan Rumah Tangga"
                 href="/keuangan-rumah"
-                className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
-                style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5" />
-                    <path d="M12 11v6M14 12.2c-.4-.6-1.1-.9-2-.9-1.1 0-2 .6-2 1.4 0 1.9 4 1 4 2.9 0 .8-.9 1.4-2 1.4-.9 0-1.6-.3-2-.9" />
-                  </svg>
-                </div>
-                <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Keuangan Rumah Tangga</div>
-              </Link>
+                path="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5M12 11v6M14 12.2c-.4-.6-1.1-.9-2-.9-1.1 0-2 .6-2 1.4 0 1.9 4 1 4 2.9 0 .8-.9 1.4-2 1.4-.9 0-1.6-.3-2-.9"
+                highlight
+                state={tileState('keuangan_rumah', false)}
+                adminPreview={viewerIsSuperadmin && disabledFeatures.has('keuangan_rumah')}
+              />
             ) : null}
 
             {isSecurity ? (
@@ -574,7 +595,7 @@ export default async function DashboardPage() {
             ) : null}
           </div>
 
-          {openPolls.length > 0 && !isLocked && !isItSupportRole ? (
+          {openPolls.length > 0 && !isLocked && !isItSupportRole && !isOff('polling') ? (
             <div className="mt-10">
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>
@@ -615,6 +636,7 @@ export default async function DashboardPage() {
             </div>
           ) : null}
 
+          {!isOff('pengumuman') ? (
           <div className="mt-10">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>
@@ -657,6 +679,7 @@ export default async function DashboardPage() {
               </p>
             )}
           </div>
+          ) : null}
         </div>
       </section>
     </main>

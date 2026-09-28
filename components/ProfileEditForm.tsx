@@ -97,8 +97,10 @@ export default function ProfileEditForm({
 
   const pendingName = pendingRequests.find((r) => r.field === 'full_name')
   const pendingOccupancy = pendingRequests.find((r) => r.field === 'occupancy_status')
+  const pendingRole = pendingRequests.find((r) => r.field === 'family_role')
   // Kepala Keluarga & Ibu Rumah Tangga membuka akses khusus rumah, jadi dikunci setelah terverifikasi
   const isProtectedRole = familyRole === 'kepala_keluarga' || familyRole === 'ibu_rumah_tangga'
+  const [selectedRole, setSelectedRole] = useState(familyRole)
 
   function handleCancel(id: string) {
     startCancel(async () => {
@@ -115,8 +117,14 @@ export default function ProfileEditForm({
         {pendingRequests.map((r) => (
           <div key={r.id} className="mt-1.5 flex items-center justify-between gap-3">
             <span className="text-[12.5px] font-medium" style={{ color: '#3a3424' }}>
-              {r.field === 'full_name' ? 'Nama Lengkap' : 'Status Hunian'} →{' '}
-              <b>{r.field === 'occupancy_status' ? OCCUPANCY_LABEL[r.new_value] ?? r.new_value : r.new_value}</b>
+              {r.field === 'full_name' ? 'Nama Lengkap' : r.field === 'family_role' ? 'Peran Keluarga' : 'Status Hunian'} →{' '}
+              <b>
+                {r.field === 'occupancy_status'
+                  ? OCCUPANCY_LABEL[r.new_value] ?? r.new_value
+                  : r.field === 'family_role'
+                    ? FAMILY_ROLE_LABEL[r.new_value] ?? r.new_value
+                    : r.new_value}
+              </b>
             </span>
             <button
               type="button"
@@ -219,25 +227,38 @@ export default function ProfileEditForm({
 
         <div className="flex flex-col gap-1.5">
           <label style={labelStyle}>Peran dalam Keluarga</label>
-          {!inCompletion && isProtectedRole ? (
+          {pendingRole ? (
             <>
-              <input type="text" value={FAMILY_ROLE_LABEL[familyRole] ?? familyRole} readOnly style={readOnlyStyle} />
+              <input type="text" value={FAMILY_ROLE_LABEL[pendingRole.new_value] ?? pendingRole.new_value} readOnly style={readOnlyStyle} />
               <input type="hidden" name="family_role" value={familyRole} />
-              <span style={hintStyle}>Peran ini hanya bisa diubah Pengurus.</span>
+              <span style={hintStyle}>Sedang diajukan. Tunggu konfirmasi atau batalkan di atas.</span>
             </>
           ) : (
-            <div style={{ position: 'relative' }}>
-              <select name="family_role" defaultValue={familyRole} required style={selectStyle}>
-                {Object.entries(FAMILY_ROLE_LABEL)
-                  .filter(([value]) => inCompletion || (value !== 'kepala_keluarga' && value !== 'ibu_rumah_tangga'))
-                  .map(([value, label]) => (
+            <>
+              <div style={{ position: 'relative' }}>
+                <select
+                  name="family_role"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  required
+                  style={selectStyle}
+                >
+                  {Object.entries(FAMILY_ROLE_LABEL).map(([value, label]) => (
                     <option key={value} value={value} style={{ color: '#1a1305', background: '#ffffff' }}>
                       {label}
                     </option>
                   ))}
-              </select>
-              <SelectChevron />
-            </div>
+                </select>
+                <SelectChevron />
+              </div>
+              {!inCompletion && selectedRole !== familyRole && (isProtectedRole || selectedRole === 'kepala_keluarga' || selectedRole === 'ibu_rumah_tangga') ? (
+                <span style={{ ...hintStyle, color: '#b3392f' }}>
+                  {selectedRole === 'ibu_rumah_tangga'
+                    ? 'Perubahan ke Ibu Rumah Tangga akan dikirim ke Kepala Keluarga rumahmu (atau Pengurus) untuk dikonfirmasi.'
+                    : 'Perubahan peran ini akan dikirim ke Pengurus Paguyuban untuk disetujui.'}
+                </span>
+              ) : null}
+            </>
           )}
         </div>
 

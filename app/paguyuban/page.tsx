@@ -76,6 +76,13 @@ export default async function PaguyubanDashboardPage() {
     .eq('role', 'warga')
     .eq('account_status', 'menunggu_verifikasi')
 
+  const periodeIni = hariIni.slice(0, 7)
+  const { count: belumBayarIuran } = await supabase
+    .from('iuran_payment_status')
+    .select('id', { count: 'exact', head: true })
+    .eq('period', periodeIni)
+    .neq('status', 'lunas')
+
   const recentTx = allTx.slice(0, 6)
 
   return (
@@ -115,6 +122,13 @@ export default async function PaguyubanDashboardPage() {
           caption="Diaktifkan warga"
           iconBg="#e6c98a"
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
+        />
+        <StatCard
+          label="Belum Bayar Iuran"
+          value={belumBayarIuran ?? 0}
+          caption="Bulan ini"
+          iconBg="#f2b8b0"
+          iconPath="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
         />
         <StatCard
           label="Menunggu Verifikasi"

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
 import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
 import LiveClock from '@/components/LiveClock'
+import RealtimeRefresher from '@/components/RealtimeRefresher'
 
 export type AdminNavItem = { title: string; href: string }
 
@@ -95,6 +96,7 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen w-full" style={{ background: '#f2f1ec' }}>
       <EmergencyAlertWatcher />
+      <RealtimeRefresher />
       <aside
         className="hidden w-64 flex-shrink-0 flex-col md:flex"
         style={{ background: '#0a0b0f', borderRight: '1px solid rgba(230,201,138,0.12)' }}

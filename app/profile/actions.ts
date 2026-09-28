@@ -13,6 +13,12 @@ export type UpdateProfileState = {
 const FAMILY_ROLES = ['kepala_keluarga', 'ibu_rumah_tangga', 'anggota_keluarga', 'asisten_rumah_tangga', 'lainnya']
 // Peran yang membuka akses khusus rumah (mis. Keuangan Rumah Tangga): hanya lewat Pengurus setelah terverifikasi
 const PROTECTED_FAMILY_ROLES = ['kepala_keluarga', 'ibu_rumah_tangga']
+
+const REQUEST_LABEL: Record<string, string> = {
+  full_name: 'Nama Lengkap',
+  occupancy_status: 'Status Hunian',
+  family_role: 'Peran Keluarga',
+}
 const OCCUPANCY = ['pemilik', 'penyewa', 'sementara']
 
 // Aturan (keputusan 27 Sep 2026):
@@ -57,16 +63,18 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     bio: bio || null,
   }
 
+  const requests: { field: 'full_name' | 'occupancy_status' | 'family_role'; old_value: string | null; new_value: string }[] = []
+
   if (familyRole && familyRole !== current.family_role) {
     if (!FAMILY_ROLES.includes(familyRole)) return { error: 'Peran keluarga tidak valid.', success: false }
     const touchesProtected = PROTECTED_FAMILY_ROLES.includes(familyRole) || PROTECTED_FAMILY_ROLES.includes(current.family_role ?? '')
     if (touchesProtected && !inCompletion) {
-      return { error: 'Status Kepala Keluarga / Ibu Rumah Tangga hanya bisa diubah dengan persetujuan Pengurus.', success: false }
+      // Jadi Ibu Rumah Tangga -> dikonfirmasi Kepala Keluarga (atau Pengurus); peran Kepala Keluarga -> Pengurus
+      requests.push({ field: 'family_role', old_value: current.family_role ?? null, new_value: familyRole })
+    } else {
+      update.family_role = familyRole
     }
-    update.family_role = familyRole
   }
-
-  const requests: { field: 'full_name' | 'occupancy_status'; old_value: string | null; new_value: string }[] = []
 
   if (inCompletion) {
     if (!/^\d{16}$/.test(nik)) return { error: 'NIK harus terdiri dari 16 digit angka.', success: false }
@@ -105,7 +113,7 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     if (requestError) {
       if ((requestError as { code?: string }).code === '23505') {
         return {
-          error: `Masih ada pengajuan perubahan ${r.field === 'full_name' ? 'Nama Lengkap' : 'Status Hunian'} yang menunggu. Batalkan dulu kalau ingin mengganti.`,
+          error: `Masih ada pengajuan perubahan ${REQUEST_LABEL[r.field]} yang menunggu. Batalkan dulu kalau ingin mengganti.`,
           success: false,
         }
       }
@@ -121,7 +129,11 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     success: true,
     message:
       requests.length > 0
-        ? 'Profil tersimpan. Perubahan Nama Lengkap / Status Hunian dikirim ke Pengurus untuk disetujui.'
+        ? `Profil tersimpan. Pengajuan ${requests.map((r) => REQUEST_LABEL[r.field]).join(' & ')} sudah dikirim${
+            requests.some((r) => r.field === 'family_role' && r.new_value === 'ibu_rumah_tangga')
+              ? ' (peran Ibu Rumah Tangga dikonfirmasi Kepala Keluarga rumahmu atau Pengurus)'
+              : ' ke Pengurus untuk disetujui'
+          }.`
         : 'Profil berhasil diperbarui.',
   }
 }
