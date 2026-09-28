@@ -82,7 +82,8 @@ export default function RealtimeRefresher() {
     }
 
     let ownChannel: ReturnType<typeof supabase.channel> | null = null
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getSession().then(({ data: sessionData }) => {
+      const data = { user: sessionData.session?.user ?? null }
       if (cancelled || !data.user) return
       channel.subscribe()
       // Perubahan pada akun sendiri (mis. baru diverifikasi Pengurus) langsung membuka fitur.

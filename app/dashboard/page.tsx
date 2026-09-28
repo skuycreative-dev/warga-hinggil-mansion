@@ -167,8 +167,46 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     redirect('/lengkapi-profil')
   }
 
+  // Semua data Beranda diambil BERSAMAAN (bukan satu per satu) supaya halaman cepat terbuka
+  const sejak24Jam = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const kepala = profile?.family_role === 'kepala_keluarga' && !!profile?.house_id
+  const [{ data: featureRows }, { data: pollsRaw }, { data: announcements }, { data: daruratRaw }, { data: familyRequestsRaw }, { data: roleRequestsRaw }] =
+    await Promise.all([
+      supabase.from('app_features').select('key, enabled'),
+      supabase.from('polls').select('id, title, closes_at').eq('is_active', true).order('created_at', { ascending: false }).limit(5),
+      supabase
+        .from('announcements')
+        .select('id, title, created_at, is_pinned')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(3),
+      supabase
+        .from('emergency_alerts')
+        .select('id, emergency_type, status, created_at, house:houses(nomor_rumah), reporter:reporter_id(full_name, nickname)')
+        .in('status', ['aktif', 'ditangani'])
+        .gte('created_at', sejak24Jam)
+        .order('created_at', { ascending: false })
+        .limit(3),
+      kepala
+        ? supabase
+            .from('profiles')
+            .select('id, full_name, nickname, family_role, created_at')
+            .eq('house_id', profile!.house_id)
+            .eq('family_status', 'menunggu_kepala')
+            .order('created_at', { ascending: true })
+        : Promise.resolve({ data: [] as any[] }),
+      kepala
+        ? supabase
+            .from('profile_change_requests')
+            .select('id, created_at, requester:profiles!profile_change_requests_user_id_fkey(full_name, nickname)')
+            .eq('field', 'family_role')
+            .eq('new_value', 'ibu_rumah_tangga')
+            .eq('status', 'menunggu')
+            .order('created_at', { ascending: true })
+        : Promise.resolve({ data: [] as any[] }),
+    ])
+
   // Fitur yang dinonaktifkan Superadmin tetap tampil, tapi terkunci (Superadmin tetap bisa membuka)
-  const { data: featureRows } = await supabase.from('app_features').select('key, enabled')
   const disabledFeatures = disabledSet(featureRows)
   const viewerIsSuperadmin = profile?.role === 'superadmin'
   const isOff = (key: FeatureKey | null) => !!key && disabledFeatures.has(key) && !viewerIsSuperadmin
@@ -176,34 +214,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     key && disabledFeatures.has(key) && !viewerIsSuperadmin ? 'disabled' : pendingLock ? 'pending' : 'open'
 
   // Polling aktif ditampilkan di dashboard (kebutuhan #10)
-  const { data: pollsRaw } = await supabase
-    .from('polls')
-    .select('id, title, closes_at')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(5)
-  const openPolls = (pollsRaw ?? []).filter((p) => !p.closes_at || new Date(p.closes_at).getTime() > Date.now()).slice(0, 2)
+  const openPolls = (pollsRaw ?? []).filter((p: any) => !p.closes_at || new Date(p.closes_at).getTime() > Date.now()).slice(0, 2)
   const { data: myVotes } =
     openPolls.length > 0
-      ? await supabase.from('poll_votes').select('poll_id').eq('voter_id', user.id).in('poll_id', openPolls.map((p) => p.id))
+      ? await supabase.from('poll_votes').select('poll_id').eq('voter_id', user.id).in('poll_id', openPolls.map((p: any) => p.id))
       : { data: [] as { poll_id: string }[] }
-  const votedPollIds = new Set((myVotes ?? []).map((v) => v.poll_id))
-
-  const { data: announcements } = await supabase
-    .from('announcements')
-    .select('id, title, created_at, is_pinned')
-    .order('is_pinned', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(3)
-
-  const sejak24Jam = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  const { data: daruratRaw } = await supabase
-    .from('emergency_alerts')
-    .select('id, emergency_type, status, created_at, house:houses(nomor_rumah), reporter:reporter_id(full_name, nickname)')
-    .in('status', ['aktif', 'ditangani'])
-    .gte('created_at', sejak24Jam)
-    .order('created_at', { ascending: false })
-    .limit(3)
+  const votedPollIds = new Set((myVotes ?? []).map((v: any) => v.poll_id))
 
   const daruratAktif = (daruratRaw ?? []).map((a: any) => ({
     ...a,
@@ -232,14 +248,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   // Kepala Keluarga: daftar orang yang memilih rumahnya saat mendaftar (verifikasi tahap 1)
   const isKepalaKeluarga = profile?.family_role === 'kepala_keluarga' && !!profile?.house_id
-  const { data: familyRequestsRaw } = isKepalaKeluarga
-    ? await supabase
-        .from('profiles')
-        .select('id, full_name, nickname, family_role, created_at')
-        .eq('house_id', profile!.house_id)
-        .eq('family_status', 'menunggu_kepala')
-        .order('created_at', { ascending: true })
-    : { data: [] as any[] }
   const familyRequests = (familyRequestsRaw ?? []).map((r: any) => ({
     id: r.id as string,
     name: nameOf(r),
@@ -249,15 +257,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const familyStatus = profile?.family_status ?? null
 
   // Kepala Keluarga: penghuni rumahnya yang mengajukan jadi Ibu Rumah Tangga lewat Edit Profil
-  const { data: roleRequestsRaw } = isKepalaKeluarga
-    ? await supabase
-        .from('profile_change_requests')
-        .select('id, created_at, requester:profiles!profile_change_requests_user_id_fkey(full_name, nickname)')
-        .eq('field', 'family_role')
-        .eq('new_value', 'ibu_rumah_tangga')
-        .eq('status', 'menunggu')
-        .order('created_at', { ascending: true })
-    : { data: [] as any[] }
   const roleRequests = (roleRequestsRaw ?? []).map((r: any) => ({
     id: r.id as string,
     name: nameOf(Array.isArray(r.requester) ? r.requester[0] : r.requester),

@@ -136,7 +136,8 @@ export default function EmergencyAlertWatcher() {
         if (id) loadAlerts(id)
       })
 
-    supabase.auth.getUser().then(async ({ data }) => {
+    supabase.auth.getSession().then(async ({ data: sessionData }) => {
+      const data = { user: sessionData.session?.user ?? null }
       if (cancelled || !data.user) return
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
       userRef.current = { id: data.user.id, responder: RESPONDER_ROLES.includes(profile?.role ?? '') }

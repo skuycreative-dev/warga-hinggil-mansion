@@ -129,7 +129,7 @@ async function notifyKepala(houseId: string, memberId: string, familyRole: strin
       type: 'keluarga',
       title: 'Permintaan bergabung ke rumah kamu',
       body: `${name} mendaftar sebagai ${FAMILY_ROLE_LABEL[familyRole] ?? 'penghuni'} di Rumah ${house?.nomor_rumah ?? '-'}. Konfirmasi di Beranda.`,
-      link: '/dashboard',
+      link: '/dashboard#permintaan-keluarga',
     }))
 
     if (rows.length > 0) {

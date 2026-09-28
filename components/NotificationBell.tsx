@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { initNotificationSound, isSoundEnabled, playNotificationSound, setSoundEnabled } from '@/lib/notification-sound'
 
@@ -15,7 +16,16 @@ type Notif = {
   created_at: string
 }
 
+// Notifikasi lama untuk Kepala Keluarga menunjuk ke /dashboard saja: arahkan langsung ke kotak konfirmasi
+function targetOf(n: Notif) {
+  const link = n.link && n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/dashboard'
+  if (link === '/dashboard' && /bergabung/i.test(n.title)) return '/dashboard#permintaan-keluarga'
+  return link
+}
+
 export default function NotificationBell() {
+  const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [notifs, setNotifs] = useState<Notif[]>([])
   const [unread, setUnread] = useState(0)
@@ -23,9 +33,11 @@ export default function NotificationBell() {
 
   async function load() {
     const supabase = createClient()
+    // Sesi dibaca dari HP (tanpa bertanya ke server); data tetap dijaga aturan database
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return
 
     const { data } = await supabase
@@ -50,11 +62,14 @@ export default function NotificationBell() {
     let cancelled = false
     let channel: ReturnType<typeof supabase.channel> | null = null
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (cancelled || !data.user) return
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user?.id
+      if (cancelled || !uid) return
       channel = supabase
-        .channel(`notifikasi-${data.user.id}-${Math.random().toString(36).slice(2)}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` }, (payload) => {
+        .channel(`notifikasi-${uid}-${Math.random().toString(36).slice(2)}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${uid}` }, (payload) => {
+          // Perubahan kecil (tanda dibaca, status kirim ke HP) tidak perlu memuat ulang daftar
+          if (payload.eventType === 'UPDATE') return
           // Notifikasi baru: bunyi "ding-dong" 2 ketukan (sekali saja walau ada 2 lonceng di halaman)
           if (payload.eventType === 'INSERT') playNotificationSound(String((payload.new as { id?: string })?.id ?? Date.now()))
           load()
@@ -81,13 +96,35 @@ export default function NotificationBell() {
   async function markAllRead() {
     const supabase = createClient()
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) return
 
     await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false)
     setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })))
     setUnread(0)
+  }
+
+  // Klik notifikasi: tutup daftar, tandai dibaca, lalu buka halamannya.
+  // Kalau halamannya sama dengan yang sedang dibuka, halaman dimuat ulang dan digulir ke bagian yang dituju.
+  function openNotif(n: Notif) {
+    setOpen(false)
+    if (!n.is_read) void markOneRead(n.id)
+    const target = targetOf(n)
+    const url = new URL(target, window.location.origin)
+    if (url.pathname === pathname) {
+      router.refresh()
+      if (url.hash) {
+        const id = decodeURIComponent(url.hash.slice(1))
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash)
+        setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350)
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+      return
+    }
+    router.push(target)
   }
 
   async function markOneRead(id: string) {
@@ -143,7 +180,7 @@ export default function NotificationBell() {
               position: 'absolute',
               right: 0,
               top: 32,
-              width: 320,
+              width: 'min(320px, calc(100vw - 24px))',
               maxHeight: 400,
               overflowY: 'auto',
               background: '#ffffff',
@@ -185,11 +222,11 @@ export default function NotificationBell() {
               </p>
             ) : (
               notifs.map((n) => (
-                <Link
+                <button
                   key={n.id}
-                  href={n.link ?? '#'}
-                  onClick={() => markOneRead(n.id)}
-                  className="block px-4 py-3"
+                  type="button"
+                  onClick={() => openNotif(n)}
+                  className="block w-full px-4 py-3 text-left"
                   style={{
                     borderBottom: '1px solid rgba(26,19,5,0.05)',
                     background: n.is_read ? 'transparent' : 'rgba(212,175,106,0.06)',
@@ -199,7 +236,7 @@ export default function NotificationBell() {
                   {n.body ? (
                     <div className="mt-0.5 text-[11.5px] font-medium" style={{ color: '#5b543f' }}>{n.body}</div>
                   ) : null}
-                </Link>
+                </button>
               ))
             )}
             <Link

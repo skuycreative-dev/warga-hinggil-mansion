@@ -65,10 +65,17 @@ export async function getMyAccess(opts: { allowPending2fa?: boolean } = {}): Pro
   const staffPosition = profile?.staff_position ?? null
 
   if (!opts.allowPending2fa && roleNeeds2fa(role)) {
-    const hasFactor = (user.factors ?? []).some((f) => f.status === 'verified')
-    if (!hasFactor) redirect('/keamanan-akun?wajib=1')
+    // Jalur cepat: sudah memasukkan kode 2FA (dibaca dari token login, tanpa bertanya ke server)
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    if (aal?.currentLevel !== 'aal2') redirect('/login/2fa')
+    if (aal?.currentLevel !== 'aal2') {
+      // Belum aal2: pastikan ke server apakah akun ini sudah punya perangkat 2FA
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const { data: fresh } = session?.access_token ? await supabase.auth.getUser(session.access_token) : { data: { user: null } }
+      const hasFactor = (fresh.user?.factors ?? []).some((f) => f.status === 'verified')
+      redirect(hasFactor ? '/login/2fa' : '/keamanan-akun?wajib=1')
+    }
   }
 
   const isSuperadmin = role === 'superadmin'

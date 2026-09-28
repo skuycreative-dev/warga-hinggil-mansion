@@ -56,6 +56,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    // Halaman yang baru dibuka disimpan sebentar di HP: kembali ke halaman itu dalam 30 detik terasa instan.
+    // Data tetap segar karena ada pembaruan real-time & setiap simpan data memuat ulang halaman terkait.
+    staleTimes: { dynamic: 30, static: 300 },
   },
   async headers() {
     return [

@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -105,20 +105,35 @@ export default function AppNavbar() {
   const [disabledFeatures, setDisabledFeatures] = useState<Set<string>>(new Set())
   const [lockedTitle, setLockedTitle] = useState<string | null>(null)
   const pathname = usePathname()
+  const loadedUid = useRef<string | null | undefined>(undefined)
+  const reloadMenu = useRef<(() => void) | null>(null)
 
+  // Data menu dimuat SEKALI saat aplikasi dibuka (bukan setiap pindah halaman), lalu diperbarui
+  // kalau status login berubah atau aplikasi dibuka lagi setelah lebih dari 5 menit.
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data }) => {
-      setLoggedIn(!!data.user)
-      if (data.user) {
+    let lastLoad = 0
+    let alive = true
+
+    async function loadMenu() {
+      lastLoad = Date.now()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const uid = session?.user?.id
+      if (!alive) return
+      loadedUid.current = uid ?? null
+      setLoggedIn(!!uid)
+      if (uid) {
         const [{ data: profile }, { data: features }] = await Promise.all([
           supabase
             .from('profiles')
             .select('role, staff_position, family_role, family_status, account_status')
-            .eq('id', data.user.id)
+            .eq('id', uid)
             .maybeSingle(),
           supabase.from('app_features').select('key, enabled'),
         ])
+        if (!alive) return
         setIsHouseholdManager(
           profile?.role === 'warga' &&
             profile?.account_status === 'aktif' &&
@@ -132,11 +147,35 @@ export default function AppNavbar() {
           r === 'superadmin' ? new Set() : new Set((features ?? []).filter((f) => f.enabled === false).map((f) => f.key as string))
         )
       }
-    })
-  }, [pathname])
+    }
 
+    loadMenu()
+    reloadMenu.current = loadMenu
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') loadMenu()
+    })
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastLoad > 5 * 60 * 1000) loadMenu()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      alive = false
+      sub.subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [])
+
+  // Pindah halaman: cukup cek sesi di HP (tanpa internet). Menu dimuat ulang hanya kalau akun berganti
+  // (mis. baru login / keluar lewat halaman server).
   useEffect(() => {
     setSidebarOpen(false)
+    if (loadedUid.current === undefined) return
+    createClient()
+      .auth.getSession()
+      .then(({ data }) => {
+        const uid = data.session?.user?.id ?? null
+        if (uid !== loadedUid.current) reloadMenu.current?.()
+      })
   }, [pathname])
 
   if (!loggedIn) return null

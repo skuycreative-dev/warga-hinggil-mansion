@@ -28,9 +28,17 @@ export async function updateSession(request: NextRequest) {
   // PENTING: jangan taruh logika apa pun di antara createServerClient dan
   // supabase.auth.getUser() di bawah ini. Kesalahan kecil di sini bisa
   // menyebabkan user tiba-tiba ter-logout secara acak dan sulit dilacak.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Prefetch (Next.js memuat duluan menu yang terlihat di layar) tidak perlu pengecekan lengkap:
+  // halaman aslinya tetap dicek penuh saat benar-benar dibuka. Ini menghemat banyak panggilan ke database.
+  if (request.headers.get('next-router-prefetch') === '1' || request.headers.get('purpose') === 'prefetch') {
+    return supabaseResponse
+  }
+
+  // getClaims: identitas diverifikasi dari tanda tangan token (cepat, tanpa bertanya ke server Auth
+  // di setiap pindah halaman). Proyek dengan kunci lama otomatis kembali ke pengecekan server.
+  const { data: claimData } = await supabase.auth.getClaims()
+  const claims = claimData?.claims as { sub?: string; aal?: string } | undefined
+  const user = claims?.sub ? { id: claims.sub } : null
 
   // ---------------------------------------------------------------------
   // Penjaga halaman terpusat (sebelumnya hanya dicek di masing-masing halaman).
@@ -64,16 +72,25 @@ export async function updateSession(request: NextRequest) {
   const isOpen = (list: string[]) => list.some((p) => path === p || path.startsWith(p + '/'))
   if (user && !isOpen(MFA_ALWAYS_OPEN)) {
     let mfaTarget: string | null = null
-    const hasFactor = (user.factors ?? []).some((f) => f.status === 'verified')
-    if (hasFactor) {
+    // Sudah memasukkan kode 2FA -> lewat. Kalau belum, cek (dari sesi login) apakah akun punya perangkat 2FA.
+    const { data: aal } = claims?.aal === 'aal2' ? { data: null } : await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    const hasFactor = aal?.nextLevel === 'aal2'
+    if (claims?.aal === 'aal2') {
+      // aman
+    } else if (hasFactor) {
       // Punya 2FA tapi belum memasukkan kode: semua halaman (termasuk Keamanan Akun) ditutup
-      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-      if (aal?.currentLevel !== 'aal2') {
-        mfaTarget = `/login/2fa?next=${encodeURIComponent(path + request.nextUrl.search)}`
-      }
+      mfaTarget = `/login/2fa?next=${encodeURIComponent(path + request.nextUrl.search)}`
     } else if (!isOpen(MFA_OPEN_PATHS)) {
       const me = await loadProfile()
-      if (roleNeeds2fa(me?.role)) mfaTarget = '/keamanan-akun?wajib=1'
+      if (roleNeeds2fa(me?.role)) {
+        // Admin tanpa kode 2FA: pastikan ke server apakah sudah punya perangkat (jarang terjadi, hanya admin)
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        const { data: fresh } = session?.access_token ? await supabase.auth.getUser(session.access_token) : { data: { user: null } }
+        const serverHasFactor = (fresh.user?.factors ?? []).some((f) => f.status === 'verified')
+        mfaTarget = serverHasFactor ? `/login/2fa?next=${encodeURIComponent(path + request.nextUrl.search)}` : '/keamanan-akun?wajib=1'
+      }
     }
 
     if (mfaTarget) {

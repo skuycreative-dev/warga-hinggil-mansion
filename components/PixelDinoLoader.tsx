@@ -14,6 +14,8 @@ export default function PixelDinoLoader({ label = 'Memuat halaman' }: { label?: 
         alignItems: 'center',
         justifyContent: 'center',
         background: 'rgba(10,11,15,0.9)',
+        // Muncul hanya kalau memuat lebih dari 0,3 detik (pindah halaman cepat tidak berkedip gelap)
+        animation: 'hmFadeIn 0.2s ease-out 0.3s both',
       }}
     >
       <div className="hm-dino-wrap" aria-hidden>
@@ -37,6 +39,7 @@ export default function PixelDinoLoader({ label = 'Memuat halaman' }: { label?: 
           background-size: 28px 4px;
           animation: hmGround 0.5s linear infinite;
         }
+        @keyframes hmFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes hmBob { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
         @keyframes hmLegA { 0% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes hmLegB { 0% { opacity: 0; } 50% { opacity: 1; } }

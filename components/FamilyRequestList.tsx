@@ -48,7 +48,7 @@ export default function FamilyRequestList({
   }
 
   return (
-    <div className="mb-6 rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
+    <div id="permintaan-keluarga" className="mb-6 scroll-mt-24 rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
       <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
         Permintaan Bergabung ke Rumah {houseLabel ?? ''} ({requests.length})
       </div>
