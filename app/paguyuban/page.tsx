@@ -83,6 +83,12 @@ export default async function PaguyubanDashboardPage() {
     .eq('period', periodeIni)
     .neq('status', 'lunas')
 
+  // Setoran IPL dari Manajemen yang menunggu konfirmasi Ketua / Bendahara (Step 316)
+  const { count: setoranIplMenunggu } = await supabase
+    .from('ipl_disbursements')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'dikirim')
+
   const recentTx = allTx.slice(0, 6)
 
   return (
@@ -124,11 +130,19 @@ export default async function PaguyubanDashboardPage() {
           iconPath="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"
         />
         <StatCard
-          label="Belum Bayar Iuran"
+          label="Belum Bayar IPL"
           value={belumBayarIuran ?? 0}
-          caption="Bulan ini"
+          caption="Bulan ini (data Manajemen)"
           iconBg="#f2b8b0"
           iconPath="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+        />
+        <StatCard
+          label="Setoran IPL"
+          value={setoranIplMenunggu ?? 0}
+          badge={setoranIplMenunggu ? 'KONFIRMASI' : undefined}
+          caption="Menunggu konfirmasi di menu Iuran IPL"
+          iconBg="#e6c98a"
+          iconPath="M12 19V5M5 12l7-7 7 7"
         />
         <StatCard
           label="Menunggu Verifikasi"

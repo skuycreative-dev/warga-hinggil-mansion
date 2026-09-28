@@ -9,6 +9,7 @@ const ALLOWED_ROLES = ['manajemen', 'superadmin']
 
 const NAV_ITEMS = [
   { title: 'Dashboard', href: '/manajemen' },
+  { title: 'Iuran IPL', href: '/iuran-ipl' },
   { title: 'Kelola Katalog Tukang', href: '/tukang/kelola' },
   { title: 'Pengumuman', href: '/pengumuman' },
 ]
@@ -58,6 +59,13 @@ export default async function ManajemenDashboardPage() {
     creator: Array.isArray(c.creator) ? c.creator[0] : c.creator,
   }))
 
+  // Iuran IPL dibayar ke Manajemen (Step 316)
+  const periodeIni = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()).slice(0, 7)
+  const [{ count: belumBayarIpl }, { count: setoranMenunggu }] = await Promise.all([
+    supabase.from('iuran_payment_status').select('id', { count: 'exact', head: true }).eq('period', periodeIni).neq('status', 'lunas'),
+    supabase.from('ipl_disbursements').select('id', { count: 'exact', head: true }).eq('status', 'dikirim'),
+  ])
+
   const pengaduanBaru = complaints.filter((c) => c.status === 'diterima').length
   const pengaduanDiproses = complaints.filter((c) => c.status === 'diproses').length
 
@@ -69,7 +77,7 @@ export default async function ManajemenDashboardPage() {
           Dashboard Manajemen
         </h1>
         <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
-          Fokus: pengaduan warga, katalog tukang, pengumuman.
+          Fokus: pengaduan warga, Iuran IPL, katalog tukang, pengumuman.
         </p>
       </div>
 
@@ -101,6 +109,21 @@ export default async function ManajemenDashboardPage() {
           iconPath="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
         />
       </div>
+
+      <Link
+        href="/iuran-ipl"
+        className="mb-7 flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition hover:-translate-y-0.5"
+        style={{ background: '#1a1305' }}
+      >
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Iuran IPL bulan ini</div>
+          <div className="mt-1 text-lg font-bold" style={{ color: '#e6c98a' }}>{belumBayarIpl ?? 0} rumah belum lunas</div>
+          <div className="text-[12px] font-medium" style={{ color: '#d8cfb8' }}>
+            {setoranMenunggu ? `${setoranMenunggu} setoran menunggu konfirmasi Paguyuban · ` : ''}Kelola tagihan, denda, bukti bayar
+          </div>
+        </div>
+        <span className="text-sm font-bold" style={{ color: '#e6c98a' }}>Buka →</span>
+      </Link>
 
       <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
         Pengaduan Terbaru

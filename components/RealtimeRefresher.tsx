@@ -28,6 +28,13 @@ const TABLES = [
   'profile_statuses',
   'tukang_catalog',
   'app_features',
+  'ipl_disbursements',
+  'ipl_house_rates',
+  'ipl_settings',
+  'household_accounts',
+  'household_debts',
+  'household_goals',
+  'household_goal_entries',
 ]
 
 export default function RealtimeRefresher() {

@@ -23,6 +23,9 @@ export type MyAccess = {
   canCreateItSupport: boolean
   canManageFinance: boolean
   canViewFinance: boolean
+  canManageIpl: boolean
+  canViewIpl: boolean
+  canConfirmIplDisbursement: boolean
   roleLabel: string
 }
 
@@ -83,6 +86,17 @@ export async function getMyAccess(): Promise<MyAccess> {
     // Kebutuhan #6: laporan keuangan untuk warga (terverifikasi) dan pengurus Paguyuban
     canViewFinance:
       isSuperadmin || isKetuaPaguyuban || role === 'staff_paguyuban' || (role === 'warga' && (profile?.account_status ?? '') === 'aktif'),
+    // IPL dibayar warga ke Manajemen (keputusan 28 Sep 2026): tagihan, status, denda, bukti -> Admin Manajemen (+ Superadmin)
+    canManageIpl: isSuperadmin || role === 'manajemen',
+    // Yang boleh melihat halaman Iuran IPL: warga terverifikasi (rumahnya sendiri), pengurus Paguyuban, Manajemen
+    canViewIpl:
+      isSuperadmin ||
+      role === 'manajemen' ||
+      isKetuaPaguyuban ||
+      role === 'staff_paguyuban' ||
+      (role === 'warga' && (profile?.account_status ?? '') === 'aktif'),
+    // Setoran IPL dari Manajemen masuk kas Paguyuban setelah dikonfirmasi Ketua / Bendahara
+    canConfirmIplDisbursement: isSuperadmin || isKetuaPaguyuban || isBendahara,
     roleLabel,
   }
 }

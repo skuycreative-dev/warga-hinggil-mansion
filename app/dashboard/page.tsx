@@ -249,6 +249,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     isHouseholdMember &&
     (profile?.family_role === 'kepala_keluarga' || (profile?.family_role === 'ibu_rumah_tangga' && familyStatus === 'dikonfirmasi'))
 
+  // Pengingat jatuh tempo cicilan (Keuangan Rumah Tangga) dikirim saat Kepala / Ibu RT membuka Beranda.
+  // Database mencegah notifikasi dobel; kalau jadwal harian (pg_cron) aktif, ini hanya cadangan.
+  if (isHouseholdManager && !disabledFeatures.has('keuangan_rumah')) {
+    await supabase.rpc('refresh_my_debt_reminders')
+  }
+
   return (
     <main className="flex w-full flex-col">
       <section

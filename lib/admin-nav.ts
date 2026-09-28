@@ -10,6 +10,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Kelola Fitur', href: '/superadmin/fitur' },
+      { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Dashboard Paguyuban', href: '/paguyuban' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
@@ -35,12 +36,14 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
     return [
       { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
+      { title: 'Iuran IPL', href: '/iuran-ipl' },
     ]
   }
 
   if (access.role === 'manajemen') {
     return [
       { title: 'Dashboard', href: '/manajemen' },
+      { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Katalog Tukang', href: '/tukang/kelola' },
       { title: 'Pengumuman', href: '/pengumuman' },
     ]

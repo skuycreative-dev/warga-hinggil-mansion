@@ -9,10 +9,14 @@ import {
   type HouseholdTxState,
   type HouseholdTxInput,
 } from '@/app/keuangan-rumah/actions'
+import type { HhAccount } from '@/lib/household-finance'
 
 export type HouseholdTx = {
   id: string
-  type: 'pemasukan' | 'pengeluaran'
+  type: 'pemasukan' | 'pengeluaran' | 'transfer'
+  account_id: string | null
+  to_account_id: string | null
+  debt_id: string | null
   category: string
   amount: number
   description: string | null
@@ -64,23 +68,44 @@ function formatAmountInput(raw: string) {
   return digits ? Number(digits).toLocaleString('id-ID') : ''
 }
 
-export default function HouseholdFinance({ transactions, houseLabel }: { transactions: HouseholdTx[]; houseLabel: string | null }) {
+type TxType = 'pemasukan' | 'pengeluaran' | 'transfer'
+
+const TYPE_LABEL: Record<TxType, string> = { pengeluaran: 'Pengeluaran', pemasukan: 'Pemasukan', transfer: 'Transfer' }
+const TYPE_COLOR: Record<TxType, string> = { pengeluaran: '#b3392f', pemasukan: '#2f6b4f', transfer: '#3b5b8a' }
+
+export default function HouseholdFinance({
+  transactions,
+  houseLabel,
+  accounts,
+  totalBalance,
+}: {
+  transactions: HouseholdTx[]
+  houseLabel: string | null
+  accounts: HhAccount[]
+  totalBalance: number
+}) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isSaving] = useActionState(addHouseholdTransaction, initialState)
   const [isPending, startTransition] = useTransition()
-  const [newType, setNewType] = useState<'pemasukan' | 'pengeluaran'>('pengeluaran')
+  const [newType, setNewType] = useState<TxType>('pengeluaran')
   const [newAmount, setNewAmount] = useState('')
   const [selectedMonth, setSelectedMonth] = useState(monthKey(todayWib()))
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [draft, setDraft] = useState<HouseholdTxInput & { amountText: string }>({
+  const [draft, setDraft] = useState<HouseholdTxInput & { amountText: string; locked: boolean }>({
     type: 'pengeluaran',
     category: '',
     amount: 0,
     amountText: '',
     description: '',
     transactionDate: todayWib(),
+    accountId: '',
+    toAccountId: '',
+    locked: false,
   })
+
+  const activeAccounts = accounts.filter((a) => !a.is_archived)
+  const accountName = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
   const [rowError, setRowError] = useState('')
 
   useEffect(() => {
@@ -94,8 +119,8 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
   const totals = useMemo(() => {
     const masuk = transactions.filter((t) => t.type === 'pemasukan').reduce((s, t) => s + Number(t.amount), 0)
     const keluar = transactions.filter((t) => t.type === 'pengeluaran').reduce((s, t) => s + Number(t.amount), 0)
-    return { masuk, keluar, saldo: masuk - keluar }
-  }, [transactions])
+    return { masuk, keluar, saldo: totalBalance }
+  }, [transactions, totalBalance])
 
   const months = useMemo(() => {
     const keys = new Set<string>([monthKey(todayWib())])
@@ -127,6 +152,9 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
       amountText: Number(t.amount).toLocaleString('id-ID'),
       description: t.description ?? '',
       transactionDate: t.transaction_date,
+      accountId: t.account_id ?? '',
+      toAccountId: t.to_account_id ?? '',
+      locked: !!t.debt_id || t.type === 'transfer',
     })
   }
 
@@ -138,6 +166,8 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
         amount: Number(draft.amountText.replace(/[^0-9]/g, '')),
         description: draft.description,
         transactionDate: draft.transactionDate,
+        accountId: draft.accountId,
+        toAccountId: draft.toAccountId,
       })
       if (result.error) {
         setRowError(result.error)
@@ -149,7 +179,8 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
   }
 
   function remove(t: HouseholdTx) {
-    if (!confirm(`Hapus ${t.category} ${rupiah(Number(t.amount))}?`)) return
+    const extra = t.debt_id ? ' Pembayaran hutang/piutang ini juga akan dibatalkan.' : ''
+    if (!confirm(`Hapus ${t.category} ${rupiah(Number(t.amount))}?${extra}`)) return
     startTransition(async () => {
       const result = await deleteHouseholdTransaction(t.id)
       if (result.error) alert(result.error)
@@ -161,7 +192,7 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
     <div className="flex flex-col gap-7">
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
-          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Saldo Rumah {houseLabel ?? ''}</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Total Saldo Rumah {houseLabel ?? ''}</div>
           <div className="mt-1 text-xl font-bold" style={{ color: totals.saldo >= 0 ? '#e6c98a' : '#f2b8b0' }}>{rupiah(totals.saldo)}</div>
         </div>
         <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
@@ -181,14 +212,14 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
         style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
       >
         <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Catat Transaksi</div>
-        <div className="grid grid-cols-2 gap-2">
-          {(['pengeluaran', 'pemasukan'] as const).map((type) => (
+        <div className="grid grid-cols-3 gap-2">
+          {(['pengeluaran', 'pemasukan', 'transfer'] as const).map((type) => (
             <label
               key={type}
               className="cursor-pointer rounded-xl py-2.5 text-center text-[13px] font-bold"
               style={
                 newType === type
-                  ? { background: type === 'pemasukan' ? '#2f6b4f' : '#b3392f', color: '#ffffff' }
+                  ? { background: TYPE_COLOR[type], color: '#ffffff' }
                   : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }
               }
             >
@@ -200,10 +231,15 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
                 onChange={() => setNewType(type)}
                 className="sr-only"
               />
-              {type === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+              {TYPE_LABEL[type]}
             </label>
           ))}
         </div>
+        {newType === 'transfer' && activeAccounts.length < 2 ? (
+          <p className="rounded-xl px-3 py-2.5 text-[12px] font-semibold" style={{ background: '#faf7f0', color: '#7a5a1f' }}>
+            Transfer butuh minimal 2 rekening. Tambahkan rekening di tab Rekening &amp; Pos Tujuan.
+          </p>
+        ) : null}
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
             <label style={labelStyle}>Nominal (Rp)</label>
@@ -222,15 +258,40 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
             <input type="date" name="transaction_date" defaultValue={todayWib()} required style={inputStyle} />
           </div>
           <div className="flex flex-col gap-1">
-            <label style={labelStyle}>Kategori</label>
-            <input name="category" list={`kategori-${newType}`} required maxLength={40} placeholder="Pilih atau ketik" style={inputStyle} />
-            <datalist id={`kategori-${newType}`}>
-              {CATEGORY_SUGGESTIONS[newType].map((c) => (
-                <option key={c} value={c} />
+            <label style={labelStyle}>{newType === 'transfer' ? 'Dari rekening' : newType === 'pemasukan' ? 'Masuk ke rekening' : 'Dibayar dari rekening'}</label>
+            <select name="account_id" required={newType === 'transfer'} defaultValue="" key={`acc-${newType}`} style={inputStyle}>
+              <option value="">{newType === 'transfer' ? 'Pilih rekening' : 'Tanpa rekening'}</option>
+              {activeAccounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
               ))}
-            </datalist>
+            </select>
           </div>
-          <div className="flex flex-col gap-1">
+          {newType === 'transfer' ? (
+            <div className="flex flex-col gap-1">
+              <label style={labelStyle}>Ke rekening</label>
+              <select name="to_account_id" required defaultValue="" style={inputStyle}>
+                <option value="">Pilih rekening</option>
+                {activeAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <label style={labelStyle}>Kategori</label>
+              <input name="category" list={`kategori-${newType}`} required maxLength={40} placeholder="Pilih atau ketik" style={inputStyle} />
+              <datalist id={`kategori-${newType}`}>
+                {CATEGORY_SUGGESTIONS[newType].map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
+          )}
+          <div className="flex flex-col gap-1 sm:col-span-2">
             <label style={labelStyle}>Keterangan (opsional)</label>
             <input name="description" maxLength={200} style={inputStyle} />
           </div>
@@ -267,17 +328,46 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
             monthRows.map((t) =>
               editingId === t.id ? (
                 <div key={t.id} className="grid grid-cols-1 gap-2 rounded-2xl px-4 py-4 sm:grid-cols-2" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
-                  <select value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })} style={inputStyle}>
-                    <option value="pengeluaran">Pengeluaran</option>
-                    <option value="pemasukan">Pemasukan</option>
-                  </select>
+                  {draft.locked ? (
+                    <div className="flex items-center rounded-[10px] px-3 text-[12.5px] font-bold" style={{ background: '#faf7f0', color: TYPE_COLOR[draft.type as TxType] }}>
+                      {TYPE_LABEL[draft.type as TxType]}
+                      {t.debt_id ? ' · hutang/piutang' : ''}
+                    </div>
+                  ) : (
+                    <select value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })} style={inputStyle}>
+                      <option value="pengeluaran">Pengeluaran</option>
+                      <option value="pemasukan">Pemasukan</option>
+                    </select>
+                  )}
                   <input
                     value={draft.amountText}
                     inputMode="numeric"
                     onChange={(e) => setDraft({ ...draft, amountText: formatAmountInput(e.target.value) })}
                     style={inputStyle}
                   />
-                  <input value={draft.category} maxLength={40} onChange={(e) => setDraft({ ...draft, category: e.target.value })} style={inputStyle} />
+                  <select value={draft.accountId ?? ''} onChange={(e) => setDraft({ ...draft, accountId: e.target.value })} aria-label="Rekening" style={inputStyle}>
+                    {draft.type === 'transfer' ? null : <option value="">Tanpa rekening</option>}
+                    {accounts
+                      .filter((a) => !a.is_archived || a.id === draft.accountId)
+                      .map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {draft.type === 'transfer' ? `Dari: ${a.name}` : a.name}
+                        </option>
+                      ))}
+                  </select>
+                  {draft.type === 'transfer' ? (
+                    <select value={draft.toAccountId ?? ''} onChange={(e) => setDraft({ ...draft, toAccountId: e.target.value })} aria-label="Ke rekening" style={inputStyle}>
+                      {accounts
+                        .filter((a) => !a.is_archived || a.id === draft.toAccountId)
+                        .map((a) => (
+                          <option key={a.id} value={a.id}>
+                            Ke: {a.name}
+                          </option>
+                        ))}
+                    </select>
+                  ) : (
+                    <input value={draft.category} maxLength={40} onChange={(e) => setDraft({ ...draft, category: e.target.value })} style={inputStyle} />
+                  )}
                   <input type="date" value={draft.transactionDate} onChange={(e) => setDraft({ ...draft, transactionDate: e.target.value })} style={inputStyle} />
                   <input
                     value={draft.description}
@@ -309,16 +399,26 @@ export default function HouseholdFinance({ transactions, houseLabel }: { transac
               ) : (
                 <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
                   <div className="min-w-0">
-                    <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>{t.category}</div>
+                    <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>
+                      {t.type === 'transfer'
+                        ? `${accountName.get(t.account_id ?? '') ?? '?'} → ${accountName.get(t.to_account_id ?? '') ?? '?'}`
+                        : t.category}
+                      {t.debt_id ? (
+                        <span className="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(59,91,138,0.12)', color: '#3b5b8a' }}>
+                          {t.type === 'pengeluaran' ? 'cicilan' : 'piutang'}
+                        </span>
+                      ) : null}
+                    </div>
                     <div className="truncate text-[11.5px] font-medium" style={{ color: '#9c7a3f' }}>
                       {new Date(`${t.transaction_date}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                      {t.type !== 'transfer' && t.account_id ? ` · ${accountName.get(t.account_id) ?? ''}` : ''}
                       {t.description ? ` · ${t.description}` : ''}
                       {t.author_name ? ` · oleh ${t.author_name}` : ''}
                     </div>
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">
-                    <span className="text-[13.5px] font-bold" style={{ color: t.type === 'pemasukan' ? '#2f6b4f' : '#b3392f' }}>
-                      {t.type === 'pemasukan' ? '+' : '-'}
+                    <span className="text-[13.5px] font-bold" style={{ color: TYPE_COLOR[t.type] }}>
+                      {t.type === 'pemasukan' ? '+' : t.type === 'pengeluaran' ? '-' : '⇄ '}
                       {rupiah(Number(t.amount))}
                     </span>
                     <div className="flex gap-3">
