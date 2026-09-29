@@ -184,7 +184,7 @@ export default async function StatistikPage() {
           </div>
           <div className="mt-3 flex gap-2">
             <Link href="/verifikasi-akun" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>Verifikasi Akun</Link>
-            <Link href="/kelola-warga" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#efe9db', color: '#1f1a10' }}>Kelola Warga Pindah</Link>
+            <Link href="/kelola-warga" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#efe9db', color: '#1f1a10' }}>Kelola Warga</Link>
           </div>
         </section>
 

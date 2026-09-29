@@ -31,7 +31,7 @@ const SHORTCUTS = [
   { title: 'Iuran IPL', href: '/iuran-ipl' },
   { title: 'Anggaran Paguyuban', href: '/anggaran' },
   { title: 'Verifikasi Akun', href: '/verifikasi-akun' },
-  { title: 'Kelola Warga Pindah', href: '/kelola-warga' },
+  { title: 'Kelola Warga', href: '/kelola-warga' },
   { title: 'Statistik Warga', href: '/statistik' },
   { title: 'Kelola Admin', href: '/superadmin' },
   { title: 'Kelola Fitur', href: '/superadmin/fitur' },

@@ -5,6 +5,9 @@ import { privateFields } from '@/lib/private-fields'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { passwordProblem, siteOrigin } from '@/lib/security'
+
+type SimpleResult = { ok: boolean; error: string | null; message?: string }
 
 export type UpdateProfileState = {
   error: string
@@ -208,4 +211,71 @@ export async function clearMyStatus() {
   revalidatePath('/profile')
   revalidatePath('/warga')
   return { error: null }
+}
+
+// ---------------------------------------------------------------------
+// Ubah Email & Kata Sandi (Kebutuhan #1, 29 Sep 2026) -- sebelumnya tidak ada sama sekali di Edit
+// Profil, warga cuma bisa lewat Lupa Password (reset lewat link) kalau lupa. Password lama diminta dulu
+// (re-autentikasi) sebelum email/password diganti, supaya sesi yang dibajak tidak bisa ambil alih akun.
+// ---------------------------------------------------------------------
+
+async function reauth(supabase: Awaited<ReturnType<typeof createClient>>, currentPassword: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user?.email) return { ok: false as const, error: 'Sesi berakhir. Masuk lagi.' }
+
+  const { error } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword })
+  if (error) return { ok: false as const, error: 'Password saat ini salah.' }
+  return { ok: true as const, user }
+}
+
+export async function changeEmail(currentPassword: string, newEmail: string): Promise<SimpleResult> {
+  const email = (newEmail ?? '').trim().toLowerCase()
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: 'Format email tidak valid.' }
+  if (!currentPassword) return { ok: false, error: 'Masukkan password saat ini untuk konfirmasi.' }
+
+  const supabase = await createClient()
+  const auth = await reauth(supabase, currentPassword)
+  if (!auth.ok) return { ok: false, error: auth.error }
+  if (auth.user.email?.toLowerCase() === email) return { ok: false, error: 'Email baru sama dengan email sekarang.' }
+
+  const { error } = await supabase.auth.updateUser({ email }, { emailRedirectTo: `${await siteOrigin()}/auth/callback` })
+  if (error) {
+    if (/already registered|already exists|duplicate/i.test(error.message)) return { ok: false, error: 'Email ini sudah dipakai akun lain.' }
+    return { ok: false, error: 'Gagal mengubah email. Coba lagi.' }
+  }
+
+  return {
+    ok: true,
+    error: null,
+    message: 'Link konfirmasi sudah dikirim ke email lama dan email baru. Buka salah satu link itu untuk menyelesaikan penggantian.',
+  }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string, confirm: string): Promise<SimpleResult> {
+  if (newPassword !== confirm) return { ok: false, error: 'Konfirmasi password baru tidak sama.' }
+  const weak = passwordProblem(newPassword ?? '')
+  if (weak) return { ok: false, error: weak }
+  if (!currentPassword) return { ok: false, error: 'Masukkan password saat ini untuk konfirmasi.' }
+  if (currentPassword === newPassword) return { ok: false, error: 'Password baru tidak boleh sama dengan password lama.' }
+
+  const supabase = await createClient()
+  const auth = await reauth(supabase, currentPassword)
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) {
+    if (error.code === 'weak_password') return { ok: false, error: 'Password terlalu lemah. Pakai minimal 8 karakter berisi huruf dan angka.' }
+    return { ok: false, error: 'Gagal mengubah password. Coba lagi.' }
+  }
+
+  // Sesi lain (HP/perangkat lain) dikeluarkan; sesi yang sedang dipakai tetap login
+  try {
+    await supabase.auth.signOut({ scope: 'others' })
+  } catch {
+    // abaikan -- perubahan password sudah berhasil walau ini gagal
+  }
+
+  return { ok: true, error: null, message: 'Password berhasil diganti. Perangkat lain otomatis keluar.' }
 }

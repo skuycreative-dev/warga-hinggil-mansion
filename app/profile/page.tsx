@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import ProfileEditForm from '@/components/ProfileEditForm'
 import ProfileInfoCard from '@/components/ProfileInfoCard'
 import StatusEditor from '@/components/StatusEditor'
+import AccountSecurityForm from '@/components/AccountSecurityForm'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -90,6 +91,8 @@ export default async function ProfilePage() {
               pendingRequests={pendingRequests ?? []}
             />
           </div>
+
+          <AccountSecurityForm email={user.email ?? '-'} />
         </ProfileInfoCard>
       </div>
     </main>
