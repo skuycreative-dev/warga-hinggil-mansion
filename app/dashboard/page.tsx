@@ -110,6 +110,12 @@ const menu: MenuItem[] = [
     feature: 'status_hunian',
   },
   {
+    title: 'Peta Perumahan',
+    href: '/peta',
+    path: 'M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3zM9 7v13M15 4v13',
+    feature: null,
+  },
+  {
     title: 'Jadwal Jaga',
     href: '/jadwal-jaga',
     path: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM12 14v3l2 1',
@@ -240,6 +246,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const isSekretaris = profile?.role === 'staff_paguyuban' && profile?.staff_position === 'sekretaris'
   const canVerifyAccounts = isSuperadmin || profile?.role === 'paguyuban' || isSekretaris
   const canManageEmergencyContacts = canVerifyAccounts
+  // Kebutuhan #6: menu warga & menu pengurus/staff dipisah biar tidak tercampur susunannya
+  const hasAdminMenu =
+    isSecurity || canRespondEmergency || canPatrol || isPaguyuban || isManajemen || canVerifyAccounts || canManageEmergencyContacts || isItSupport || isSuperadmin
   const isWarga = profile?.role === 'warga'
   // IT Support hanya untuk log error: menu warga disembunyikan (kecuali Tombol Darurat & Profil)
   const isItSupportRole = profile?.role === 'it_support'
@@ -441,6 +450,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               />
             ) : null}
 
+          </div>
+
+          {hasAdminMenu ? (
+            <>
+              <div className="mb-4 mt-9 text-xs font-bold uppercase tracking-widest md:text-sm" style={{ color: '#9c7a3f' }}>
+                Menu Pengurus & Staff
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {isSecurity ? (
               <Link
                 href="/security"
@@ -663,7 +680,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <div className="text-[13.5px] font-bold" style={{ color: '#1f1a10' }}>Kelola Admin</div>
               </Link>
             ) : null}
-          </div>
+              </div>
+            </>
+          ) : null}
 
           {openPolls.length > 0 && !isLocked && !isItSupportRole && !isOff('polling') ? (
             <div className="mt-10">

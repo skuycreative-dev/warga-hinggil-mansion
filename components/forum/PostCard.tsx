@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteForumPost, reportPost, toggleLike } from '@/app/forum/actions'
+import { deleteForumPost, editForumPost, reportPost, toggleLike } from '@/app/forum/actions'
 import { FORUM_LEVELS } from '@/lib/forum-level'
 import { FORUM_CATEGORIES, findCategory } from '@/lib/categories'
 import type { ForumPost } from '@/lib/forum-data'
@@ -57,10 +57,38 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [viewer, setViewer] = useState<number | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editContent, setEditContent] = useState(post.content)
+  const [editCategory, setEditCategory] = useState(post.category)
+  const [editError, setEditError] = useState('')
   const cat = findCategory(FORUM_CATEGORIES, post.category)
   const mine = post.author_id === myId
   const confirmModal = useConfirm()
   const alertModal = useAlertModal()
+
+  function startEdit() {
+    setEditContent(post.content)
+    setEditCategory(post.category)
+    setEditError('')
+    setEditing(true)
+  }
+
+  function saveEdit() {
+    const text = editContent.trim()
+    if (!text) {
+      setEditError('Tulisan tidak boleh kosong.')
+      return
+    }
+    startTransition(async () => {
+      const r = await editForumPost(post.id, text, editCategory)
+      if (r.error) {
+        setEditError(r.error)
+        return
+      }
+      setEditing(false)
+      router.refresh()
+    })
+  }
 
   function like() {
     startTransition(async () => {
@@ -100,11 +128,17 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: '#9c7a3f' }}>
               {timeAgo(post.created_at)}
+              {post.updated_at ? <span title={new Date(post.updated_at).toLocaleString('id-ID')}>· diedit</span> : null}
               <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {mine ? (
+            <button type="button" onClick={startEdit} disabled={isPending} className="text-[11.5px] font-bold" style={{ color: '#9c7a3f' }}>
+              Ubah
+            </button>
+          ) : null}
           {mine || canModerate ? (
             <button type="button" onClick={remove} disabled={isPending} className="text-[11.5px] font-bold" style={{ color: '#b3392f' }}>
               Hapus
@@ -122,7 +156,37 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
         </div>
       </div>
 
-      {detail ? (
+      {editing ? (
+        <div className="mt-3 flex flex-col gap-2.5">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            maxLength={3000}
+            rows={4}
+            className="w-full rounded-xl px-3.5 py-3 text-sm"
+            style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.12)', color: '#1f1a10', outline: 'none' }}
+          />
+          <select
+            value={editCategory}
+            onChange={(e) => setEditCategory(e.target.value)}
+            className="rounded-xl px-3 py-2 text-[13px]"
+            style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.12)', color: '#1f1a10' }}
+          >
+            {FORUM_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>{c.label}</option>
+            ))}
+          </select>
+          {editError ? <p className="text-[12px] font-semibold" style={{ color: '#b3392f' }}>{editError}</p> : null}
+          <div className="flex gap-2.5">
+            <button type="button" onClick={() => setEditing(false)} disabled={isPending} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#efe9db', color: '#5b543f' }}>
+              Batal
+            </button>
+            <button type="button" onClick={saveEdit} disabled={isPending} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
+              {isPending ? 'Menyimpan...' : 'Simpan'}
+            </button>
+          </div>
+        </div>
+      ) : detail ? (
         <p className="mt-3 whitespace-pre-line text-sm font-medium leading-relaxed md:text-base" style={{ color: '#3a3424' }}>{post.content}</p>
       ) : (
         <Link href={`/forum/${post.id}`} className="mt-3 block">
@@ -130,7 +194,7 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
         </Link>
       )}
 
-      <PhotoGrid images={post.images} onOpen={setViewer} />
+      {!editing ? <PhotoGrid images={post.images} onOpen={setViewer} /> : null}
 
       <div className="mt-3.5 flex items-center gap-5 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
         <button

@@ -147,6 +147,26 @@ function canReviewField(access: MyAccess, field: string) {
   return false
 }
 
+// Kebutuhan #5 (29 Sep 2026): pengajuan "Peran Keluarga" oleh akun ADMIN sendiri (Paguyuban/Sekretaris/
+// Bendahara ingin jadi Kepala Keluarga di rumahnya sendiri) dijenjang lebih tinggi supaya tidak bisa
+// menyetujui pengajuannya sendiri:
+//   - Paguyuban mengajukan  -> hanya Superadmin yang boleh menyetujui
+//   - Sekretaris/Bendahara mengajukan -> hanya Admin Paguyuban (atau Superadmin) yang boleh menyetujui
+//   - Warga biasa mengajukan -> tetap seperti sebelumnya (Superadmin/Paguyuban/Sekretaris)
+// Superadmin sendiri tidak pernah masuk sini karena perubahan perannya langsung berlaku (lihat app/profile/actions.ts).
+async function canReviewRequest(admin: AdminClient, access: MyAccess, request: { user_id: string; field: string }) {
+  if (access.userId === request.user_id) return false // tidak boleh menyetujui pengajuan sendiri
+
+  if (request.field !== 'family_role') return canReviewField(access, request.field)
+
+  const { data: requester } = await admin.from('profiles').select('role, staff_position').eq('id', request.user_id).maybeSingle()
+  const requesterRole = requester?.role ?? 'warga'
+
+  if (requesterRole === 'paguyuban') return access.isSuperadmin
+  if (requesterRole === 'staff_paguyuban') return access.isKetuaPaguyuban || access.isSuperadmin
+  return access.canVerifyAccounts
+}
+
 async function loadPendingRequest(admin: AdminClient, id: string) {
   const { data } = await admin
     .from('profile_change_requests')
@@ -165,8 +185,8 @@ export async function approveChangeRequest(id: string) {
     const admin = createAdminClient()
     const request = await loadPendingRequest(admin, id)
     if (!request) return { error: 'Pengajuan ini sudah diproses atau dibatalkan.' }
-    if (!canReviewField(access, request.field)) {
-      return { error: `Perubahan ${FIELD_LABEL[request.field] ?? request.field} hanya bisa disetujui Admin Paguyuban atau Superadmin.` }
+    if (!(await canReviewRequest(admin, access, request))) {
+      return { error: `Perubahan ${FIELD_LABEL[request.field] ?? request.field} ini hanya bisa disetujui oleh jenjang di atasmu (bukan pengajuan sendiri).` }
     }
 
     // Disetujui Pengurus menjadi Ibu Rumah Tangga = sekaligus terkonfirmasi sebagai penghuni rumah itu
@@ -212,8 +232,8 @@ export async function rejectChangeRequest(id: string, note: string) {
     const admin = createAdminClient()
     const request = await loadPendingRequest(admin, id)
     if (!request) return { error: 'Pengajuan ini sudah diproses atau dibatalkan.' }
-    if (!canReviewField(access, request.field)) {
-      return { error: `Perubahan ${FIELD_LABEL[request.field] ?? request.field} hanya bisa diproses Admin Paguyuban atau Superadmin.` }
+    if (!(await canReviewRequest(admin, access, request))) {
+      return { error: `Perubahan ${FIELD_LABEL[request.field] ?? request.field} ini hanya bisa diproses oleh jenjang di atasmu (bukan pengajuan sendiri).` }
     }
 
     const { error } = await admin

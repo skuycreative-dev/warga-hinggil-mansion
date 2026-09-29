@@ -51,7 +51,7 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
 
   const { data: current } = await supabase
     .from('profiles')
-    .select('full_name, account_status, family_role, occupancy_status')
+    .select('full_name, account_status, family_role, occupancy_status, role')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -72,8 +72,15 @@ export async function updateProfile(prevState: UpdateProfileState, formData: For
     if (!FAMILY_ROLES.includes(familyRole)) return { error: 'Peran keluarga tidak valid.', success: false }
     const touchesProtected = PROTECTED_FAMILY_ROLES.includes(familyRole) || PROTECTED_FAMILY_ROLES.includes(current.family_role ?? '')
     if (touchesProtected && !inCompletion) {
-      // Jadi Ibu Rumah Tangga -> dikonfirmasi Kepala Keluarga (atau Pengurus); peran Kepala Keluarga -> Pengurus
-      requests.push({ field: 'family_role', old_value: current.family_role ?? null, new_value: familyRole })
+      // Superadmin tidak punya siapa pun di atasnya untuk menyetujui, jadi perubahan perannya sendiri
+      // langsung berlaku (keputusan 29 Sep 2026). Paguyuban/Sekretaris/Bendahara tetap lewat pengajuan
+      // -- lihat approveChangeRequest di verifikasi-akun/actions.ts untuk siapa yang boleh menyetujui.
+      if (current.role === 'superadmin') {
+        update.family_role = familyRole
+      } else {
+        // Jadi Ibu Rumah Tangga -> dikonfirmasi Kepala Keluarga (atau Pengurus); peran Kepala Keluarga -> Pengurus
+        requests.push({ field: 'family_role', old_value: current.family_role ?? null, new_value: familyRole })
+      }
     } else {
       update.family_role = familyRole
     }

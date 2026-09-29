@@ -1,8 +1,8 @@
 ﻿import { unstable_cache } from 'next/cache'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { DEFAULT_BRANDING, brandingLogoUrl, type Branding } from '@/lib/branding-types'
+import { DEFAULT_BRANDING, brandingLogoUrl, brandingLetterheadUrl, type Branding } from '@/lib/branding-types'
 
-export { DEFAULT_BRANDING, brandingLogoUrl, type Branding }
+export { DEFAULT_BRANDING, brandingLogoUrl, brandingLetterheadUrl, type Branding }
 
 // Identitas perumahan (white label). Diatur Superadmin di menu Identitas Perumahan (Step 353).
 async function fetchBranding(): Promise<Branding> {
@@ -19,6 +19,7 @@ async function fetchBranding(): Promise<Branding> {
       short_name: data.short_name ?? DEFAULT_BRANDING.short_name,
       tagline: data.tagline ?? null,
       logo_url: brandingLogoUrl(data.logo_path),
+      letterhead_url: brandingLetterheadUrl(data.letterhead_path),
       theme_color: data.theme_color ?? DEFAULT_BRANDING.theme_color,
       accent_color: data.accent_color ?? DEFAULT_BRANDING.accent_color,
       contact_whatsapp: data.contact_whatsapp ?? null,

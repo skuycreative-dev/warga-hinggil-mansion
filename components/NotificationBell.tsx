@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -30,6 +30,23 @@ export default function NotificationBell() {
   const [notifs, setNotifs] = useState<Notif[]>([])
   const [unread, setUnread] = useState(0)
   const [soundOn, setSoundOn] = useState(true)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  // Posisi panel dihitung dari lonceng saat dibuka (bukan cuma "right: 0" relatif ke tombol),
+  // supaya di HP kecil panelnya selalu utuh di layar -- tidak terpotong di kiri/kanan
+  // walau lonceng ada di dalam header yang sempit/banyak ikon.
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function place() {
+      const rect = btnRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setAnchor({ top: rect.bottom + 8, right: Math.max(12, window.innerWidth - rect.right) })
+    }
+    place()
+    window.addEventListener('resize', place)
+    return () => window.removeEventListener('resize', place)
+  }, [open])
 
   async function load() {
     const supabase = createClient()
@@ -137,6 +154,7 @@ export default function NotificationBell() {
   return (
     <div style={{ position: 'relative' }}>
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Notifikasi"
@@ -171,7 +189,7 @@ export default function NotificationBell() {
         ) : null}
       </button>
 
-      {open ? (
+      {open && anchor ? (
         <>
           <div
             onClick={() => setOpen(false)}
@@ -179,11 +197,11 @@ export default function NotificationBell() {
           />
           <div
             style={{
-              position: 'absolute',
-              right: 0,
-              top: 32,
+              position: 'fixed',
+              top: anchor.top,
+              right: anchor.right,
               width: 'min(320px, calc(100vw - 24px))',
-              maxHeight: 400,
+              maxHeight: 'min(400px, calc(100vh - 96px))',
               overflowY: 'auto',
               background: '#ffffff',
               border: '1px solid rgba(26,19,5,0.1)',

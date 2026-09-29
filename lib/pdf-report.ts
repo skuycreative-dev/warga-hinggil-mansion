@@ -37,6 +37,22 @@ async function loadLogo(pdf: PDFDocument, url: string, origin: string): Promise<
   }
 }
 
+// Kop surat gambar utuh (logo+nama+alamat+dekorasi sudah didesain lengkap) -- kalau diunggah Superadmin,
+// dipakai apa adanya sebagai banner selebar halaman menggantikan kop otomatis (Kebutuhan #3, 29 Sep 2026).
+async function loadLetterhead(pdf: PDFDocument, url: string): Promise<PDFImage | null> {
+  try {
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) return null
+    const bytes = new Uint8Array(await res.arrayBuffer())
+    if (bytes.length > 8 * 1024 * 1024) return null
+    if (bytes[0] === 0x89 && bytes[1] === 0x50) return await pdf.embedPng(bytes)
+    if (bytes[0] === 0xff && bytes[1] === 0xd8) return await pdf.embedJpg(bytes)
+    return null
+  } catch {
+    return null
+  }
+}
+
 export async function buildReportPdf(report: Report, brand: Branding, origin: string, printedBy: string): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
   pdf.setTitle(clean(`${report.title} - ${brand.community_name}`))
@@ -45,6 +61,7 @@ export async function buildReportPdf(report: Report, brand: Branding, origin: st
   const font = await pdf.embedFont(StandardFonts.Helvetica)
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
   const logo = await loadLogo(pdf, brand.logo_url, origin)
+  const letterhead = brand.letterhead_url ? await loadLetterhead(pdf, brand.letterhead_url) : null
 
   const [W, H] = report.landscape ? [841.89, 595.28] : [595.28, 841.89]
   const M = 36
@@ -69,20 +86,31 @@ export async function buildReportPdf(report: Report, brand: Branding, origin: st
     pages.push(page)
     y = H - M
     if (first) {
-      let x = M
-      if (logo) {
-        const s = 44 / Math.max(logo.width, logo.height)
-        page.drawImage(logo, { x, y: y - 44, width: logo.width * s, height: logo.height * s })
-        x += 54
+      if (letterhead) {
+        // Kop surat gambar utuh: banner selebar halaman, tinggi mengikuti rasio gambar (dibatasi biar tidak kelewat tinggi)
+        const bw = tableW
+        const bh = Math.min(110, (letterhead.height / letterhead.width) * bw)
+        const bx = M + (bw - (letterhead.width / letterhead.height) * bh) / 2
+        page.drawImage(letterhead, { x: bx, y: y - bh, width: (letterhead.width / letterhead.height) * bh, height: bh })
+        y -= bh + 14
+        page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 1.5, color: gold })
+        y -= 24
+      } else {
+        let x = M
+        if (logo) {
+          const s = 44 / Math.max(logo.width, logo.height)
+          page.drawImage(logo, { x, y: y - 44, width: logo.width * s, height: logo.height * s })
+          x += 54
+        }
+        page.drawText(fit(brand.community_name.toUpperCase(), bold, 15, W - x - M), { x, y: y - 16, size: 15, font: bold, color: dark })
+        const addr = [brand.address, brand.city].filter(Boolean).join(', ')
+        const contact = [brand.contact_whatsapp ? `WA ${brand.contact_whatsapp}` : '', brand.contact_email ?? ''].filter(Boolean).join('  |  ')
+        if (addr) page.drawText(fit(addr, font, 9, W - x - M), { x, y: y - 30, size: 9, font, color: muted })
+        if (contact) page.drawText(fit(contact, font, 9, W - x - M), { x, y: y - 42, size: 9, font, color: muted })
+        y -= 54
+        page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 1.5, color: gold })
+        y -= 24
       }
-      page.drawText(fit(brand.community_name.toUpperCase(), bold, 15, W - x - M), { x, y: y - 16, size: 15, font: bold, color: dark })
-      const addr = [brand.address, brand.city].filter(Boolean).join(', ')
-      const contact = [brand.contact_whatsapp ? `WA ${brand.contact_whatsapp}` : '', brand.contact_email ?? ''].filter(Boolean).join('  |  ')
-      if (addr) page.drawText(fit(addr, font, 9, W - x - M), { x, y: y - 30, size: 9, font, color: muted })
-      if (contact) page.drawText(fit(contact, font, 9, W - x - M), { x, y: y - 42, size: 9, font, color: muted })
-      y -= 54
-      page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 1.5, color: gold })
-      y -= 24
       page.drawText(clean(report.title), { x: M, y, size: 14, font: bold, color: dark })
       y -= 15
       page.drawText(clean(`${report.subtitle}  ·  Dicetak ${now} WIB oleh ${printedBy}`), { x: M, y, size: 9, font, color: muted })

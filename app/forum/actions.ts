@@ -33,6 +33,28 @@ export async function createForumPost(input: { content: string; category: string
   return { error: null }
 }
 
+export async function editForumPost(postId: string, content: string, category: string): Promise<Result> {
+  const text = String(content ?? '').trim()
+  const cat = FORUM_CATEGORIES.some((c) => c.key === category) ? category : 'umum'
+  if (!text) return { error: 'Tulisan tidak boleh kosong.' }
+  if (text.length > 3000) return { error: 'Tulisan maksimal 3000 karakter.' }
+
+  const { supabase, user } = await requireUser()
+  const { data, error } = await supabase
+    .from('forum_posts')
+    .update({ content: text, category: cat, updated_at: new Date().toISOString() })
+    .eq('id', postId)
+    .eq('author_id', user.id)
+    .select('id')
+
+  if (error) return { error: publicError(error) }
+  if (!data?.length) return { error: 'Kamu hanya bisa mengubah postingan sendiri.' }
+
+  revalidatePath('/forum')
+  revalidatePath(`/forum/${postId}`)
+  return { error: null }
+}
+
 export async function deleteForumPost(postId: string): Promise<Result> {
   const { supabase } = await requireUser()
   const { data: post } = await supabase.from('forum_posts').select('id, image_paths').eq('id', postId).maybeSingle()

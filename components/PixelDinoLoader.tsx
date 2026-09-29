@@ -1,5 +1,8 @@
 ﻿// Animasi loading: dinosaurus piksel (desain orisinal Hinggil Mansion) berlari di tempat, tanpa tulisan.
 // Murni SVG + CSS (tanpa gambar/berkas tambahan) supaya ringan di HP. Teks "Memuat" hanya untuk pembaca layar.
+// Latar belakang SENGAJA dibuat menyerupai warna halaman aplikasi (bukan hitam pekat) supaya perpindahan
+// halaman terasa ringan -- seolah tetap di halaman yang sama, bukan berkedip ke layar gelap lalu balik lagi.
+// Ikon dinosaurus sendiri tidak diubah, hanya dipindah ke dalam badge gelap kecil supaya tetap terlihat jelas.
 export default function PixelDinoLoader({ label = 'Memuat halaman' }: { label?: string }) {
   return (
     <div
@@ -13,28 +16,31 @@ export default function PixelDinoLoader({ label = 'Memuat halaman' }: { label?: 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(10,11,15,0.9)',
-        // Muncul hanya kalau memuat lebih dari 0,3 detik (pindah halaman cepat tidak berkedip gelap)
+        background: 'rgba(250,247,240,0.88)',
+        // Muncul hanya kalau memuat lebih dari 0,3 detik (pindah halaman cepat tidak berkedip)
         animation: 'hmFadeIn 0.2s ease-out 0.3s both',
       }}
     >
-      <div className="hm-dino-wrap" aria-hidden>
-        <svg className="hm-dino" viewBox="0 0 24 17" width="120" height="85" shapeRendering="crispEdges">
-          <g fill="#e6c98a"><rect x="18" y="0" width="4" height="1" /><rect x="17" y="1" width="6" height="1" /><rect x="17" y="2" width="2" height="1" /><rect x="20" y="2" width="3" height="1" /><rect x="17" y="3" width="5" height="1" /><rect x="16" y="4" width="3" height="1" /><rect x="15" y="5" width="3" height="1" /><rect x="14" y="6" width="3" height="1" /><rect x="8" y="7" width="5" height="1" /><rect x="14" y="7" width="3" height="1" /><rect x="6" y="8" width="11" height="1" /><rect x="5" y="9" width="12" height="1" /><rect x="3" y="10" width="14" height="1" /><rect x="0" y="11" width="16" height="1" /><rect x="2" y="12" width="12" height="1" /></g>
-          <g fill="#9c7a3f"><rect x="9" y="8" width="1" height="1" /><rect x="12" y="8" width="1" height="1" /><rect x="7" y="9" width="1" height="1" /></g>
-          <g className="hm-leg-a" fill="#e6c98a"><rect x="4" y="13" width="2" height="1" /><rect x="11" y="13" width="2" height="1" /><rect x="4" y="14" width="2" height="1" /><rect x="12" y="14" width="2" height="1" /><rect x="3" y="15" width="3" height="1" /><rect x="12" y="15" width="3" height="1" /></g>
-          <g className="hm-leg-b" fill="#e6c98a"><rect x="5" y="13" width="2" height="1" /><rect x="10" y="13" width="2" height="1" /><rect x="4" y="14" width="2" height="1" /><rect x="11" y="14" width="2" height="1" /><rect x="4" y="15" width="3" height="1" /><rect x="10" y="15" width="3" height="1" /></g>
-        </svg>
-        <div className="hm-ground" />
+      <div className="hm-dino-card">
+        <div className="hm-dino-wrap" aria-hidden>
+          <svg className="hm-dino" viewBox="0 0 24 17" width="120" height="85" shapeRendering="crispEdges">
+            <g fill="#e6c98a"><rect x="18" y="0" width="4" height="1" /><rect x="17" y="1" width="6" height="1" /><rect x="17" y="2" width="2" height="1" /><rect x="20" y="2" width="3" height="1" /><rect x="17" y="3" width="5" height="1" /><rect x="16" y="4" width="3" height="1" /><rect x="15" y="5" width="3" height="1" /><rect x="14" y="6" width="3" height="1" /><rect x="8" y="7" width="5" height="1" /><rect x="14" y="7" width="3" height="1" /><rect x="6" y="8" width="11" height="1" /><rect x="5" y="9" width="12" height="1" /><rect x="3" y="10" width="14" height="1" /><rect x="0" y="11" width="16" height="1" /><rect x="2" y="12" width="12" height="1" /></g>
+            <g fill="#9c7a3f"><rect x="9" y="8" width="1" height="1" /><rect x="12" y="8" width="1" height="1" /><rect x="7" y="9" width="1" height="1" /></g>
+            <g className="hm-leg-a" fill="#e6c98a"><rect x="4" y="13" width="2" height="1" /><rect x="11" y="13" width="2" height="1" /><rect x="4" y="14" width="2" height="1" /><rect x="12" y="14" width="2" height="1" /><rect x="3" y="15" width="3" height="1" /><rect x="12" y="15" width="3" height="1" /></g>
+            <g className="hm-leg-b" fill="#e6c98a"><rect x="5" y="13" width="2" height="1" /><rect x="10" y="13" width="2" height="1" /><rect x="4" y="14" width="2" height="1" /><rect x="11" y="14" width="2" height="1" /><rect x="4" y="15" width="3" height="1" /><rect x="10" y="15" width="3" height="1" /></g>
+          </svg>
+          <div className="hm-ground" />
+        </div>
       </div>
       <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>{label}</span>
       <style>{`
-        .hm-dino-wrap { position: relative; width: 150px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        .hm-dino-card { background: #0a0b0f; border-radius: 20px; padding: 14px 18px 10px; box-shadow: 0 14px 34px -10px rgba(10,11,15,0.35); }
+        .hm-dino-wrap { position: relative; width: 120px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
         .hm-dino { animation: hmBob 0.36s steps(2, end) infinite; image-rendering: pixelated; }
         .hm-leg-a { animation: hmLegA 0.36s steps(1, end) infinite; }
         .hm-leg-b { animation: hmLegB 0.36s steps(1, end) infinite; }
         .hm-ground {
-          width: 150px; height: 4px; margin-top: 2px;
+          width: 120px; height: 4px; margin-top: 2px;
           background-image: linear-gradient(90deg, #9c7a3f 0 8px, transparent 8px 16px, #6b5a36 16px 20px, transparent 20px 28px);
           background-size: 28px 4px;
           animation: hmGround 0.5s linear infinite;

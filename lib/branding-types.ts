@@ -6,6 +6,7 @@ export type Branding = {
   short_name: string
   tagline: string | null
   logo_url: string
+  letterhead_url: string | null
   theme_color: string
   accent_color: string
   contact_whatsapp: string | null
@@ -21,6 +22,7 @@ export const DEFAULT_BRANDING: Branding = {
   short_name: 'Hinggil Mansion',
   tagline: 'Komunitas warga, dalam satu genggaman.',
   logo_url: '/logo-hinggil-mansion.jpg',
+  letterhead_url: null,
   theme_color: '#0a0b0f',
   accent_color: '#e6c98a',
   contact_whatsapp: null,
@@ -34,4 +36,12 @@ export function brandingLogoUrl(logoPath: string | null | undefined) {
   if (!logoPath) return DEFAULT_BRANDING.logo_url
   const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')
   return `${base}/storage/v1/object/public/branding/${encodeURIComponent(logoPath)}`
+}
+
+// Kop surat (letterhead) siap pakai yang diunggah Superadmin -- opsional, tidak punya gambar bawaan
+// seperti logo (kalau belum diunggah, kop otomatis dari nama+alamat yang tetap dipakai).
+export function brandingLetterheadUrl(letterheadPath: string | null | undefined) {
+  if (!letterheadPath) return null
+  const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')
+  return `${base}/storage/v1/object/public/branding/${encodeURIComponent(letterheadPath)}`
 }

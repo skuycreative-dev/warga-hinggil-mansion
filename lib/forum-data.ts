@@ -7,6 +7,7 @@ export type ForumPost = {
   content: string
   category: string
   created_at: string
+  updated_at: string | null
   author_id: string
   author_name: string
   author_level: string
@@ -28,7 +29,7 @@ export async function loadForumPosts(
 ): Promise<ForumPost[]> {
   let q = supabase
     .from('forum_posts')
-    .select('id, content, category, image_paths, created_at, author_id, author:profiles(full_name, nickname, forum_points, avatar_url)')
+    .select('id, content, category, image_paths, created_at, updated_at, author_id, author:profiles(full_name, nickname, forum_points, avatar_url)')
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
     .limit(opts.limit ?? 30)
@@ -62,6 +63,7 @@ export async function loadForumPosts(
       content: p.content,
       category: p.category ?? 'umum',
       created_at: p.created_at,
+      updated_at: (p.updated_at as string | null) ?? null,
       author_id: p.author_id,
       author_name: displayName(author),
       author_level: forumLevel(author?.forum_points).name,

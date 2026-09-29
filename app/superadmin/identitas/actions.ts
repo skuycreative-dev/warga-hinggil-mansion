@@ -73,3 +73,24 @@ export async function saveLogo(path: string | null): Promise<Result> {
   revalidatePath('/', 'layout')
   return { ok: true, error: null }
 }
+
+// Kop surat (letterhead) siap pakai -- gambar utuh (logo+nama+alamat+dekorasi) yang Superadmin unggah
+// sendiri. Kalau diisi, dipakai sebagai header PDF Ekspor Laporan (menggantikan kop otomatis) dan bisa
+// diunduh kosongan dari halaman Identitas Perumahan (Kebutuhan #3, 29 Sep 2026).
+export async function saveLetterhead(path: string | null): Promise<Result> {
+  const access = await getMyAccess()
+  if (!access.isSuperadmin) return { ok: false, error: 'Hanya Superadmin.' }
+  if (path !== null && !/^letterhead-[0-9]+\.(webp|jpg|png)$/.test(path)) return { ok: false, error: 'Nama file kop surat tidak valid.' }
+
+  const supabase = await createClient()
+  const { data: old } = await supabase.from('app_branding').select('letterhead_path').eq('id', 1).maybeSingle()
+  const { error } = await supabase
+    .from('app_branding')
+    .update({ letterhead_path: path, updated_by: access.userId, updated_at: new Date().toISOString() })
+    .eq('id', 1)
+  if (error) return { ok: false, error: publicError(error) }
+  if (old?.letterhead_path && old.letterhead_path !== path) await supabase.storage.from('branding').remove([old.letterhead_path as string])
+  updateTag('branding')
+  revalidatePath('/', 'layout')
+  return { ok: true, error: null }
+}
