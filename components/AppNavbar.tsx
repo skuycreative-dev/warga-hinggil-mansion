@@ -34,7 +34,13 @@ const sidebarLinks: NavLink[] = [
   { title: 'CCTV Jogja', href: CCTV_URL, feature: 'cctv', external: true },
 ]
 
-// Halaman portal admin memakai sidebar sendiri (AdminLayout), jadi navbar warga disembunyikan di sana
+// Halaman portal admin memakai sidebar sendiri (AdminLayout), jadi navbar warga disembunyikan di sana.
+// PENTING: setiap halaman baru yang memakai <AdminLayout> harus ditambahkan di sini juga -- kalau
+// terlewat, navbar warga (dengan EmergencyAlertWatcher-nya sendiri) tetap ikut nyala DI ATAS
+// AdminLayout (yang juga punya EmergencyAlertWatcher sendiri), jadi dua channel realtime "darurat-live"
+// dipasang bersamaan dan saling tabrakan -> error "cannot add postgres_changes callbacks ... after
+// subscribe()" yang menjatuhkan seluruh halaman. Ini yang terjadi pada /kelola-warga dan /statistik
+// (kelewat waktu Paket Q ditambahkan) -- sekarang sudah dimasukkan (Paket S, 29 Sep 2026).
 const PORTAL_PREFIXES = [
   '/superadmin',
   '/paguyuban',
@@ -45,6 +51,8 @@ const PORTAL_PREFIXES = [
   '/it-support',
   '/security',
   '/keamanan',
+  '/kelola-warga',
+  '/statistik',
 ]
 
 // Sekretaris / Bendahara ditulis "staff_paguyuban:jabatan"

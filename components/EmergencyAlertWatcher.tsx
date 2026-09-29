@@ -30,6 +30,15 @@ const RESPONDER_ROLES = ['security', 'paguyuban', 'staff_paguyuban', 'manajemen'
 const STORAGE_KEY = 'darurat-sudah-dilihat'
 const LOOKBACK_MINUTES = 30
 
+// Pengaman: komponen ini seharusnya cuma dipasang SEKALI per halaman (navbar warga menyembunyikan diri
+// di halaman portal admin lewat PORTAL_PREFIXES supaya tidak dobel dengan punya AdminLayout). Kalau ada
+// halaman admin baru yang lupa dimasukkan ke daftar itu, dua instance akan mencoba buka channel realtime
+// "darurat-live" bersamaan dan saling tabrakan (error "cannot add postgres_changes callbacks ... after
+// subscribe()") yang menjatuhkan seluruh halaman. Modul-level flag ini membuat cuma instance PERTAMA
+// yang benar-benar jalan; instance kedua (kalau kepasang lagi) diam saja -- jadi paling buruk cuma
+// dobel elemen kosong, bukan halaman error (Paket S, 29 Sep 2026).
+let watcherActive = false
+
 function readDismissed(): string[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -124,6 +133,9 @@ export default function EmergencyAlertWatcher() {
   )
 
   useEffect(() => {
+    if (watcherActive) return // sudah ada instance lain aktif di halaman ini -- lihat catatan di watcherActive
+    watcherActive = true
+
     const supabase = createClient()
     supabaseRef.current = supabase
     dismissedRef.current = new Set(readDismissed())
@@ -154,6 +166,7 @@ export default function EmergencyAlertWatcher() {
       cancelled = true
       clearInterval(timer)
       supabase.removeChannel(channel)
+      watcherActive = false
     }
   }, [loadAlerts])
 
