@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getMyAccess } from '@/lib/access'
 import { displayName } from '@/lib/display-name'
 import NewRequestForm from '@/components/layanan/NewRequestForm'
+import LetterheadCard from '@/components/layanan/LetterheadCard'
 import { LAYANAN_STATUS, categoryLabel } from '@/lib/layanan'
 
 export const dynamic = 'force-dynamic'
@@ -97,6 +98,8 @@ export default async function LayananPage({ searchParams }: { searchParams: Prom
             <NewRequestForm />
           </div>
         )}
+
+        {staff ? <LetterheadCard /> : null}
 
         {staff ? (
           <nav className="mb-4 flex gap-1.5" aria-label="Filter">

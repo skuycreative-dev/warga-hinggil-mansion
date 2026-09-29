@@ -69,6 +69,30 @@ export async function compressImage(file: File | Blob, opts: { maxBytes?: number
   throw new Error('Foto tidak bisa dikecilkan di bawah 2 MB. Coba foto lain.')
 }
 
+// Ubah gambar jadi PNG dengan sisi terpanjang maksimal `max` px -- dipakai untuk logo & kop surat
+// (butuh PNG polos berkualitas tinggi, beda dari compressImage di atas yang WebP untuk foto biasa).
+export async function toPngResized(file: File, max: number, maxBytes = 2 * 1024 * 1024): Promise<Blob> {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = () => reject(new Error('gambar'))
+      img.src = url
+    })
+    const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale))
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale))
+    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+    if (!blob || blob.size > maxBytes) throw new Error('besar')
+    return blob
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
 export function extFor(type: string) {
   if (type === 'image/webp') return 'webp'
   if (type === 'image/png') return 'png'

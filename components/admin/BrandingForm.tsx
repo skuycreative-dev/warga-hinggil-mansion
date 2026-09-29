@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { isImage } from '@/lib/image-upload'
+import { isImage, toPngResized } from '@/lib/image-upload'
 import { saveBranding, saveLogo, saveLetterhead, type BrandingInput } from '@/app/superadmin/identitas/actions'
 import { useBranding } from '@/components/BrandingProvider'
 
@@ -18,28 +18,7 @@ const field: React.CSSProperties = {
   outline: 'none',
 }
 const label = 'flex flex-col gap-1 text-[12px] font-bold'
-
-async function toPng(file: File, max: number, maxBytes = 2 * 1024 * 1024): Promise<Blob> {
-  const url = URL.createObjectURL(file)
-  try {
-    const img = new Image()
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('gambar'))
-      img.src = url
-    })
-    const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight))
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale))
-    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale))
-    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
-    if (!blob || blob.size > maxBytes) throw new Error('besar')
-    return blob
-  } finally {
-    URL.revokeObjectURL(url)
-  }
-}
+const toPng = toPngResized
 
 export default function BrandingForm({ initial }: { initial: BrandingInput }) {
   const router = useRouter()
