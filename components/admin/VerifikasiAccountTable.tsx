@@ -96,6 +96,9 @@ export default function VerifikasiAccountTable({
 
   return (
     <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+      {/* overflow-x-auto: di layar HP tabelnya lebih lebar dari layar -- tanpa ini tombol Aksi
+          di kolom paling kanan (Setujui/Tolak/Hapus) kepotong dan tidak bisa dijangkau sama sekali. */}
+      <div className="overflow-x-auto">
       <table className="w-full border-collapse text-left">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -182,6 +185,7 @@ export default function VerifikasiAccountTable({
           )}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

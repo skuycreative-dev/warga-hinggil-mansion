@@ -35,6 +35,7 @@ export default function IplArrears({ bills }: { bills: IplBill[] }) {
         <span className="text-[13px] font-bold" style={{ color: '#b3392f' }}>{rupiah(grand)}</span>
       </div>
       <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left text-[12.5px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -59,6 +60,7 @@ export default function IplArrears({ bills }: { bills: IplBill[] }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

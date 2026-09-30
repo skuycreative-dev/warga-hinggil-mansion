@@ -60,6 +60,7 @@ export default function AdminAccountTable({
 
   return (
     <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+      <div className="overflow-x-auto">
       <table className="w-full border-collapse text-left">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -150,6 +151,7 @@ export default function AdminAccountTable({
           )}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

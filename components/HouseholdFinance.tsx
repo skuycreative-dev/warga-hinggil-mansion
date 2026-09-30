@@ -443,6 +443,7 @@ export default function HouseholdFinance({
       <div>
         <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Ringkasan 6 Bulan</div>
         <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-[12.5px]">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -465,6 +466,7 @@ export default function HouseholdFinance({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

@@ -124,6 +124,7 @@ export default function KelolaWargaTable({
           />
         </div>
         <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -170,6 +171,7 @@ export default function KelolaWargaTable({
               )}
             </tbody>
           </table>
+          </div>
         </div>
         {!query && aktif.length > 40 ? (
           <p className="mt-2 text-[11.5px] font-medium" style={{ color: '#9c7a3f' }}>Menampilkan 40 dari {aktif.length}. Ketik nama/nomor rumah untuk mencari yang lain.</p>
@@ -181,6 +183,7 @@ export default function KelolaWargaTable({
           Sudah Ditandai Pindah -- Hapus Permanen ({pindah.length})
         </div>
         <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -231,6 +234,7 @@ export default function KelolaWargaTable({
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
@@ -239,6 +243,7 @@ export default function KelolaWargaTable({
           Arsip Warga Dihapus ({arsip.length})
         </div>
         <div className="overflow-hidden rounded-2xl" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(26,19,5,0.08)' }}>
@@ -271,6 +276,7 @@ export default function KelolaWargaTable({
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </section>
     </div>
