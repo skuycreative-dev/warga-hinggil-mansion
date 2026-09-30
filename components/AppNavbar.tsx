@@ -5,6 +5,7 @@ import { BrandLogo, useBranding } from '@/components/BrandingProvider'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { signOut } from '@/app/dashboard/actions'
 import NotificationBell from '@/components/NotificationBell'
 import EmergencyAlertWatcher from '@/components/EmergencyAlertWatcher'
 import LiveClock from '@/components/LiveClock'
@@ -289,6 +290,20 @@ export default function AppNavbar() {
           <div className="flex-shrink-0" style={{ color: '#efe4c8' }}>
             <NotificationBell />
           </div>
+
+          <form action={signOut} className="flex-shrink-0">
+            <button
+              type="submit"
+              aria-label="Keluar"
+              title="Keluar"
+              className="flex h-9 w-9 items-center justify-center rounded-full transition"
+              style={{ color: '#c7c9d2' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+            </button>
+          </form>
         </div>
       </div>
 

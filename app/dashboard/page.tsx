@@ -3,8 +3,6 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { signOut } from './actions'
-import NotificationBell from '@/components/NotificationBell'
 import { displayName as nameOf } from '@/lib/display-name'
 import FamilyRequestList from '@/components/FamilyRequestList'
 import RoleRequestList from '@/components/RoleRequestList'
@@ -297,7 +295,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
         }}
       >
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5 md:px-10">
+        <div className="mx-auto flex w-full max-w-3xl items-center px-6 py-5 md:px-10">
           <div className="flex items-center gap-2.5">
             <BrandLogo size={32} className="rounded-lg object-cover" />
             <span
@@ -306,20 +304,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             >
               HINGGIL MANSION
             </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div style={{ color: '#efe4c8' }}>
-              <NotificationBell />
-            </div>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-full px-4 py-2 text-sm font-bold transition hover:bg-white/10"
-                style={{ color: '#efe4c8', border: '1px solid rgba(230,201,138,0.35)' }}
-              >
-                Keluar
-              </button>
-            </form>
           </div>
         </div>
 
