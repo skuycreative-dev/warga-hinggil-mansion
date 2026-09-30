@@ -7,18 +7,19 @@ import { passwordProblem } from '@/lib/security'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logError } from '@/lib/log-error'
 import { getMyAccess } from '@/lib/access'
+import { assignJabatan, revokeJabatan, type Jabatan } from '@/lib/jabatan'
 
 export type StaffAccountState = { error: string; success: boolean }
 
-// Nilai pilihan di form. Sekretaris & Bendahara = role staff_paguyuban + jabatan.
+// Paket T (30 Sep 2026): Sekretaris, Bendahara, dan Security TIDAK LAGI dibuat sebagai akun
+// baru -- sekarang diangkat dari warga aktif lewat assignStaffJabatan/revokeStaffJabatan di
+// bawah. Panel "Tambah Akun Staff" di halaman ini sekarang cuma untuk IT Support (bukan warga
+// penghuni, dibuat langsung, dan hanya boleh oleh Superadmin -- lihat requester.canCreateItSupport).
 const STAFF_OPTIONS: Record<string, { role: string; staff_position: string | null }> = {
-  security: { role: 'security', staff_position: null },
   it_support: { role: 'it_support', staff_position: null },
-  'staff_paguyuban:sekretaris': { role: 'staff_paguyuban', staff_position: 'sekretaris' },
-  'staff_paguyuban:bendahara': { role: 'staff_paguyuban', staff_position: 'bendahara' },
 }
 
-const MANAGED_ROLES = ['security', 'it_support', 'staff_paguyuban']
+const MANAGED_ROLES = ['it_support']
 
 async function requireStaffManager() {
   const access = await getMyAccess()
@@ -147,4 +148,30 @@ export async function deleteStaffAccount(id: string) {
   } catch (err) {
     await logError('kelola-staff: deleteStaffAccount', err)
   }
+}
+
+const JABATAN_FROM_STAFF_PAGE: Jabatan[] = ['sekretaris', 'bendahara', 'security']
+
+// Angkat seorang warga aktif jadi Sekretaris/Bendahara/Security.
+export async function assignStaffJabatan(targetId: string, jabatan: string) {
+  const requester = await requireStaffManager()
+  if (!requester) return { error: 'Kamu tidak punya akses untuk fitur ini.' }
+  if (!JABATAN_FROM_STAFF_PAGE.includes(jabatan as Jabatan)) {
+    return { error: 'Jabatan tidak valid dari halaman ini.' }
+  }
+  return assignJabatan({ targetId, jabatan: jabatan as Jabatan, assignedBy: requester.userId })
+}
+
+// Cabut jabatan Sekretaris/Bendahara/Security -- akun kembali jadi warga biasa.
+export async function revokeStaffJabatan(targetId: string) {
+  const requester = await requireStaffManager()
+  if (!requester) return { error: 'Kamu tidak punya akses untuk fitur ini.' }
+
+  const admin = createAdminClient()
+  const { data: target } = await admin.from('profiles').select('role').eq('id', targetId).maybeSingle()
+  const bolehDicabutDariSini = !!target && (target.role === 'security' || target.role === 'staff_paguyuban')
+  if (!bolehDicabutDariSini) {
+    return { error: 'Akun ini tidak bisa dicabut dari halaman ini.' }
+  }
+  return revokeJabatan({ targetId, revokedBy: requester.userId })
 }

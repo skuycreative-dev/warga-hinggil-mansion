@@ -9,15 +9,34 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logError } from '@/lib/log-error'
+import { assignJabatan, revokeJabatan } from '@/lib/jabatan'
 
 export type AdminAccountState = { error: string; success: boolean }
 
-const MANAGED_ROLES = ['manajemen', 'paguyuban']
+// Paket T (30 Sep 2026): Admin Paguyuban TIDAK LAGI dibuat lewat panel "Tambah Akun Admin" --
+// sekarang diangkat dari warga aktif (lihat assignAdminPaguyuban/revokeAdminPaguyuban di bawah).
+// Panel buat-akun-baru ini sekarang cuma untuk Manajemen Perumahan (dipegang developer
+// perumahan, bukan warga penghuni, jadi tetap dibuatkan langsung oleh Superadmin).
+const MANAGED_ROLES = ['manajemen']
 
 async function requireSuperadmin() {
   // getMyAccess juga memastikan kode 2FA sudah dimasukkan
   const access = await getMyAccess()
   return access.isSuperadmin ? { userId: access.userId } : null
+}
+
+// Angkat seorang warga aktif jadi Admin Paguyuban.
+export async function assignAdminPaguyuban(targetId: string) {
+  const requester = await requireSuperadmin()
+  if (!requester) return { error: 'Kamu tidak punya akses untuk fitur ini.' }
+  return assignJabatan({ targetId, jabatan: 'admin_paguyuban', assignedBy: requester.userId })
+}
+
+// Cabut jabatan Admin Paguyuban -- akun kembali jadi warga biasa, data warga tetap utuh.
+export async function revokeAdminPaguyuban(targetId: string) {
+  const requester = await requireSuperadmin()
+  if (!requester) return { error: 'Kamu tidak punya akses untuk fitur ini.' }
+  return revokeJabatan({ targetId, revokedBy: requester.userId })
 }
 
 // Hanya akun Manajemen / Ketua Paguyuban yang boleh diubah atau dihapus dari panel ini

@@ -6,15 +6,19 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
 import AdminAccountPanel from '@/components/admin/AdminAccountPanel'
 import AdminAccountTable from '@/components/admin/AdminAccountTable'
-import { createStaffAccount, updateStaffAccount, deleteStaffAccount } from './actions'
+import JabatanManager from '@/components/admin/JabatanManager'
+import { listActiveWargaForPicker, listJabatanHolders } from '@/lib/jabatan'
+import { createStaffAccount, updateStaffAccount, deleteStaffAccount, assignStaffJabatan, revokeStaffJabatan } from './actions'
 
-const BASE_ROLE_OPTIONS = [
-  { value: 'staff_paguyuban:sekretaris', label: 'Sekretaris Paguyuban' },
-  { value: 'staff_paguyuban:bendahara', label: 'Bendahara Paguyuban' },
+// Paket T (30 Sep 2026): Sekretaris/Bendahara/Security sekarang diangkat dari warga aktif lewat
+// JabatanManager di bawah, bukan lewat panel buat-akun-baru ini lagi.
+const JABATAN_OPTIONS = [
+  { value: 'sekretaris', label: 'Sekretaris Paguyuban' },
+  { value: 'bendahara', label: 'Bendahara Paguyuban' },
   { value: 'security', label: 'Security' },
 ]
 
-// IT Support hanya bisa dikelola Superadmin
+// IT Support hanya bisa dikelola Superadmin, dan tetap akun terpisah (bukan warga penghuni)
 const IT_SUPPORT_OPTION = { value: 'it_support', label: 'IT Support' }
 
 export default async function KelolaStaffPage() {
@@ -34,27 +38,29 @@ export default async function KelolaStaffPage() {
     )
   }
 
-  const ROLE_OPTIONS = access.canCreateItSupport ? [...BASE_ROLE_OPTIONS, IT_SUPPORT_OPTION] : BASE_ROLE_OPTIONS
-  const visibleRoles = access.canCreateItSupport ? ['staff_paguyuban', 'security', 'it_support'] : ['staff_paguyuban', 'security']
+  // IT Support: hanya Superadmin yang boleh buat akun baru dari sini (bukan warga penghuni).
+  const itSupportOnly = access.canCreateItSupport ? [IT_SUPPORT_OPTION] : []
 
   const supabase = await createClient()
-  const { data: accountsRaw } = await supabase
-    .from('profiles')
-    .select('id, full_name, role, staff_position, created_at')
-    .in('role', visibleRoles)
-    .order('created_at', { ascending: false })
+  const { data: accountsRaw } = access.canCreateItSupport
+    ? await supabase.from('profiles').select('id, full_name, role, staff_position, created_at').eq('role', 'it_support').order('created_at', { ascending: false })
+    : { data: [] as any[] }
 
-  // Tabel memakai satu nilai "role" per baris; Sekretaris/Bendahara digabung jadi "staff_paguyuban:jabatan"
   const accounts = (accountsRaw ?? []).map((a: any) => ({
     id: a.id as string,
     full_name: (a.full_name ?? '') as string,
     created_at: a.created_at as string,
-    role: a.role === 'staff_paguyuban' ? `staff_paguyuban:${a.staff_position ?? 'sekretaris'}` : (a.role as string),
+    role: a.role as string,
   }))
 
-  const pengurusCount = accounts.filter((a) => a.role.startsWith('staff_paguyuban')).length
-  const securityCount = accounts.filter((a) => a.role === 'security').length
-  const itSupportCount = accounts.filter((a) => a.role === 'it_support').length
+  const [jabatanHolders, wargaOptions] = await Promise.all([
+    listJabatanHolders(['sekretaris', 'bendahara', 'security']),
+    listActiveWargaForPicker(),
+  ])
+
+  const pengurusCount = jabatanHolders.filter((h) => h.jabatan === 'sekretaris' || h.jabatan === 'bendahara').length
+  const securityCount = jabatanHolders.filter((h) => h.jabatan === 'security').length
+  const itSupportCount = accounts.length
 
   return (
     <AdminLayout portalLabel="Portal Admin" roleLabel={access.roleLabel} userName={access.fullName} navItems={adminNavFor(access)}>
@@ -65,8 +71,8 @@ export default async function KelolaStaffPage() {
         </h1>
         <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
           {access.canCreateItSupport
-            ? 'Tambah, edit, atau hapus akun Sekretaris, Bendahara, Security, dan IT Support.'
-            : 'Tambah, edit, atau hapus akun Sekretaris, Bendahara, dan Security. Akun IT Support dikelola Superadmin.'}
+            ? 'Angkat Sekretaris, Bendahara, dan Security dari warga aktif. Akun IT Support tetap dibuat terpisah di bawah.'
+            : 'Angkat Sekretaris, Bendahara, dan Security dari warga aktif. Akun IT Support dikelola Superadmin.'}
         </p>
       </div>
 
@@ -94,29 +100,41 @@ export default async function KelolaStaffPage() {
         ) : null}
         <StatCard
           label="Total Staff"
-          value={accounts.length}
+          value={jabatanHolders.length + accounts.length}
           iconBg="#a8d8c8"
           iconPath="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
-            Daftar Staff
-          </div>
-          <AdminAccountTable
-            accounts={accounts}
-            roleOptions={ROLE_OPTIONS}
-            updateAction={updateStaffAccount}
-            deleteAction={deleteStaffAccount}
-          />
-        </div>
+      <JabatanManager
+        title="Pengurus Paguyuban & Security (diangkat dari warga aktif)"
+        description="Pilih warga yang statusnya sudah aktif/terverifikasi untuk diangkat jadi Sekretaris, Bendahara, atau Security. Kalau jabatannya dicabut nanti, akun otomatis kembali jadi warga biasa -- data & riwayat sebagai warga tidak hilang."
+        jabatanOptions={JABATAN_OPTIONS}
+        wargaOptions={wargaOptions}
+        holders={jabatanHolders}
+        assignAction={assignStaffJabatan}
+        revokeAction={revokeStaffJabatan}
+      />
 
-        <div>
-          <AdminAccountPanel title="Tambah Akun Staff" roleOptions={ROLE_OPTIONS} createAction={createStaffAccount} />
+      {access.canCreateItSupport ? (
+        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
+              Daftar IT Support
+            </div>
+            <AdminAccountTable
+              accounts={accounts}
+              roleOptions={itSupportOnly}
+              updateAction={updateStaffAccount}
+              deleteAction={deleteStaffAccount}
+            />
+          </div>
+
+          <div>
+            <AdminAccountPanel title="Tambah Akun IT Support" roleOptions={itSupportOnly} createAction={createStaffAccount} />
+          </div>
         </div>
-      </div>
+      ) : null}
     </AdminLayout>
   )
 }

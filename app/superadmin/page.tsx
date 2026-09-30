@@ -7,12 +7,14 @@ import { adminNavFor } from '@/lib/admin-nav'
 import StatCard from '@/components/admin/StatCard'
 import AdminAccountPanel from '@/components/admin/AdminAccountPanel'
 import AdminAccountTable from '@/components/admin/AdminAccountTable'
-import { createAdminAccount, updateAdminAccount, deleteAdminAccount } from './actions'
+import JabatanManager from '@/components/admin/JabatanManager'
+import { listActiveWargaForPicker, listJabatanHolders } from '@/lib/jabatan'
+import { createAdminAccount, updateAdminAccount, deleteAdminAccount, assignAdminPaguyuban, revokeAdminPaguyuban } from './actions'
 
-const ROLE_OPTIONS = [
-  { value: 'manajemen', label: 'Admin Manajemen Perumahan' },
-  { value: 'paguyuban', label: 'Admin Paguyuban' },
-]
+// Manajemen Perumahan tetap dibuat langsung (bukan warga penghuni). Admin Paguyuban sekarang
+// diangkat dari warga aktif lewat JabatanManager di bawah, bukan lewat panel ini lagi.
+const ROLE_OPTIONS = [{ value: 'manajemen', label: 'Admin Manajemen Perumahan' }]
+const ADMIN_PAGUYUBAN_OPTIONS = [{ value: 'admin_paguyuban', label: 'Admin Paguyuban' }]
 
 export default async function SuperadminPage() {
   const access = await getMyAccess()
@@ -43,7 +45,7 @@ export default async function SuperadminPage() {
   const { data: accounts } = await supabase
     .from('profiles')
     .select('id, full_name, role, created_at')
-    .in('role', ['manajemen', 'paguyuban'])
+    .in('role', ['manajemen'])
     .order('created_at', { ascending: false })
 
   const { count: wargaCount } = await supabase
@@ -57,7 +59,8 @@ export default async function SuperadminPage() {
     .eq('role', 'warga')
     .eq('account_status', 'menunggu_verifikasi')
 
-  const paguyubanCount = (accounts ?? []).filter((a) => a.role === 'paguyuban').length
+  const [paguyubanHolders, wargaOptions] = await Promise.all([listJabatanHolders('admin_paguyuban'), listActiveWargaForPicker()])
+  const paguyubanCount = paguyubanHolders.length
   const manajemenCount = (accounts ?? []).filter((a) => a.role === 'manajemen').length
 
   return (
@@ -115,8 +118,20 @@ export default async function SuperadminPage() {
         </div>
 
         <div>
-          <AdminAccountPanel title="Tambah Akun Admin" roleOptions={ROLE_OPTIONS} createAction={createAdminAccount} />
+          <AdminAccountPanel title="Tambah Akun Manajemen" roleOptions={ROLE_OPTIONS} createAction={createAdminAccount} />
         </div>
+      </div>
+
+      <div className="mt-8">
+        <JabatanManager
+          title="Admin Paguyuban (diangkat dari warga aktif)"
+          description="Pilih warga yang statusnya sudah aktif/terverifikasi untuk diangkat jadi Admin Paguyuban. Kalau jabatannya dicabut nanti, akun otomatis kembali jadi warga biasa -- data & riwayat sebagai warga tidak hilang."
+          jabatanOptions={ADMIN_PAGUYUBAN_OPTIONS}
+          wargaOptions={wargaOptions}
+          holders={paguyubanHolders}
+          assignAction={assignAdminPaguyuban}
+          revokeAction={revokeAdminPaguyuban}
+        />
       </div>
     </AdminLayout>
   )
