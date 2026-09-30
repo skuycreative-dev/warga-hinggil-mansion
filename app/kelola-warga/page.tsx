@@ -1,11 +1,27 @@
 ﻿import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getMyAccess } from '@/lib/access'
 import { adminNavFor } from '@/lib/admin-nav'
 import AdminLayout from '@/components/admin/AdminLayout'
 import StatCard from '@/components/admin/StatCard'
 import KelolaWargaTable from '@/components/admin/KelolaWargaTable'
-import { deactivateWarga, restoreWarga, permanentlyDeleteMovedWarga } from './actions'
+import ChangeRequestTable from '@/components/admin/ChangeRequestTable'
+import OccupancyRequestList from '@/components/admin/OccupancyRequestList'
+import FamilyMembersAdminList from '@/components/admin/FamilyMembersAdminList'
+import { approveChangeRequest, rejectChangeRequest } from '@/app/verifikasi-akun/actions'
+import {
+  deactivateWarga,
+  restoreWarga,
+  permanentlyDeleteMovedWarga,
+  approveOccupancyRequest,
+  rejectOccupancyRequest,
+  deleteFamilyMemberAdmin,
+} from './actions'
+
+// Paket V (30 Sep 2026): halaman ini sekarang memakai admin client (bukan client biasa yang
+// tunduk RLS) untuk SEMUA pembacaan data -- ini juga menutup tuntas bug lama "Warga Aktif
+// selalu 0" yang disebabkan sesi 2FA (aal2) belum aktif saat query dijalankan lewat RLS.
+// Penulisan/perubahan data tetap lewat action yang memvalidasi hak akses sendiri (lihat actions.ts).
 
 export const dynamic = 'force-dynamic'
 
@@ -28,29 +44,45 @@ export default async function KelolaWargaPage() {
     )
   }
 
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const [{ data: aktifRaw }, { data: pindahRaw }, { data: arsipRaw }] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('id, full_name, nickname, phone, family_role, house:houses(nomor_rumah)')
-      .eq('role', 'warga')
-      .eq('account_status', 'aktif')
-      .order('full_name', { ascending: true })
-      .limit(1000),
-    supabase
-      .from('profiles')
-      .select('id, full_name, nickname, deactivated_at, deactivated_reason')
-      .eq('role', 'warga')
-      .eq('account_status', 'pindah')
-      .order('deactivated_at', { ascending: false })
-      .limit(500),
-    supabase
-      .from('warga_arsip')
-      .select('id, full_name, nomor_rumah, alasan, dihapus_oleh_nama, created_at')
-      .order('created_at', { ascending: false })
-      .limit(50),
-  ])
+  const [{ data: aktifRaw }, { data: pindahRaw }, { data: arsipRaw }, { data: familyRaw }, { data: occRequestsRaw }, { data: changeRequestsRaw }] =
+    await Promise.all([
+      admin
+        .from('profiles')
+        .select('id, full_name, nickname, phone, family_role, house:houses(nomor_rumah)')
+        .eq('role', 'warga')
+        .eq('account_status', 'aktif')
+        .order('full_name', { ascending: true })
+        .limit(1000),
+      admin
+        .from('profiles')
+        .select('id, full_name, nickname, deactivated_at, deactivated_reason')
+        .eq('role', 'warga')
+        .eq('account_status', 'pindah')
+        .order('deactivated_at', { ascending: false })
+        .limit(500),
+      admin
+        .from('warga_arsip')
+        .select('id, full_name, nomor_rumah, alasan, dihapus_oleh_nama, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50),
+      // Anggota Keluarga Tanpa Akun (anak/lansia/ART tanpa login sendiri), semua rumah.
+      admin.from('family_members').select('id, name, relation, note, house:houses(nomor_rumah)').order('created_at', { ascending: false }).limit(1000),
+      // Pengajuan status hunian dari penghuni yang bukan pemilik rumah (Paket V).
+      admin
+        .from('house_occupancy_requests')
+        .select('id, new_status, note, requested_by, created_at, house:houses(nomor_rumah)')
+        .eq('status', 'menunggu')
+        .order('created_at', { ascending: true }),
+      // Pengajuan perubahan data lain (nama, peran keluarga, dll) -- sama seperti di Verifikasi Akun,
+      // ditampilkan juga di sini supaya semua urusan data warga terkumpul di satu tempat.
+      admin
+        .from('profile_change_requests')
+        .select('id, field, old_value, new_value, created_at, requester:profiles!profile_change_requests_user_id_fkey(full_name, nickname, house:houses(nomor_rumah))')
+        .eq('status', 'menunggu')
+        .order('created_at', { ascending: true }),
+    ])
 
   const normalize = (rows: any[] | null) =>
     (rows ?? []).map((r) => ({ ...r, house: Array.isArray(r.house) ? r.house[0] : r.house }))
@@ -58,6 +90,38 @@ export default async function KelolaWargaPage() {
   const aktif = normalize(aktifRaw)
   const pindah = pindahRaw ?? []
   const arsip = arsipRaw ?? []
+
+  const familyMembers = normalize(familyRaw).map((r: any) => ({
+    id: r.id as string,
+    name: r.name as string,
+    relation: r.relation as string,
+    note: (r.note as string | null) ?? null,
+    house_label: (r.house?.nomor_rumah as string | undefined) ?? null,
+  }))
+
+  const occRequestsNormalized = normalize(occRequestsRaw)
+  const requesterIds = Array.from(new Set(occRequestsNormalized.map((r: any) => r.requested_by as string)))
+  const { data: requesterProfiles } = requesterIds.length
+    ? await admin.from('profiles').select('id, full_name, nickname').in('id', requesterIds)
+    : { data: [] as any[] }
+  const requesterName = new Map((requesterProfiles ?? []).map((p: any) => [p.id as string, (p.nickname?.trim() || p.full_name) as string]))
+
+  const occupancyRequests = occRequestsNormalized.map((r: any) => ({
+    id: r.id as string,
+    house_label: (r.house?.nomor_rumah as string | undefined) ?? '-',
+    requester_name: requesterName.get(r.requested_by as string) ?? 'Penghuni',
+    new_status: r.new_status as string,
+    note: (r.note as string | null) ?? null,
+    created_at: r.created_at as string,
+  }))
+
+  const changeRequests = (changeRequestsRaw ?? []).map((r: any) => {
+    const requester = Array.isArray(r.requester) ? r.requester[0] : r.requester
+    return {
+      ...r,
+      requester: requester ? { ...requester, house: Array.isArray(requester.house) ? requester.house[0] : requester.house } : null,
+    }
+  })
 
   return (
     <AdminLayout portalLabel="Portal Admin" roleLabel={access.roleLabel} userName={access.fullName} navItems={adminNavFor(access)}>
@@ -93,6 +157,40 @@ export default async function KelolaWargaPage() {
         restoreAction={restoreWarga}
         deleteAction={permanentlyDeleteMovedWarga}
       />
+
+      <div className="mt-9">
+        <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
+          Pengajuan Status Hunian ({occupancyRequests.length})
+        </div>
+        <p className="mb-3 text-[12.5px]" style={{ color: '#5b543f' }}>
+          Penghuni rumah yang bukan pemilik (istri, anak, dst) mengajukan perubahan di menu Status Hunian --
+          disetujui/ditolak di sini.
+        </p>
+        <OccupancyRequestList requests={occupancyRequests} approveAction={approveOccupancyRequest} rejectAction={rejectOccupancyRequest} />
+      </div>
+
+      <div className="mt-9">
+        <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
+          Pengajuan Perubahan Data ({changeRequests.length})
+        </div>
+        <ChangeRequestTable
+          requests={changeRequests}
+          canReviewFullName={access.isSuperadmin || access.isKetuaPaguyuban}
+          approveAction={approveChangeRequest}
+          rejectAction={rejectChangeRequest}
+        />
+      </div>
+
+      <div className="mt-9">
+        <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>
+          Anggota Keluarga Tanpa Akun ({familyMembers.length})
+        </div>
+        <p className="mb-3 text-[12.5px]" style={{ color: '#5b543f' }}>
+          Anak, lansia, ART, atau penghuni lain yang didaftarkan tanpa akun login sendiri oleh Kepala/Ibu Rumah
+          Tangga masing-masing rumah.
+        </p>
+        <FamilyMembersAdminList members={familyMembers} deleteAction={deleteFamilyMemberAdmin} />
+      </div>
     </AdminLayout>
   )
 }

@@ -2,11 +2,23 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { changeOccupancy } from '@/app/status-hunian/actions'
+import { changeOccupancy, requestOccupancy } from '@/app/status-hunian/actions'
 import { OCCUPANCY_OPTIONS } from '@/lib/hunian'
 import { inputStyle } from '@/lib/format'
 
-export default function OccupancyEditor({ current, houseId = null, compact = false }: { current: string; houseId?: string | null; compact?: boolean }) {
+export default function OccupancyEditor({
+  current,
+  houseId = null,
+  compact = false,
+  mode = 'direct',
+}: {
+  current: string
+  houseId?: string | null
+  compact?: boolean
+  // 'direct': pemilik rumah / Pengurus, langsung tersimpan (perilaku lama).
+  // 'request': penghuni lain (bukan pemilik) -- jadi pengajuan, menunggu disetujui Pengurus.
+  mode?: 'direct' | 'request'
+}) {
   const router = useRouter()
   const [status, setStatus] = useState(current)
   const [note, setNote] = useState('')
@@ -16,6 +28,20 @@ export default function OccupancyEditor({ current, houseId = null, compact = fal
   function save() {
     setMsg(null)
     startTransition(async () => {
+      if (mode === 'request') {
+        const r = await requestOccupancy(status, note)
+        if (r.error) {
+          setMsg({ ok: false, text: r.error })
+          return
+        }
+        setNote('')
+        setMsg({
+          ok: true,
+          text: r.langsung ? 'Status hunian diperbarui.' : 'Pengajuan dikirim, menunggu disetujui Admin Paguyuban/Sekretaris.',
+        })
+        router.refresh()
+        return
+      }
       const r = await changeOccupancy(status, note, houseId)
       if (r.error) {
         setMsg({ ok: false, text: r.error })
@@ -47,7 +73,7 @@ export default function OccupancyEditor({ current, houseId = null, compact = fal
       </div>
       <input value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} placeholder="Catatan (opsional), mis. disewakan mulai 1 Oktober" aria-label="Catatan" style={inputStyle} />
       <button type="button" disabled={isPending || status === current} onClick={save} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || status === current ? 0.6 : 1 }}>
-        {isPending ? 'Menyimpan...' : 'Simpan Status'}
+        {isPending ? 'Menyimpan...' : mode === 'request' ? 'Ajukan Perubahan' : 'Simpan Status'}
       </button>
       {msg ? <p className="text-[12.5px] font-bold" style={{ color: msg.ok ? '#2f6b4f' : '#b3392f' }}>{msg.text}</p> : null}
     </div>

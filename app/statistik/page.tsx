@@ -1,5 +1,5 @@
 ﻿import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getMyAccess } from '@/lib/access'
 import { adminNavFor } from '@/lib/admin-nav'
 import AdminLayout from '@/components/admin/AdminLayout'
@@ -46,14 +46,17 @@ export default async function StatistikPage() {
     )
   }
 
-  const supabase = await createClient()
+  // Paket V (30 Sep 2026): memakai admin client (bukan client biasa yang tunduk RLS) untuk
+  // menutup tuntas bug lama "Statistik = 0" yang disebabkan sesi 2FA (aal2) belum aktif
+  // saat query dijalankan lewat RLS -- pola sama seperti perbaikan di Kelola Warga.
+  const admin = createAdminClient()
 
   const [{ data: peopleRaw }, { count: nonAccountCount }, { data: housesRaw }, { data: iplRaw }, { data: complaintsRaw }] = await Promise.all([
-    supabase.from('profiles').select('id, role, account_status, family_role, created_at').eq('role', 'warga').limit(5000),
-    supabase.from('family_members').select('id', { count: 'exact', head: true }),
-    supabase.from('houses').select('id, occupancy_status').limit(3000),
-    supabase.from('iuran_payment_status').select('status, amount_due, late_fee, amount_paid').limit(5000),
-    supabase.from('complaints').select('id, status').limit(5000),
+    admin.from('profiles').select('id, role, account_status, family_role, created_at').eq('role', 'warga').limit(5000),
+    admin.from('family_members').select('id', { count: 'exact', head: true }),
+    admin.from('houses').select('id, occupancy_status').limit(3000),
+    admin.from('iuran_payment_status').select('status, amount_due, late_fee, amount_paid').limit(5000),
+    admin.from('complaints').select('id, status').limit(5000),
   ])
 
   const people = peopleRaw ?? []

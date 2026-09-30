@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { logAdminAction } from '@/lib/audit'
 import { getMyAccess } from '@/lib/access'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { logError } from '@/lib/log-error'
 
 async function requireVerifier() {
@@ -160,6 +161,57 @@ export async function permanentlyDeleteMovedWarga(id: string) {
     return { error: null }
   } catch (err) {
     await logError('kelola-warga: permanentlyDeleteMovedWarga', err)
+    return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
+  }
+}
+
+// Paket V (30 Sep 2026): setujui/tolak pengajuan status hunian dari penghuni yang BUKAN pemilik
+// rumah. Pengecekan siapa yang boleh menyetujui dilakukan di database (RPC
+// review_house_occupancy_request), jadi cukup panggil lewat client biasa (bukan admin client).
+export async function approveOccupancyRequest(id: string, note: string) {
+  const requester = await requireVerifier()
+  if (!requester) return { error: 'Kamu tidak punya akses.' }
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('review_house_occupancy_request', { p_id: id, p_approve: true, p_review_note: note.trim() || null })
+  if (error) return { error: publicError(error) }
+  revalidatePath('/kelola-warga')
+  revalidatePath('/status-hunian')
+  return { error: null }
+}
+
+export async function rejectOccupancyRequest(id: string, note: string) {
+  const requester = await requireVerifier()
+  if (!requester) return { error: 'Kamu tidak punya akses.' }
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('review_house_occupancy_request', { p_id: id, p_approve: false, p_review_note: note.trim() || null })
+  if (error) return { error: publicError(error) }
+  revalidatePath('/kelola-warga')
+  revalidatePath('/status-hunian')
+  return { error: null }
+}
+
+// Paket V: Pengurus bisa menghapus catatan Anggota Keluarga Tanpa Akun (mis. data keliru/duplikat
+// atau orangnya sudah tidak tinggal di sana lagi) -- beda dari penghapusan oleh Kepala/Ibu Rumah
+// Tangga sendiri (yang sudah ada lewat app/keluarga), ini lewat admin client karena RLS
+// family_members hanya mengizinkan pengurus RUMAH itu sendiri, bukan Pengurus Paguyuban.
+export async function deleteFamilyMemberAdmin(id: string) {
+  const requester = await requireVerifier()
+  if (!requester) return { error: 'Kamu tidak punya akses.' }
+
+  try {
+    const admin = createAdminClient()
+    const { data: target } = await admin.from('family_members').select('name, house:houses(nomor_rumah)').eq('id', id).maybeSingle()
+    if (!target) return { error: 'Data tidak ditemukan.' }
+
+    const { error } = await admin.from('family_members').delete().eq('id', id)
+    if (error) return { error: publicError(error) }
+
+    const house = Array.isArray((target as any).house) ? (target as any).house[0] : (target as any).house
+    await logAdminAction(requester.userId, 'hapus', 'anggota_keluarga', id, `Menghapus data Anggota Keluarga Tanpa Akun: ${target.name} (Rumah ${house?.nomor_rumah ?? '-'})`)
+    revalidatePath('/kelola-warga')
+    return { error: null }
+  } catch (err) {
+    await logError('kelola-warga: deleteFamilyMemberAdmin', err)
     return { error: 'Gagal terhubung ke server Supabase. Hubungi developer.' }
   }
 }

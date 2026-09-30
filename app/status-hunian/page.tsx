@@ -17,7 +17,7 @@ export default async function StatusHunianPage() {
   const { data: me } = await supabase.from('profiles').select('house_id, is_house_owner, account_status').eq('id', access.userId).maybeSingle()
   const myHouseId = (me?.house_id as string) ?? null
 
-  const [{ data: myHouse }, { data: residents }, { data: history }] = await Promise.all([
+  const [{ data: myHouse }, { data: residents }, { data: history }, { data: pendingRequest }] = await Promise.all([
     myHouseId ? supabase.from('houses').select('id, nomor_rumah, occupancy_status').eq('id', myHouseId).maybeSingle() : Promise.resolve({ data: null as any }),
     myHouseId
       ? supabase.from('profiles').select('id, full_name, nickname, family_role, is_house_owner').eq('house_id', myHouseId).eq('account_status', 'aktif')
@@ -25,6 +25,9 @@ export default async function StatusHunianPage() {
     myHouseId
       ? supabase.from('house_occupancy_history').select('id, old_status, new_status, note, changed_by, created_at').eq('house_id', myHouseId).order('created_at', { ascending: false }).limit(20)
       : Promise.resolve({ data: [] as any[] }),
+    myHouseId
+      ? supabase.from('house_occupancy_requests').select('id, new_status, note, requested_by, created_at').eq('house_id', myHouseId).eq('status', 'menunggu').maybeSingle()
+      : Promise.resolve({ data: null as any }),
   ])
 
   const changerIds = Array.from(new Set((history ?? []).map((h: any) => h.changed_by).filter(Boolean) as string[]))
@@ -32,6 +35,8 @@ export default async function StatusHunianPage() {
   const changerName = new Map((changers ?? []).map((p: any) => [p.id as string, displayName(p)]))
   const owners = (residents ?? []).filter((r: any) => r.is_house_owner)
   const isOwner = !!me?.is_house_owner && me?.account_status === 'aktif'
+  const isActiveResident = (residents ?? []).some((r: any) => r.id === access.userId)
+  const requesterName = pendingRequest ? changerName.get(pendingRequest.requested_by) ?? (residents ?? []).find((r: any) => r.id === pendingRequest.requested_by)?.full_name ?? 'Penghuni' : null
 
   // Pengurus: semua rumah
   let houses: HouseRow[] = []
@@ -71,7 +76,9 @@ export default async function StatusHunianPage() {
             <h1 className="mt-1 text-2xl font-bold md:text-3xl" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#1f1a10' }}>
               Status Hunian
             </h1>
-            <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>Status dicatat per rumah dan hanya bisa diubah pemilik rumah. Setiap perubahan tersimpan di riwayat.</p>
+            <p className="mt-1 text-sm" style={{ color: '#5b543f' }}>
+              Status dicatat per rumah. Pemilik rumah bisa mengubah langsung; penghuni lain bisa mengajukan, menunggu disetujui Pengurus. Setiap perubahan tersimpan di riwayat.
+            </p>
           </div>
           <Link href="/dashboard" className="flex-shrink-0 text-sm font-bold" style={{ color: '#9c7a3f' }}>Beranda</Link>
         </div>
@@ -90,6 +97,20 @@ export default async function StatusHunianPage() {
               <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
                 <div className="mb-3 text-[14px] font-bold" style={{ color: '#1f1a10' }}>Ubah status rumahmu</div>
                 <OccupancyEditor current={myHouse.occupancy_status ?? 'kosong'} />
+              </div>
+            ) : isActiveResident && pendingRequest ? (
+              <div className="rounded-2xl px-5 py-4 text-[12.5px]" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)', color: '#5b543f' }}>
+                <b style={{ color: '#1f1a10' }}>Ada pengajuan menunggu persetujuan:</b> {occupancyInfo(pendingRequest.new_status).label}
+                {pendingRequest.note ? ` · ${pendingRequest.note}` : ''} -- diajukan {requesterName} pada{' '}
+                {new Date(pendingRequest.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}. Menunggu disetujui Admin Paguyuban/Sekretaris Paguyuban.
+              </div>
+            ) : isActiveResident ? (
+              <div className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.45)' }}>
+                <div className="mb-3 text-[14px] font-bold" style={{ color: '#1f1a10' }}>Ajukan perubahan status rumahmu</div>
+                <p className="mb-3 text-[12px]" style={{ color: '#5b543f' }}>
+                  Kamu bukan pemilik rumah ini, jadi perubahan akan menunggu disetujui Admin Paguyuban atau Sekretaris Paguyuban dulu.
+                </p>
+                <OccupancyEditor current={myHouse.occupancy_status ?? 'kosong'} mode="request" />
               </div>
             ) : (
               <p className="rounded-2xl px-5 py-4 text-[12.5px]" style={{ background: '#ffffff', color: '#5b543f' }}>
