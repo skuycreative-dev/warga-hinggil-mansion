@@ -27,6 +27,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: `Aplikasi komunitas warga ${b.community_name}`,
     applicationName: b.app_name,
     appleWebApp: { capable: true, title: b.short_name, statusBarStyle: 'black-translucent' },
+    // Aplikasi ini portal privat berbasis login untuk warga -- tidak perlu dan tidak boleh muncul
+    // di hasil pencarian Google/dsb (30 Sep 2026). metadataBase memastikan setiap alamat yang
+    // dibuat aplikasi ini selalu mengarah ke domain asli, bukan alamat sementara bawaan Vercel.
+    metadataBase: new URL('https://warga.hinggilmansion.com'),
+    robots: { index: false, follow: false, nocache: true },
   }
 }
 
