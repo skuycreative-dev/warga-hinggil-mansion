@@ -20,10 +20,19 @@ export default async function PollingPage() {
 
   const { data: polls } = await supabase
     .from('polls')
-    .select('id, title, description, is_active, created_at')
+    .select('id, title, description, is_active, closes_at, image_path, created_at')
     .order('created_at', { ascending: false })
 
   const pollIds = (polls ?? []).map((p) => p.id)
+
+  // Gambar polling disimpan privat: dibuat link sementara 1 jam
+  const imagePaths = (polls ?? []).map((p: any) => p.image_path as string | null).filter(Boolean) as string[]
+  const { data: signedImages } = imagePaths.length
+    ? await supabase.storage.from('poll-images').createSignedUrls(imagePaths, 60 * 60)
+    : { data: [] as any[] }
+  const imageMap = new Map(
+    ((signedImages ?? []) as any[]).filter((s) => s?.path && s?.signedUrl).map((s) => [s.path as string, s.signedUrl as string])
+  )
 
   const [{ data: options }, { data: votes }] = await Promise.all([
     pollIds.length > 0
@@ -43,7 +52,9 @@ export default async function PollingPage() {
       id: p.id,
       title: p.title,
       description: p.description,
-      is_active: p.is_active,
+      // Polling yang melewati batas waktunya dianggap ditutup (sama seperti di database)
+      is_active: !!p.is_active && (!p.closes_at || new Date(p.closes_at as string).getTime() > Date.now()),
+      image_url: (p as any).image_path ? imageMap.get((p as any).image_path as string) ?? null : null,
       totalVotes: pollVotes.length,
       votedOptionId: myVote?.option_id ?? null,
       options: pollOptions.map((o) => ({
@@ -69,7 +80,7 @@ export default async function PollingPage() {
 
         {canManage ? (
           <div className="mb-6">
-            <PollCreateForm />
+            <PollCreateForm userId={user.id} />
           </div>
         ) : null}
 
