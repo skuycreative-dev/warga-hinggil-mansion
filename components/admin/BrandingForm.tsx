@@ -94,7 +94,7 @@ export default function BrandingForm({ initial }: { initial: BrandingInput }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={brand.logo_url} alt="Logo saat ini" width={72} height={72} className="rounded-2xl object-cover" style={{ width: 72, height: 72, background: '#faf7f0' }} />
           <div className="flex flex-col gap-2">
-            <button type="button" disabled={isPending} onClick={() => fileRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+            <button type="button" disabled={isPending} onClick={() => fileRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: '#e6c98a' }}>
               {isPending ? 'Memproses...' : 'Ganti Logo'}
             </button>
             <button
@@ -132,7 +132,7 @@ export default function BrandingForm({ initial }: { initial: BrandingInput }) {
           <p className="mb-3 text-[12px] font-medium" style={{ color: '#9c7a3f' }}>Belum ada kop surat. Kop otomatis dari data di atas tetap dipakai.</p>
         )}
         <div className="flex flex-wrap gap-2.5">
-          <button type="button" disabled={isPending} onClick={() => letterheadRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+          <button type="button" disabled={isPending} onClick={() => letterheadRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: '#e6c98a' }}>
             {isPending ? 'Memproses...' : brand.letterhead_url ? 'Ganti Kop Surat' : 'Unggah Kop Surat'}
           </button>
           {brand.letterhead_url ? (
@@ -213,7 +213,7 @@ export default function BrandingForm({ initial }: { initial: BrandingInput }) {
             </span>
           </label>
         </div>
-        <button type="submit" disabled={isPending} className="mt-1 rounded-xl py-3 text-[14px] font-bold" style={{ background: '#1a1305', color: '#e6c98a', opacity: isPending ? 0.6 : 1 }}>
+        <button type="submit" disabled={isPending} className="mt-1 rounded-xl py-3 text-[14px] font-bold" style={{ background: 'var(--brand-theme)', color: '#e6c98a', opacity: isPending ? 0.6 : 1 }}>
           {isPending ? 'Menyimpan...' : 'Simpan Identitas'}
         </button>
       </form>

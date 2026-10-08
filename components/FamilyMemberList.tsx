@@ -152,7 +152,7 @@ export default function FamilyMemberList({
             {error ? <p className="text-[12px] font-semibold" style={{ color: '#b3392f' }}>{error}</p> : null}
             <div className="flex gap-2.5">
               <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#efe9db', color: '#5b543f' }}>Batal</button>
-              <button type="button" disabled={isPending} onClick={handleSave} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
+              <button type="button" disabled={isPending} onClick={handleSave} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
                 {isPending ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>

@@ -121,7 +121,7 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
           type="submit"
           disabled={busy}
           className="ml-auto rounded-full px-6 py-2.5 text-sm font-bold"
-          style={{ border: 'none', background: '#1a1305', color: '#f5f3ee', opacity: busy ? 0.7 : 1 }}
+          style={{ border: 'none', background: 'var(--brand-theme)', color: '#f5f3ee', opacity: busy ? 0.7 : 1 }}
         >
           {busy ? 'Mengirim...' : 'Kirim'}
         </button>

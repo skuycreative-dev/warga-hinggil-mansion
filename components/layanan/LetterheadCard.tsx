@@ -58,7 +58,7 @@ export default function LetterheadCard() {
         <p className="mb-3 text-[12px] font-bold" style={{ color: msg.ok ? '#2f6b4f' : '#b3392f' }}>{msg.text}</p>
       ) : null}
       <div className="flex flex-wrap gap-2.5">
-        <button type="button" disabled={isPending} onClick={() => fileRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: '#e6c98a' }}>
+        <button type="button" disabled={isPending} onClick={() => fileRef.current?.click()} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: '#e6c98a' }}>
           {isPending ? 'Memproses...' : brand.letterhead_url ? 'Ganti Kop Surat' : 'Unggah Kop Surat'}
         </button>
         {brand.letterhead_url ? (

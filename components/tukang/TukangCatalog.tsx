@@ -42,7 +42,7 @@ export default function TukangCatalog({ items, myId }: { items: TukangSummary[];
             type="button"
             onClick={() => setCategory(c.key)}
             className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-bold"
-            style={category === c.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+            style={category === c.key ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
           >
             {c.label}
             {c.key !== 'semua' ? ` (${counts.get(c.key)})` : ` (${items.length})`}
@@ -70,7 +70,7 @@ export default function TukangCatalog({ items, myId }: { items: TukangSummary[];
             return (
               <div key={t.id} className="rounded-2xl px-4 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
                 <Link href={`/tukang/${t.id}`} className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-[15px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-[15px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                     {initials(t.name)}
                   </div>
                   <div className="min-w-0 flex-1">

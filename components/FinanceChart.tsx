@@ -146,7 +146,7 @@ export default function FinanceChart({ months }: { months: MonthlyFinance[] }) {
                     top: 4,
                     left: `${((active ?? 0) + 0.5) * (100 / months.length)}%`,
                     transform: `translateX(${(active ?? 0) < months.length / 2 ? '0' : '-100%'})`,
-                    background: '#1a1305',
+                    background: 'var(--brand-theme)',
                     color: '#efe4c8',
                     minWidth: 170,
                   }}

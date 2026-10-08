@@ -124,7 +124,7 @@ export default async function RumahKosongPage() {
           <Link
             href="/keamanan/rumah-kosong"
             className="flex items-center justify-between rounded-2xl px-5 py-4"
-            style={{ background: '#1a1305' }}
+            style={{ background: 'var(--brand-theme)' }}
           >
             <div>
               <div className="text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>Dashboard Rumah Kosong & Patroli</div>

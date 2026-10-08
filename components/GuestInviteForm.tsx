@@ -54,7 +54,7 @@ export default function GuestInviteForm({ houseLabel = null }: { houseLabel?: st
         {generated.token ? (
           <GuestQr token={generated.token} code={generated.code} guestName={generated.name} purpose={generated.purpose} houseLabel={houseLabel} />
         ) : (
-          <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: '#1a1305' }}>
+          <div className="flex flex-col items-center gap-3 rounded-2xl px-5 py-7 text-center" style={{ background: 'var(--brand-theme)' }}>
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Kode Tamu</span>
             <span className="text-4xl font-bold tracking-[0.3em]" style={{ fontFamily: 'var(--font-fraunces), serif', color: 'var(--brand-accent)' }}>{generated.code}</span>
           </div>
@@ -83,7 +83,7 @@ export default function GuestInviteForm({ houseLabel = null }: { houseLabel?: st
         type="button"
         onClick={() => setOpen(true)}
         className="w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-        style={{ background: '#1a1305', color: '#f5f3ee' }}
+        style={{ background: 'var(--brand-theme)', color: '#f5f3ee' }}
       >
         + Undang Tamu Baru
       </button>
@@ -132,7 +132,7 @@ export default function GuestInviteForm({ houseLabel = null }: { houseLabel?: st
           type="submit"
           disabled={isPending}
           className="flex-1 rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-          style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}
+          style={{ background: 'var(--brand-theme)', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}
         >
           {isPending ? 'Membuat QR...' : 'Buat QR Undangan'}
         </button>

@@ -15,7 +15,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="id">
-      <body style={{ margin: 0, background: '#0a0b0f', fontFamily: 'sans-serif' }}>
+      <body style={{ margin: 0, background: 'var(--brand-theme, #0a0b0f)', fontFamily: 'sans-serif' }}>
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
           <div style={{ maxWidth: 360, width: '100%', background: '#ffffff', borderRadius: 16, padding: '32px 24px', textAlign: 'center' }}>
             <h1 style={{ fontSize: 20, margin: 0, color: '#1f1a10' }}>Aplikasi sedang bermasalah</h1>
@@ -23,7 +23,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             <button
               type="button"
               onClick={() => reset()}
-              style={{ width: '100%', padding: '12px 0', borderRadius: 12, border: 'none', background: '#1a1305', color: 'var(--brand-accent)', fontWeight: 700 }}
+              style={{ width: '100%', padding: '12px 0', borderRadius: 12, border: 'none', background: 'var(--brand-theme, #0a0b0f)', color: 'var(--brand-accent, #e6c98a)', fontWeight: 700 }}
             >
               Coba Lagi
             </button>

@@ -199,7 +199,7 @@ export default async function PaguyubanDashboardPage() {
             <Link
               href="/polling"
               className="block rounded-xl py-2.5 text-center text-[12.5px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
             >
               Kelola Polling
             </Link>

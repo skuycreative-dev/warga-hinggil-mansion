@@ -26,7 +26,7 @@ export default function FeatureLockedModal({
         className="w-full max-w-sm rounded-3xl px-6 py-7 text-center"
         style={{ background: '#ffffff', boxShadow: '0 20px 50px rgba(10,11,15,0.35)' }}
       >
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full" style={{ background: '#1a1305' }}>
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full" style={{ background: 'var(--brand-theme)' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="4" y="10" width="16" height="11" rx="2" />
             <path d="M8 10V7a4 4 0 0 1 8 0v3" />
@@ -38,7 +38,7 @@ export default function FeatureLockedModal({
           type="button"
           onClick={onClose}
           className="mt-5 w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
         >
           Mengerti
         </button>

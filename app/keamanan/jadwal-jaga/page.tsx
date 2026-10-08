@@ -31,7 +31,7 @@ export default async function JadwalJagaKelolaPage({ searchParams }: { searchPar
         </p>
       </div>
 
-      <div className="mb-5 rounded-2xl px-4 py-3 text-[13px]" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+      <div className="mb-5 rounded-2xl px-4 py-3 text-[13px]" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
         <b>Sedang jaga sekarang:</b> {onDuty.length ? onDuty.map((s) => `${s.security_name} (${s.post}, ${s.start_time}–${s.end_time})`).join(' · ') : 'belum ada'}
       </div>
 

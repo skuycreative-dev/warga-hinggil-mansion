@@ -89,7 +89,7 @@ export default async function AlertDetailPage({ params }: { params: Promise<{ id
             <div className="text-[12.5px]" style={{ color: '#5b543f' }}>{alert.nomor_rumah ? `Rumah ${alert.nomor_rumah}` : 'Nomor rumah tidak tercatat'}</div>
             {alert.reporter_phone ? (
               <div className="mt-2 flex gap-2">
-                <a href={`tel:${alert.reporter_phone.replace(/[^0-9+]/g, '')}`} className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>☎ Telepon</a>
+                <a href={`tel:${alert.reporter_phone.replace(/[^0-9+]/g, '')}`} className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>☎ Telepon</a>
                 <a href={`https://wa.me/${alert.reporter_phone.replace(/[^0-9]/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1f7a45', color: '#fff' }}>
                   WhatsApp
                 </a>

@@ -194,7 +194,7 @@ export default function HouseholdFinance({
   return (
     <div className="flex flex-col gap-7">
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+        <div className="rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Total Saldo Rumah {houseLabel ?? ''}</div>
           <div className="mt-1 text-xl font-bold" style={{ color: totals.saldo >= 0 ? 'var(--brand-accent)' : '#f2b8b0' }}>{rupiah(totals.saldo)}</div>
         </div>
@@ -304,7 +304,7 @@ export default function HouseholdFinance({
           type="submit"
           disabled={isSaving}
           className="w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isSaving ? 0.7 : 1 }}
+          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isSaving ? 0.7 : 1 }}
         >
           {isSaving ? 'Menyimpan...' : 'Simpan'}
         </button>
@@ -393,7 +393,7 @@ export default function HouseholdFinance({
                       disabled={isPending}
                       onClick={() => saveEdit(t.id)}
                       className="flex-1 rounded-lg py-2 text-[12.5px] font-bold"
-                      style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                      style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                     >
                       Simpan
                     </button>

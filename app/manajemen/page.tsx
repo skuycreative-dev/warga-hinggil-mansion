@@ -113,7 +113,7 @@ export default async function ManajemenDashboardPage() {
       <Link
         href="/iuran-ipl"
         className="mb-7 flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition hover:-translate-y-0.5"
-        style={{ background: '#1a1305' }}
+        style={{ background: 'var(--brand-theme)' }}
       >
         <div>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Iuran IPL bulan ini</div>

@@ -158,7 +158,7 @@ export default function PushSettings({ muted: initialMuted, devices }: { muted: 
             </div>
             {subscribed ? (
               <div className="flex gap-2">
-                <button type="button" disabled={isPending} onClick={test} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                <button type="button" disabled={isPending} onClick={test} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                   Kirim Uji Coba
                 </button>
                 <button type="button" disabled={isPending} onClick={disable} className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: '#faf7f0', color: '#b3392f', border: '1px solid rgba(179,57,47,0.25)' }}>
@@ -166,7 +166,7 @@ export default function PushSettings({ muted: initialMuted, devices }: { muted: 
                 </button>
               </div>
             ) : (
-              <button type="button" disabled={isPending} onClick={enable} className="rounded-xl py-3 text-[14px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.6 : 1 }}>
+              <button type="button" disabled={isPending} onClick={enable} className="rounded-xl py-3 text-[14px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.6 : 1 }}>
                 {isPending ? 'Mengaktifkan...' : 'Aktifkan Notifikasi HP'}
               </button>
             )}

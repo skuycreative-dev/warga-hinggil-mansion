@@ -74,7 +74,7 @@ export default function RoleRequestList({
                   disabled={isPending && busyId === r.id}
                   onClick={() => decide(r, true)}
                   className="rounded-lg px-3 py-1.5 text-[12px] font-bold"
-                  style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                  style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                 >
                   {isPending && busyId === r.id ? 'Memproses...' : 'Setujui'}
                 </button>

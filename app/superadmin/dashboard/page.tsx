@@ -213,12 +213,12 @@ export default async function SuperadminDashboardPage() {
                       <b>{count}</b>
                     </div>
                     <div className="mt-0.5 h-1.5 overflow-hidden rounded-full" style={{ background: '#f1ece0' }}>
-                      <div className="h-full rounded-full" style={{ width: `${(count / maxRole) * 100}%`, background: '#1a1305' }} />
+                      <div className="h-full rounded-full" style={{ width: `${(count / maxRole) * 100}%`, background: 'var(--brand-theme)' }} />
                     </div>
                   </div>
                 ))}
             </div>
-            <Link href="/superadmin" className="mt-3 block rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>+ Tambah Admin</Link>
+            <Link href="/superadmin" className="mt-3 block rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>+ Tambah Admin</Link>
           </section>
 
           <section className="rounded-2xl px-5 py-4" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>

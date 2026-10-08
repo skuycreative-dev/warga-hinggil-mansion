@@ -93,7 +93,7 @@ export default function QrScanner({ onResult, paused }: { onResult: (text: strin
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative overflow-hidden rounded-2xl" style={{ background: '#0a0b0f', aspectRatio: '4 / 3' }}>
+      <div className="relative overflow-hidden rounded-2xl" style={{ background: 'var(--brand-theme)', aspectRatio: '4 / 3' }}>
         <video ref={videoRef} playsInline muted className="h-full w-full object-cover" style={{ display: active ? 'block' : 'none' }} />
         <canvas ref={canvasRef} className="hidden" />
         {active ? (

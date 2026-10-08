@@ -153,7 +153,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
   }
 
   const chip = (on: boolean): React.CSSProperties =>
-    on ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }
+    on ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.12)' }
   const center = data.center ?? DEFAULT_CENTER
   const routeTarget = house?.lat != null && house?.lng != null ? { lat: house.lat, lng: house.lng } : data.center
 
@@ -175,14 +175,14 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-full p-1" style={{ background: '#efe9dc' }} role="tablist">
           {(['denah', 'jalan'] as const).map((t) => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => { setTab(t); setPlacing(null) }} className="rounded-full px-4 py-1.5 text-[13px] font-bold" style={tab === t ? { background: '#1a1305', color: 'var(--brand-accent)' } : { color: '#5b543f' }}>
+            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => { setTab(t); setPlacing(null) }} className="rounded-full px-4 py-1.5 text-[13px] font-bold" style={tab === t ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { color: '#5b543f' }}>
               {t === 'denah' ? 'Denah' : 'Peta Jalan'}
             </button>
           ))}
         </div>
         <form onSubmit={search} className="ml-auto flex gap-1.5">
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari no. rumah" aria-label="Cari nomor rumah" className="w-32 rounded-full px-3 py-1.5 text-[16px] sm:w-40" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.12)', color: '#1f1a10' }} />
-          <button type="submit" className="rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>Cari</button>
+          <button type="submit" className="rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>Cari</button>
         </form>
       </div>
 
@@ -298,7 +298,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
           </div>
           {data.canEdit ? (
             <div className="mt-3 flex flex-wrap gap-2 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
-              <button type="button" disabled={isPending} onClick={() => setPlacing({ kind: 'house', id: house.id, view: tab })} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+              <button type="button" disabled={isPending} onClick={() => setPlacing({ kind: 'house', id: house.id, view: tab })} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                 {tab === 'denah' ? (house.x === null ? 'Letakkan di denah' : 'Pindahkan titik') : house.lat === null ? 'Letakkan di peta' : 'Pindahkan titik'}
               </button>
               {(tab === 'denah' ? house.x !== null : house.lat !== null) ? (
@@ -328,7 +328,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
           </div>
           {data.canEdit ? (
             <div className="mt-3 flex flex-wrap gap-2 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>
-              <button type="button" onClick={() => setPlacing({ kind: 'facility', id: facility.id, view: tab })} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+              <button type="button" onClick={() => setPlacing({ kind: 'facility', id: facility.id, view: tab })} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                 Pindahkan titik
               </button>
               <button
@@ -358,7 +358,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
             <div>
               <div className="text-[13px] font-bold" style={{ color: '#1f1a10' }}>1. Gambar denah / siteplan</div>
               <p className="text-[12px]" style={{ color: '#5b543f' }}>Foto atau gambar siteplan (JPG/PNG). Dari PDF: screenshot bagian denahnya dulu. Titik rumah memakai posisi persen, jadi tetap pas walau gambar diganti dengan ukuran sama.</p>
-              <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} className="mt-2 rounded-xl px-4 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy ? 0.6 : 1 }}>
+              <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} className="mt-2 rounded-xl px-4 py-2 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: busy ? 0.6 : 1 }}>
                 {busy ? 'Mengunggah...' : data.plan.url ? 'Ganti gambar denah' : 'Unggah gambar denah'}
               </button>
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => uploadPlan(e.target.files?.[0])} />
@@ -403,7 +403,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
                   disabled={newFacility.name.trim().length < 2}
                   onClick={() => setPlacing({ kind: 'new-facility', id: 'baru', view: tab })}
                   className="rounded-xl px-3 py-2 text-[12.5px] font-bold"
-                  style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: newFacility.name.trim().length < 2 ? 0.5 : 1 }}
+                  style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: newFacility.name.trim().length < 2 ? 0.5 : 1 }}
                 >
                   Letakkan
                 </button>
@@ -422,7 +422,7 @@ export default function PetaPerumahan({ data }: { data: MapData }) {
                     run(() => saveMapCenter(v.lat, v.lng, Math.max(10, Math.min(20, v.zoom))), 'Lokasi perumahan disimpan.')
                   }}
                   className="mt-2 rounded-xl px-4 py-2 text-[12.5px] font-bold"
-                  style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                  style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                 >
                   Simpan tampilan ini sebagai lokasi perumahan
                 </button>

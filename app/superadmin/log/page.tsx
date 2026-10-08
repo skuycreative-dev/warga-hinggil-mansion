@@ -98,7 +98,7 @@ export default async function LogAdminPage({ searchParams }: { searchParams: Pro
           <option value="keamanan">Keamanan</option>
           <option value="backup">Backup</option>
         </select>
-        <button type="submit" className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+        <button type="submit" className="rounded-xl px-4 py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
           Cari
         </button>
       </form>

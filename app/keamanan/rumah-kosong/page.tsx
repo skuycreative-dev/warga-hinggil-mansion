@@ -44,7 +44,7 @@ export default async function RumahKosongDashboardPage() {
             {active.length} rumah sedang kosong · {upcoming.length} akan kosong. Penghuni dapat notifikasi setiap patroli dicatat.
           </p>
         </div>
-        <Link href="/keamanan/rumah-kosong/cetak" className="rounded-lg px-4 py-2 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+        <Link href="/keamanan/rumah-kosong/cetak" className="rounded-lg px-4 py-2 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
           {'\u{1F5A8}'} Cetak Jadwal Patroli
         </Link>
       </div>
@@ -56,7 +56,7 @@ export default async function RumahKosongDashboardPage() {
         <StatCard label="Mencurigakan" value={suspicious ?? 0} caption="Bulan ini" iconBg="#f2b8b0" iconPath="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
       </div>
 
-      <div className="mb-6 rounded-2xl px-4 py-3 text-[12.5px]" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+      <div className="mb-6 rounded-2xl px-4 py-3 text-[12.5px]" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
         <b>Sedang jaga:</b> {onDuty.length ? onDuty.map((s) => `${s.security_name} (${s.post}, ${s.start_time}–${s.end_time})`).join(' · ') : 'belum ada jadwal jaga untuk jam ini'}
         {' · '}
         <Link href="/keamanan/jadwal-jaga" className="underline">Atur jadwal jaga</Link>

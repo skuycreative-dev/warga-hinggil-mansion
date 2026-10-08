@@ -292,7 +292,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         className="w-full"
         style={{
           background:
-            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
+            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), var(--brand-theme)',
         }}
       >
         <div className="mx-auto flex w-full max-w-3xl items-center px-6 py-5 md:px-10">
@@ -448,7 +448,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7" rx="1.5" />
                     <rect x="14" y="3" width="7" height="7" rx="1.5" />
@@ -466,7 +466,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
                   </svg>
@@ -481,7 +481,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1ZM9 13l2 2 4-4" />
                   </svg>
@@ -496,7 +496,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
                     <path d="m9 12 2 2 4-4" />
@@ -512,7 +512,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7" rx="1.5" />
                     <rect x="14" y="3" width="7" height="7" rx="1.5" />
@@ -530,7 +530,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -547,7 +547,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7" rx="1.5" />
                     <rect x="14" y="3" width="7" height="7" rx="1.5" />
@@ -565,7 +565,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="m9 12 2 2 4-4M21 12c0 4.5-3.5 8.5-9 10-5.5-1.5-9-5.5-9-10V5l9-3 9 3v7Z" />
                   </svg>
@@ -580,7 +580,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   </svg>
@@ -595,7 +595,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z" />
                   </svg>
@@ -610,7 +610,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
@@ -625,7 +625,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
                   </svg>
@@ -640,7 +640,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z" />
                   </svg>
@@ -655,7 +655,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 className="flex flex-col items-center gap-3 rounded-2xl px-4 py-6 text-center transition hover:-translate-y-0.5"
                 style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: '#1a1305' }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
                     <circle cx="12" cy="10" r="2.5" />
@@ -698,7 +698,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       </div>
                       <span
                         className="flex-shrink-0 rounded-full px-3 py-1 text-[11.5px] font-bold"
-                        style={voted ? { background: 'rgba(47,138,79,0.12)', color: '#2f8a4f' } : { background: '#1a1305', color: 'var(--brand-accent)' }}
+                        style={voted ? { background: 'rgba(47,138,79,0.12)', color: '#2f8a4f' } : { background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                       >
                         {voted ? 'Sudah memilih' : 'Pilih sekarang'}
                       </span>
@@ -731,7 +731,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   >
                     <span className="text-sm font-bold" style={{ color: '#1f1a10' }}>
                       {a.is_pinned ? (
-                        <span className="mr-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                        <span className="mr-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                           Disematkan
                         </span>
                       ) : null}

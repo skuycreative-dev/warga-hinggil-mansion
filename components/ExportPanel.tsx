@@ -40,7 +40,7 @@ export default function ExportPanel({
                   aria-checked={kind === k.key}
                   onClick={() => setKind(k.key)}
                   className="rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                  style={kind === k.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+                  style={kind === k.key ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
                 >
                   {k.label}
                 </button>

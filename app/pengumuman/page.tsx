@@ -100,7 +100,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
         className="w-full"
         style={{
           background:
-            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
+            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), var(--brand-theme)',
         }}
       >
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5 md:px-10">
@@ -126,7 +126,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
             <Link
               href="/pengumuman"
               className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-              style={!category ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+              style={!category ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
             >
               Semua
             </Link>
@@ -135,7 +135,7 @@ export default async function PengumumanPage({ searchParams }: { searchParams: P
                 key={c.key}
                 href={`/pengumuman?k=${c.key}`}
                 className="flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                style={category === c.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+                style={category === c.key ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
               >
                 {c.label}
               </Link>

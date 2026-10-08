@@ -131,7 +131,7 @@ export default function ChatThread({ myId, friendId, friendName }: { myId: strin
           onClick={handleSend}
           disabled={isPending || !text.trim()}
           className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-          style={{ background: '#1a1305', opacity: isPending || !text.trim() ? 0.5 : 1 }}
+          style={{ background: 'var(--brand-theme)', opacity: isPending || !text.trim() ? 0.5 : 1 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m22 2-7 20-4-9-9-4Z" />

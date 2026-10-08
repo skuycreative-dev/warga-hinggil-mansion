@@ -91,7 +91,7 @@ export default async function AnggaranPage() {
 
         <div
           className="mb-6 rounded-3xl px-6 py-7 text-center"
-          style={{ background: 'radial-gradient(120% 140% at 50% 0%, rgba(212,175,106,0.25) 0%, rgba(10,11,15,0) 70%), #0a0b0f' }}
+          style={{ background: 'radial-gradient(120% 140% at 50% 0%, rgba(212,175,106,0.25) 0%, rgba(10,11,15,0) 70%), var(--brand-theme)' }}
         >
           <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#c7c9d2' }}>Saldo Kas Paguyuban</div>
           <div className="mt-2 text-3xl font-bold" style={{ fontFamily: 'var(--font-fraunces), serif', color: '#ffffff' }}>

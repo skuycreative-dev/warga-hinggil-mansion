@@ -43,7 +43,7 @@ export default function FriendActionButton({ targetUserId, state }: { targetUser
         <Link
           href={`/chat/${targetUserId}`}
           className="flex-1 rounded-xl py-2.5 text-center text-sm font-bold transition hover:opacity-90"
-          style={{ background: '#1a1305', color: '#f5f3ee' }}
+          style={{ background: 'var(--brand-theme)', color: '#f5f3ee' }}
         >
           Chat
         </Link>
@@ -99,7 +99,7 @@ export default function FriendActionButton({ targetUserId, state }: { targetUser
       disabled={isPending}
       onClick={handleAdd}
       className="w-full rounded-xl py-2.5 text-sm font-bold transition hover:opacity-90"
-      style={{ background: '#1a1305', color: '#f5f3ee' }}
+      style={{ background: 'var(--brand-theme)', color: '#f5f3ee' }}
     >
       + Tambah Teman
     </button>

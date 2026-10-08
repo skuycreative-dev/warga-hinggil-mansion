@@ -79,7 +79,7 @@ export default function AnnouncementEngagement({
               title={r.label}
               onClick={() => run(() => toggleReaction(announcementId, r.key))}
               className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[12.5px] font-bold"
-              style={mine ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.08)' }}
+              style={mine ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f', border: '1px solid rgba(26,19,5,0.08)' }}
             >
               <span aria-hidden>{r.icon}</span>
               {count ? <span>{count}</span> : null}
@@ -143,7 +143,7 @@ export default function AnnouncementEngagement({
               disabled={isPending || !text.trim()}
               onClick={() => run(() => addAnnouncementComment(announcementId, text), () => setText(''))}
               className="rounded-xl px-4 text-[12.5px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || !text.trim() ? 0.6 : 1 }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending || !text.trim() ? 0.6 : 1 }}
             >
               Kirim
             </button>

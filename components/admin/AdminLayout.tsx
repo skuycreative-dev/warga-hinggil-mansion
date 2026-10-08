@@ -99,7 +99,7 @@ export default function AdminLayout({
       <RealtimeRefresher />
       <aside
         className="hidden w-64 flex-shrink-0 flex-col md:flex"
-        style={{ background: '#0a0b0f', borderRight: '1px solid rgba(230,201,138,0.12)' }}
+        style={{ background: 'var(--brand-theme)', borderRight: '1px solid rgba(230,201,138,0.12)' }}
       >
         <SidebarContent portalLabel={portalLabel} roleLabel={roleLabel} navItems={navItems} pathname={pathname} />
       </aside>
@@ -121,7 +121,7 @@ export default function AdminLayout({
               bottom: 0,
               width: 264,
               zIndex: 50,
-              background: '#0a0b0f',
+              background: 'var(--brand-theme)',
               borderRight: '1px solid rgba(230,201,138,0.12)',
               overflowY: 'auto',
             }}
@@ -148,7 +148,7 @@ export default function AdminLayout({
               onClick={() => setMenuOpen(true)}
               aria-label="Buka menu portal"
               className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg md:hidden"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 7h16M4 12h16M4 17h16" />
@@ -172,7 +172,7 @@ export default function AdminLayout({
             </div>
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
             >
               {userName.charAt(0).toUpperCase()}
             </div>

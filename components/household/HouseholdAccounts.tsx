@@ -119,7 +119,7 @@ export default function HouseholdAccounts({
     <div className="flex flex-col gap-8">
       {/* ------------------------------------------------------------ Ringkasan dana */}
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+        <div className="rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Total Saldo</div>
           <div className="mt-1 text-xl font-bold" style={{ color: totalBalance >= 0 ? 'var(--brand-accent)' : '#f2b8b0' }}>{rupiah(totalBalance)}</div>
           <div className="text-[11px]" style={{ color: '#9c7a3f' }}>Semua rekening</div>
@@ -148,7 +148,7 @@ export default function HouseholdAccounts({
                 {showArchived ? 'Sembunyikan arsip' : `Lihat arsip (${archivedCount})`}
               </button>
             ) : null}
-            <button type="button" onClick={() => openAccount(null)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+            <button type="button" onClick={() => openAccount(null)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
               + Rekening
             </button>
           </div>
@@ -180,7 +180,7 @@ export default function HouseholdAccounts({
               <button type="button" onClick={() => setAccForm({ open: false, account: null })} className="rounded-lg px-4 py-2 text-[12.5px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
                 Batal
               </button>
-              <button type="submit" disabled={accSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+              <button type="submit" disabled={accSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                 {accSaving ? 'Menyimpan...' : accForm.account ? 'Simpan Rekening' : 'Tambah Rekening'}
               </button>
             </div>
@@ -243,7 +243,7 @@ export default function HouseholdAccounts({
       <section>
         <div className="mb-1 flex items-center justify-between gap-2">
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Pos Tujuan</span>
-          <button type="button" onClick={() => openGoal(null)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+          <button type="button" onClick={() => openGoal(null)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
             + Pos Tujuan
           </button>
         </div>
@@ -302,7 +302,7 @@ export default function HouseholdAccounts({
               <button type="button" onClick={() => setGoalForm({ open: false, goal: null })} className="rounded-lg px-4 py-2 text-[12.5px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
                 Batal
               </button>
-              <button type="submit" disabled={goalSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+              <button type="submit" disabled={goalSaving} className="flex-1 rounded-lg py-2 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                 {goalSaving ? 'Menyimpan...' : goalForm.goal ? 'Simpan Pos' : 'Tambah Pos'}
               </button>
             </div>

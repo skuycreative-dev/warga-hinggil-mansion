@@ -82,7 +82,7 @@ export default async function AlertCommandCenterPage() {
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <AlertActions alertId={a.id} status={a.status} handledByMe={a.handled_by === access.userId} handledByName={a.handled_by_name} escalated={!!a.escalated_at} compact />
-                <Link href={`/keamanan/darurat/${a.id}`} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                <Link href={`/keamanan/darurat/${a.id}`} className="rounded-lg px-3.5 py-2 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                   Detail & Response Log →
                 </Link>
               </div>

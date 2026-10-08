@@ -220,7 +220,7 @@ export default function FamilyBoard({
               setFormOpen(false)
             }}
             className="rounded-xl py-2.5 text-[13.5px] font-bold"
-            style={tab === k ? { background: '#1a1305', color: 'var(--brand-accent)' } : { color: '#5b543f' }}
+            style={tab === k ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { color: '#5b543f' }}
           >
             {k === 'catatan' ? `Catatan (${notes.length})` : `Kalender Event (${events.length})`}
           </button>
@@ -314,7 +314,7 @@ export default function FamilyBoard({
               disabled={isPending}
               onClick={submit}
               className="flex-1 rounded-xl py-3 text-sm font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
             >
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </button>
@@ -325,7 +325,7 @@ export default function FamilyBoard({
           type="button"
           onClick={() => openNew(tab)}
           className="w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
         >
           + {tab === 'event' ? 'Tambah Event' : 'Tambah Catatan'}
         </button>

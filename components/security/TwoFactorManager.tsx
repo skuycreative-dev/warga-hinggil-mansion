@@ -159,7 +159,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
             disabled={busy || factors === null}
             onClick={startEnroll}
             className="mt-3 w-full rounded-xl py-3 text-[13.5px] font-bold"
-            style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy ? 0.6 : 1 }}
+            style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: busy ? 0.6 : 1 }}
           >
             {busy ? 'Menyiapkan...' : 'Tampilkan QR'}
           </button>
@@ -194,7 +194,7 @@ export default function TwoFactorManager({ required, forced }: { required: boole
               <button type="button" onClick={cancelEnroll} className="flex-1 rounded-xl py-3 text-[13px] font-bold" style={{ background: '#faf7f0', color: '#5b543f' }}>
                 Batal
               </button>
-              <button type="submit" disabled={busy || code.length !== 6} className="flex-[2] rounded-xl py-3 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy || code.length !== 6 ? 0.6 : 1 }}>
+              <button type="submit" disabled={busy || code.length !== 6} className="flex-[2] rounded-xl py-3 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: busy || code.length !== 6 ? 0.6 : 1 }}>
                 {busy ? 'Memeriksa...' : 'Aktifkan 2FA'}
               </button>
             </div>

@@ -125,7 +125,7 @@ export default function GuestQr({
   }
 
   return (
-    <div className={`flex flex-col items-center gap-3 ${compact ? '' : 'rounded-2xl px-5 py-6'}`} style={compact ? undefined : { background: '#1a1305' }}>
+    <div className={`flex flex-col items-center gap-3 ${compact ? '' : 'rounded-2xl px-5 py-6'}`} style={compact ? undefined : { background: 'var(--brand-theme)' }}>
       {!compact ? <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>QR Undangan · {guestName}</span> : null}
       <div className="rounded-xl bg-white p-2.5" style={{ width: compact ? 180 : 230, height: compact ? 180 : 230 }}>
         {dataUrl ? (

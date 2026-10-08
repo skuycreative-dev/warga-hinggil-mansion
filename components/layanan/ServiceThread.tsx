@@ -171,7 +171,7 @@ export default function ServiceThread({
           const mine = m.sender_id === myId
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className="max-w-[85%] rounded-2xl px-3.5 py-2.5" style={mine ? { background: '#1a1305', color: '#f5f3ee' } : { background: '#ffffff', color: '#1f1a10' }}>
+              <div className="max-w-[85%] rounded-2xl px-3.5 py-2.5" style={mine ? { background: 'var(--brand-theme)', color: '#f5f3ee' } : { background: '#ffffff', color: '#1f1a10' }}>
                 {!mine ? (
                   <div className="mb-0.5 text-[11px] font-bold" style={{ color: m.sender_is_staff ? '#9c7a3f' : '#3b5b8a' }}>
                     {m.sender_name}
@@ -245,7 +245,7 @@ export default function ServiceThread({
               disabled={busy || (!text.trim() && !file)}
               onClick={() => void send()}
               className="ml-auto rounded-lg px-5 py-2 text-[13px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: busy || (!text.trim() && !file) ? 0.6 : 1 }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: busy || (!text.trim() && !file) ? 0.6 : 1 }}
             >
               {busy ? 'Mengirim...' : 'Kirim'}
             </button>

@@ -54,7 +54,7 @@ export default async function ProfilePage() {
         style={{
           height: 128,
           background:
-            'radial-gradient(120% 140% at 50% 0%, rgba(212,175,106,0.25) 0%, rgba(10,11,15,0) 70%), #0a0b0f',
+            'radial-gradient(120% 140% at 50% 0%, rgba(212,175,106,0.25) 0%, rgba(10,11,15,0) 70%), var(--brand-theme)',
         }}
       />
 

@@ -181,7 +181,7 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
             <button type="button" onClick={() => setEditing(false)} disabled={isPending} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#efe9db', color: '#5b543f' }}>
               Batal
             </button>
-            <button type="button" onClick={saveEdit} disabled={isPending} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
+            <button type="button" onClick={saveEdit} disabled={isPending} className="flex-1 rounded-xl py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
               {isPending ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>

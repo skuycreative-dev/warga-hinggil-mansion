@@ -47,7 +47,7 @@ export default function LandingPage() {
         className="w-full"
         style={{
           background:
-            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), #0a0b0f',
+            'radial-gradient(120% 60% at 50% 0%, rgba(212,175,106,0.16) 0%, rgba(10,11,15,0) 60%), var(--brand-theme)',
         }}
       >
         <AppHeader />
@@ -114,7 +114,7 @@ export default function LandingPage() {
               >
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-xl md:h-14 md:w-14"
-                  style={{ background: '#1a1305' }}
+                  style={{ background: 'var(--brand-theme)' }}
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d={f.path} />
@@ -180,7 +180,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="w-full" style={{ background: '#0a0b0f' }}>
+      <section className="w-full" style={{ background: 'var(--brand-theme)' }}>
         <div className="mx-auto w-full max-w-5xl px-6 py-14 md:px-10 md:py-20">
           <div className="mb-6 text-center md:mb-8">
             <span

@@ -145,7 +145,7 @@ export default async function SecurityDashboardPage() {
           <div className="text-[14px] font-bold" style={{ color: '#1f1a10' }}>Rumah Kosong & Patroli →</div>
           <div className="text-[12px]" style={{ color: '#5b543f' }}>Target patroli, catat patroli, cetak jadwal</div>
         </Link>
-        <Link href="/keamanan/jadwal-jaga" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: '#1a1305' }}>
+        <Link href="/keamanan/jadwal-jaga" className="rounded-2xl px-5 py-4 transition hover:-translate-y-0.5" style={{ background: 'var(--brand-theme)' }}>
           <div className="text-[14px] font-bold" style={{ color: 'var(--brand-accent)' }}>Jadwal Jaga →</div>
           <div className="text-[12px]" style={{ color: '#d8cfb8' }}>
             {onDuty.length ? `Sedang jaga: ${onDuty.map((s) => s.security_name).join(', ')}` : 'Belum ada yang dijadwalkan jam ini'}
@@ -191,7 +191,7 @@ export default async function SecurityDashboardPage() {
             <Link
               href="/keamanan/rumah-kosong"
               className="rounded-xl py-2.5 text-center text-[12.5px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
             >
               Lihat Semua
             </Link>

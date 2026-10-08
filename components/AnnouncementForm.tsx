@@ -60,7 +60,7 @@ export default function AnnouncementForm({ userId }: { userId: string }) {
         type="button"
         onClick={() => setOpen(true)}
         className="mb-5 w-full rounded-2xl px-5 py-3.5 text-sm font-bold transition"
-        style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+        style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
       >
         + Buat Pengumuman Baru
       </button>
@@ -134,7 +134,7 @@ export default function AnnouncementForm({ userId }: { userId: string }) {
         >
           Batal
         </button>
-        <button type="submit" disabled={isPending} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
+        <button type="submit" disabled={isPending} className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}>
           {isPending ? 'Mengirim...' : 'Kirim ke Semua Warga'}
         </button>
       </div>

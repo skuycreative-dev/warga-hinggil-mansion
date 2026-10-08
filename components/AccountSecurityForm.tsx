@@ -96,7 +96,7 @@ export default function AccountSecurityForm({ email }: { email: string }) {
             disabled={emailPending || !emailPw || !newEmail}
             onClick={submitEmail}
             className="mt-1 rounded-xl py-2.5 text-[13px] font-bold"
-            style={{ background: '#1a1305', color: '#f5f3ee', opacity: emailPending ? 0.7 : 1 }}
+            style={{ background: 'var(--brand-theme)', color: '#f5f3ee', opacity: emailPending ? 0.7 : 1 }}
           >
             {emailPending ? 'Mengirim...' : 'Kirim Konfirmasi'}
           </button>
@@ -136,7 +136,7 @@ export default function AccountSecurityForm({ email }: { email: string }) {
             disabled={pwPending || !curPw || !newPw || !confirmPw}
             onClick={submitPassword}
             className="mt-1 rounded-xl py-2.5 text-[13px] font-bold"
-            style={{ background: '#1a1305', color: '#f5f3ee', opacity: pwPending ? 0.7 : 1 }}
+            style={{ background: 'var(--brand-theme)', color: '#f5f3ee', opacity: pwPending ? 0.7 : 1 }}
           >
             {pwPending ? 'Menyimpan...' : 'Simpan Password Baru'}
           </button>

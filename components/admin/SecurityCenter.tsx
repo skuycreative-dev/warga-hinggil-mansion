@@ -148,7 +148,7 @@ function ResetCard({ r }: { r: ResetRow }) {
             Cocokkan dulu: pastikan yang meminta memang pemilik akun (mis. telepon balik ke nomor di atas) sebelum mengirim link.
           </p>
           {!link ? (
-            <button type="button" disabled={isPending} onClick={makeLink} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.6 : 1 }}>
+            <button type="button" disabled={isPending} onClick={makeLink} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.6 : 1 }}>
               {isPending ? 'Membuat link...' : 'Buat Link Reset (sekali pakai)'}
             </button>
           ) : (
@@ -238,7 +238,7 @@ export default function SecurityCenter({ resets, locks, admins }: { resets: Rese
                   </div>
                 </div>
                 {locked ? (
-                  <button type="button" disabled={isPending} onClick={() => run(() => unlockLogin(l.key), 'Kunci dibuka.')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                  <button type="button" disabled={isPending} onClick={() => run(() => unlockLogin(l.key), 'Kunci dibuka.')} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                     Buka kunci
                   </button>
                 ) : null}

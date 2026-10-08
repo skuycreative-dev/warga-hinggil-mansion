@@ -56,7 +56,7 @@ export default function IplDisbursementPanel({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+        <div className="rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>IPL Terkumpul</div>
           <div className="mt-1 text-lg font-bold" style={{ color: 'var(--brand-accent)' }}>{rupiah(totalCollected)}</div>
           <div className="text-[11px]" style={{ color: '#9c7a3f' }}>Diterima Manajemen dari warga</div>
@@ -95,7 +95,7 @@ export default function IplDisbursementPanel({
           </div>
           {state.error ? <p className="text-[12px] font-semibold" style={{ color: '#b3392f' }}>{state.error}</p> : null}
           {state.success && state.message ? <p className="text-[12px] font-semibold" style={{ color: '#2f6b4f' }}>{state.message}</p> : null}
-          <button type="submit" disabled={isSending} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isSending ? 0.7 : 1 }}>
+          <button type="submit" disabled={isSending} className="rounded-xl py-2.5 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isSending ? 0.7 : 1 }}>
             {isSending ? 'Mengirim...' : 'Kirim Setoran'}
           </button>
         </form>
@@ -156,7 +156,7 @@ export default function IplDisbursementPanel({
                             run(() => confirmDisbursement(i.id, true, ''))
                           }}
                           className="flex-1 rounded-lg px-3 py-2 text-[12px] font-bold"
-                          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                         >
                           Sudah Diterima
                         </button>

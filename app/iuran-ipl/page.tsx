@@ -81,7 +81,7 @@ export default async function IuranIplPage({ searchParams }: { searchParams: Pro
           <Header eyebrow={houseLabel ? `Rumah ${houseLabel}` : 'Rumah Saya'} subtitle="Iuran Pengelolaan Lingkungan, dibayarkan ke Manajemen Perumahan." />
 
           <div className="mb-6 grid grid-cols-2 gap-2.5">
-            <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+            <div className="rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
               <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Belum Lunas</div>
               <div className="mt-1 text-xl font-bold" style={{ color: 'var(--brand-accent)' }}>{unpaidCount} bulan</div>
             </div>
@@ -206,7 +206,7 @@ export default async function IuranIplPage({ searchParams }: { searchParams: Pro
         />
 
         <div className="mb-5 grid grid-cols-2 gap-2.5">
-          <div className="rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+          <div className="rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
             <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Tagihan Belum Lunas</div>
             <div className="mt-1 text-xl font-bold" style={{ color: 'var(--brand-accent)' }}>{unpaidCount}</div>
           </div>

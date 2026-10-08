@@ -87,7 +87,7 @@ export default function DenahView({
                     top: `${f.y}%`,
                     width: size,
                     height: size,
-                    background: '#1a1305',
+                    background: 'var(--brand-theme)',
                     color: 'var(--brand-accent)',
                     outline: selectedId === f.id ? '3px solid #2563eb' : 'none',
                     pointerEvents: placing ? 'none' : 'auto',

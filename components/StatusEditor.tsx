@@ -148,7 +148,7 @@ export default function StatusEditor({
               disabled={isPending || length === 0 || length > MAX}
               onClick={save}
               className="flex-1 rounded-xl py-2.5 text-[13px] font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || length === 0 || length > MAX ? 0.6 : 1 }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending || length === 0 || length > MAX ? 0.6 : 1 }}
             >
               {isPending ? 'Menyimpan...' : 'Pasang Status'}
             </button>

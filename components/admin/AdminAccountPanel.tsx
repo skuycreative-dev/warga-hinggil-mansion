@@ -51,7 +51,7 @@ export default function AdminAccountPanel({
   return (
     <div className="rounded-2xl px-5 py-5" style={{ background: '#ffffff', border: '1px solid rgba(212,175,106,0.35)' }}>
       <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: '#1a1305' }}>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'var(--brand-theme)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -92,7 +92,7 @@ export default function AdminAccountPanel({
           type="submit"
           disabled={isPending}
           className="mt-1 w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-          style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
+          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
         >
           {isPending ? 'Membuat Akun...' : '+ Buat Akun'}
         </button>

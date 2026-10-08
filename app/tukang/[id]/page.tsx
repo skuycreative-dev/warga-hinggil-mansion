@@ -84,7 +84,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
       <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-8 sm:px-6 md:px-10">
         <Link href="/tukang" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>‹ Katalog Tukang</Link>
 
-        <div className="mt-4 overflow-hidden rounded-3xl" style={{ background: '#1a1305' }}>
+        <div className="mt-4 overflow-hidden rounded-3xl" style={{ background: 'var(--brand-theme)' }}>
           <div className="flex items-start gap-4 px-5 py-6">
             <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold" style={{ background: 'var(--brand-accent)', color: '#1a1305' }}>
               {initials(t.name)}
@@ -195,7 +195,7 @@ export default async function TukangDetailPage({ params }: { params: Promise<{ i
             >
               Chat WhatsApp
             </a>
-            <a href={`tel:+${wa}`} className="rounded-xl px-5 py-3 text-center text-[14px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+            <a href={`tel:+${wa}`} className="rounded-xl px-5 py-3 text-center text-[14px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
               Telepon
             </a>
           </div>

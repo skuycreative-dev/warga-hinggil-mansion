@@ -108,7 +108,7 @@ export default async function LayananPage({ searchParams }: { searchParams: Prom
                 key={x.key}
                 href={`/layanan?f=${x.key}`}
                 className="rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                style={filter === x.key ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
+                style={filter === x.key ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#ffffff', color: '#5b543f', border: '1px solid rgba(26,19,5,0.1)' }}
               >
                 {x.label}
               </Link>

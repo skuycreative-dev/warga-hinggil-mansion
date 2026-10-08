@@ -58,7 +58,7 @@ export default function InstallAppBanner() {
   if (!visible) return null
 
   return (
-    <div className="mb-6 flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: '#1a1305' }}>
+    <div className="mb-6 flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: 'var(--brand-theme)' }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/icons/icon-192.png" alt="" width={40} height={40} className="flex-shrink-0 rounded-lg" />
       <div className="min-w-0 flex-1">

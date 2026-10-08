@@ -39,7 +39,7 @@ export default function TukangOwnerBar({ values, isOwner, isAdmin }: { values: T
       </span>
       <div className="flex gap-2">
         {isOwner ? (
-          <button type="button" onClick={() => setEditing(true)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+          <button type="button" onClick={() => setEditing(true)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
             Ubah
           </button>
         ) : null}

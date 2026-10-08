@@ -44,7 +44,7 @@ export default function PushPromptBanner() {
   if (!visible) return null
 
   return (
-    <div className="mb-4 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ background: '#1a1305', border: '1px solid rgba(230,201,138,0.3)' }}>
+    <div className="mb-4 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ background: 'var(--brand-theme)', border: '1px solid rgba(230,201,138,0.3)' }}>
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-bold" style={{ color: 'var(--brand-accent)' }}>Aktifkan notifikasi di HP ini</div>
         <div className="text-[11.5px]" style={{ color: '#d8cfb8' }}>Alert darurat & pesan tetap masuk walau aplikasi ditutup.</div>

@@ -80,7 +80,7 @@ export default function OccupancyRequestList({
                 <button type="button" disabled={busy} onClick={() => reject(r)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#faf7f0', color: '#b3392f', border: '1px solid rgba(179,57,47,0.25)' }}>
                   Tolak
                 </button>
-                <button type="button" disabled={busy} onClick={() => approve(r)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+                <button type="button" disabled={busy} onClick={() => approve(r)} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
                   {busy ? 'Memproses...' : 'Setujui'}
                 </button>
               </div>

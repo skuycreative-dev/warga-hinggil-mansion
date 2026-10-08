@@ -73,7 +73,7 @@ export default function RumahKosongWarga({ active, houseLabel }: { active: Absen
             })
           }}
           className="mt-4 w-full rounded-xl py-3 text-sm font-bold"
-          style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isEnding ? 0.7 : 1 }}
+          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isEnding ? 0.7 : 1 }}
         >
           {isEnding ? 'Menyimpan...' : 'Saya Sudah Kembali'}
         </button>

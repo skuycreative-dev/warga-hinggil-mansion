@@ -53,7 +53,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ fri
 
   return (
     <main className="flex w-full flex-col" style={{ height: '100vh', background: '#faf7f0' }}>
-      <div className="flex items-center gap-3 px-5 py-4" style={{ background: '#0a0b0f' }}>
+      <div className="flex items-center gap-3 px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
         <Link href="/chat" style={{ color: '#efe4c8' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />

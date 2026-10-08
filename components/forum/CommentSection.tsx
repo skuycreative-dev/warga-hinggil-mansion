@@ -77,7 +77,7 @@ export default function CommentSection({ postId, comments, myId, canModerate }: 
           className="min-w-0 flex-1 rounded-full px-4 py-2.5 text-[13px]"
           style={{ background: '#faf7f0', border: '1px solid rgba(26,19,5,0.1)', color: '#1f1a10' }}
         />
-        <button type="button" onClick={send} disabled={isPending || !text.trim()} className="rounded-full px-4 py-2 text-[13px] font-bold" style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending || !text.trim() ? 0.6 : 1 }}>
+        <button type="button" onClick={send} disabled={isPending || !text.trim()} className="rounded-full px-4 py-2 text-[13px] font-bold" style={{ background: 'var(--brand-theme)', color: '#f5f3ee', opacity: isPending || !text.trim() ? 0.6 : 1 }}>
           Kirim
         </button>
       </div>

@@ -191,7 +191,7 @@ export default function EmergencyContactManager({
                           disabled={isPending}
                           onClick={() => saveEdit(c.id)}
                           className="flex-1 rounded-lg py-2 text-[12.5px] font-bold"
-                          style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                          style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                         >
                           {isPending ? 'Menyimpan...' : 'Simpan'}
                         </button>
@@ -299,7 +299,7 @@ export default function EmergencyContactManager({
               type="submit"
               disabled={isPending}
               className="w-full rounded-xl py-3 text-sm font-bold"
-              style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
+              style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending ? 0.7 : 1 }}
             >
               {isPending ? 'Menyimpan...' : '+ Tambah Nomor'}
             </button>

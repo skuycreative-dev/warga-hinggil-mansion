@@ -166,7 +166,7 @@ export default function EmergencyPanel({
                     runAction(resolveOwnEmergency, a.id)
                   }}
                   className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-bold"
-                  style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                  style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
                 >
                   Saya Sudah Aman
                 </button>
@@ -373,7 +373,7 @@ export default function EmergencyPanel({
                     <div className="text-[12px] font-medium" style={{ color: '#9c7a3f' }}>{c.description}</div>
                   ) : null}
                 </div>
-                <div className="flex items-center gap-2 rounded-full px-3.5 py-1.5" style={{ background: '#1a1305' }}>
+                <div className="flex items-center gap-2 rounded-full px-3.5 py-1.5" style={{ background: 'var(--brand-theme)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e6c98a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z" />
                   </svg>

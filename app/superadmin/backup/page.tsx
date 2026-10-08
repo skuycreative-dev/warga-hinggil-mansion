@@ -51,7 +51,7 @@ export default async function BackupPage() {
       <section className="mb-6 rounded-2xl px-5 py-5" style={{ background: '#ffffff', border: '1px solid rgba(26,19,5,0.08)' }}>
         <div className="text-[15px] font-bold" style={{ color: '#1f1a10' }}>Unduh backup sekarang</div>
         <p className="mt-1 text-[12.5px]" style={{ color: '#5b543f' }}>Butuh beberapa detik. Setiap unduhan tercatat di Log Aktivitas Admin.</p>
-        <a href="/api/backup/unduh" className="mt-3 inline-block rounded-xl px-5 py-3 text-[13.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>
+        <a href="/api/backup/unduh" className="mt-3 inline-block rounded-xl px-5 py-3 text-[13.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>
           Unduh Backup (.xlsx)
         </a>
       </section>

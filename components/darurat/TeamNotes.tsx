@@ -45,7 +45,7 @@ export default function TeamNotes({ alertId, events, closed }: { alertId: string
             type="button"
             onClick={() => setTab(t)}
             className="flex-shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold"
-            style={tab === t ? { background: '#1a1305', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f' }}
+            style={tab === t ? { background: 'var(--brand-theme)', color: 'var(--brand-accent)' } : { background: '#faf7f0', color: '#5b543f' }}
           >
             {TAB_INFO[t].label} ({events.filter((e) => e.kind === t).length})
           </button>
@@ -69,7 +69,7 @@ export default function TeamNotes({ alertId, events, closed }: { alertId: string
         <div className="flex flex-col gap-2">
           <textarea value={text} maxLength={1000} rows={2} onChange={(e) => setText(e.target.value)} placeholder={TAB_INFO[tab].placeholder} aria-label={TAB_INFO[tab].label} style={inputStyle} />
           {error ? <p className="text-[12px] font-bold" style={{ color: '#b3392f' }}>{error}</p> : null}
-          <button type="button" disabled={isPending || !text.trim()} onClick={submit} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)', opacity: isPending || !text.trim() ? 0.6 : 1 }}>
+          <button type="button" disabled={isPending || !text.trim()} onClick={submit} className="rounded-lg py-2 text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)', opacity: isPending || !text.trim() ? 0.6 : 1 }}>
             {isPending ? 'Mengirim...' : tab === 'logbook' ? 'Simpan ke Logbook' : 'Kirim'}
           </button>
         </div>

@@ -215,7 +215,7 @@ export default function AppNavbar() {
       />
       <div
         className="sticky top-0 z-40 w-full"
-        style={{ background: '#0a0b0f', borderBottom: '1px solid rgba(230,201,138,0.15)' }}
+        style={{ background: 'var(--brand-theme)', borderBottom: '1px solid rgba(230,201,138,0.15)' }}
       >
         <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-2.5 md:px-8">
           <button
@@ -321,7 +321,7 @@ export default function AppNavbar() {
               bottom: 0,
               width: 260,
               zIndex: 50,
-              background: '#0a0b0f',
+              background: 'var(--brand-theme)',
               borderRight: '1px solid rgba(230,201,138,0.15)',
               overflowY: 'auto',
             }}

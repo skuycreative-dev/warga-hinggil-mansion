@@ -5,7 +5,7 @@ export default function AppHeader() {
   return (
     <header
       className="w-full"
-      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#0a0b0f' }}
+      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'var(--brand-theme)' }}
     >
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4 md:px-10">
         <Link href="/" className="flex items-center gap-2.5">

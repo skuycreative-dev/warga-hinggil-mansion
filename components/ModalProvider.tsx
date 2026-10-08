@@ -157,7 +157,7 @@ export default function ModalProvider({ children }: { children: React.ReactNode 
                 onClick={() => close(true)}
                 autoFocus
                 className="mt-5 w-full rounded-xl py-3 text-sm font-bold"
-                style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+                style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
               >
                 {state.opts?.okText ?? 'Mengerti'}
               </button>

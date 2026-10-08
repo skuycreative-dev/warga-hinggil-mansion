@@ -186,7 +186,7 @@ export default async function StatistikPage() {
               })}
           </div>
           <div className="mt-3 flex gap-2">
-            <Link href="/verifikasi-akun" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#1a1305', color: 'var(--brand-accent)' }}>Verifikasi Akun</Link>
+            <Link href="/verifikasi-akun" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}>Verifikasi Akun</Link>
             <Link href="/kelola-warga" className="flex-1 rounded-lg py-2 text-center text-[12.5px] font-bold" style={{ background: '#efe9db', color: '#1f1a10' }}>Kelola Warga</Link>
           </div>
         </section>
@@ -200,7 +200,7 @@ export default async function StatistikPage() {
               return (
                 <div key={m} className="flex flex-1 flex-col items-center justify-end gap-1.5" style={{ height: '100%' }}>
                   <div className="text-[11px] font-bold" style={{ color: '#1f1a10' }}>{count}</div>
-                  <div className="w-full rounded-t-md" style={{ height: `${h}%`, background: '#1a1305', minHeight: 4 }} />
+                  <div className="w-full rounded-t-md" style={{ height: `${h}%`, background: 'var(--brand-theme)', minHeight: 4 }} />
                   <div className="text-[10.5px] font-semibold" style={{ color: '#9c7a3f' }}>{monthLabel(m)}</div>
                 </div>
               )

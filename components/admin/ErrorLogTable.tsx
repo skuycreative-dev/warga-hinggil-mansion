@@ -31,7 +31,7 @@ export default function ErrorLogTable({ logs }: { logs: ErrorLog[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl" style={{ background: '#0a0b0f' }}>
+    <div className="overflow-hidden rounded-2xl" style={{ background: 'var(--brand-theme)' }}>
       {logs.length === 0 ? (
         <div className="px-5 py-8 text-center text-sm font-medium" style={{ color: '#6b6552' }}>
           Belum ada log error.

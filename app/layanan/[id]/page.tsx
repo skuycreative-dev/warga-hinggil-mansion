@@ -78,7 +78,7 @@ export default async function LayananThreadPage({ params }: { params: Promise<{ 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 md:py-12">
         <Link href="/layanan" className="text-sm font-bold" style={{ color: '#9c7a3f' }}>‹ Layanan Surat</Link>
 
-        <div className="mb-4 mt-3 rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+        <div className="mb-4 mt-3 rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>{categoryLabel(req.category)}</span>
             <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold" style={{ background: st.bg, color: st.color === '#6b6552' ? '#d8cfb8' : st.color }}>{st.label}</span>

@@ -26,7 +26,7 @@ export default function Avatar({
   return (
     <div
       className="flex flex-shrink-0 items-center justify-center rounded-full font-bold"
-      style={{ width: size, height: size, fontSize: fontSize ?? size * 0.42, background: '#1a1305', color: 'var(--brand-accent)' }}
+      style={{ width: size, height: size, fontSize: fontSize ?? size * 0.42, background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
     >
       {(name || '?').charAt(0).toUpperCase()}
     </div>

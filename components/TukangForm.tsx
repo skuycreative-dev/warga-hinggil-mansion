@@ -52,7 +52,7 @@ export default function TukangForm({
         type="button"
         onClick={() => setOpen(true)}
         className="w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90"
-        style={{ background: '#1a1305', color: '#f5f3ee' }}
+        style={{ background: 'var(--brand-theme)', color: '#f5f3ee' }}
       >
         + Rekomendasikan Tukang
       </button>
@@ -148,7 +148,7 @@ export default function TukangForm({
         >
           Batal
         </button>
-        <button type="submit" disabled={isPending} className="flex-1 rounded-xl py-3 text-sm font-bold" style={{ background: '#1a1305', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}>
+        <button type="submit" disabled={isPending} className="flex-1 rounded-xl py-3 text-sm font-bold" style={{ background: 'var(--brand-theme)', color: '#f5f3ee', opacity: isPending ? 0.7 : 1 }}>
           {isPending ? 'Menyimpan...' : initial ? 'Simpan' : 'Posting'}
         </button>
       </div>

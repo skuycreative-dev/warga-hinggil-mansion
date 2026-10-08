@@ -33,7 +33,7 @@ export default async function JadwalJagaPage({ searchParams }: { searchParams: P
           </div>
         </div>
 
-        <div className="mb-6 rounded-2xl px-5 py-4" style={{ background: '#1a1305' }}>
+        <div className="mb-6 rounded-2xl px-5 py-4" style={{ background: 'var(--brand-theme)' }}>
           <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#9c7a3f' }}>Sedang jaga sekarang</div>
           {onDuty.length ? (
             onDuty.map((s) => (

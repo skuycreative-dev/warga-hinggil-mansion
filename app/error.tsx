@@ -48,7 +48,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
             type="button"
             onClick={() => reset()}
             className="w-full rounded-xl py-3 text-sm font-bold"
-            style={{ background: '#1a1305', color: 'var(--brand-accent)' }}
+            style={{ background: 'var(--brand-theme)', color: 'var(--brand-accent)' }}
           >
             Coba Lagi
           </button>
