@@ -20,6 +20,7 @@ export function adminNavFor(access: MyAccess): AdminNavItem[] {
       { title: 'Statistik Warga', href: '/statistik' },
       { title: 'Nomor Darurat', href: '/kelola-nomor-darurat' },
       { title: 'Kelola Fitur', href: '/superadmin/fitur' },
+      { title: 'Kelola Stiker', href: '/superadmin/stiker' },
       { title: 'Iuran IPL', href: '/iuran-ipl' },
       { title: 'Alert Darurat', href: '/keamanan/darurat' },
       { title: 'Rumah Kosong', href: '/keamanan/rumah-kosong' },

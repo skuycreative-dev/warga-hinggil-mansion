@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createForumPost } from '@/app/forum/actions'
 import { FORUM_CATEGORIES } from '@/lib/categories'
 import { isImage, removePhotos, uploadPhoto } from '@/lib/image-upload'
+import StickerPicker from '@/components/StickerPicker'
+import { type Sticker, stickerUrl } from '@/lib/stickers'
 
 const MAX_PHOTOS = 4
 
@@ -17,6 +19,8 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
   const [previews, setPreviews] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [showStickers, setShowStickers] = useState(false)
+  const [sticker, setSticker] = useState<Sticker | null>(null)
   const [, startTransition] = useTransition()
 
   useEffect(() => {
@@ -50,7 +54,7 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
       setError(err instanceof Error ? err.message : 'Gagal mengunggah foto.')
       return
     }
-    const r = await createForumPost({ content, category, imagePaths: uploaded })
+    const r = await createForumPost({ content, category, imagePaths: uploaded, stickerId: sticker?.id ?? null })
     setBusy(false)
     if (r.error) {
       await removePhotos('forum-photos', uploaded)
@@ -59,6 +63,8 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
     }
     setContent('')
     setFiles([])
+    setSticker(null)
+    setShowStickers(false)
     startTransition(() => router.refresh())
   }
 
@@ -95,6 +101,17 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
         </div>
       ) : null}
 
+      {sticker ? (
+        <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: '#faf7f0' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={stickerUrl(sticker.path)} alt="Stiker dipilih" style={{ width: 56, height: 56, objectFit: 'contain' }} />
+          <span className="text-[12px] font-semibold" style={{ color: '#5b543f' }}>Stiker akan ikut di postingan</span>
+          <button type="button" onClick={() => setSticker(null)} aria-label="Lepas stiker" className="ml-auto px-2 text-[18px] font-bold leading-none" style={{ color: '#b3392f' }}>×</button>
+        </div>
+      ) : null}
+
+      {showStickers ? <StickerPicker onPick={(s) => { setSticker(s); setShowStickers(false) }} onClose={() => setShowStickers(false)} /> : null}
+
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={category}
@@ -117,6 +134,16 @@ export default function ForumComposer({ userId, defaultCategory }: { userId: str
           + Foto ({files.length}/{MAX_PHOTOS})
         </button>
         <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => pick(e.target.files)} />
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => setShowStickers((v) => !v)}
+          aria-pressed={showStickers}
+          className="rounded-full px-3 py-2 text-[13px] font-bold"
+          style={{ background: showStickers || sticker ? 'rgba(212,175,106,0.3)' : '#faf7f0', border: '1px solid rgba(26,19,5,0.1)', color: '#5b543f' }}
+        >
+          + Stiker
+        </button>
         <button
           type="submit"
           disabled={busy}

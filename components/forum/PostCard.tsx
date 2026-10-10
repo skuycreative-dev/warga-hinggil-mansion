@@ -194,6 +194,11 @@ export default function PostCard({ post, myId, canModerate, detail = false }: { 
         </Link>
       )}
 
+      {!editing && post.sticker_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={post.sticker_url} alt="Stiker" className="mt-3" style={{ width: 144, height: 144, objectFit: 'contain' }} loading="lazy" />
+      ) : null}
+
       {!editing ? <PhotoGrid images={post.images} onOpen={setViewer} /> : null}
 
       <div className="mt-3.5 flex items-center gap-5 border-t pt-3" style={{ borderColor: 'rgba(26,19,5,0.06)' }}>

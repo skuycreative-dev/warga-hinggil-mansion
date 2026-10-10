@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { STICKER_TEXT } from '@/lib/stickers'
 
 export async function sendMessage(receiverId: string, content: string) {
   const trimmed = content.trim()
@@ -22,6 +23,31 @@ export async function sendMessage(receiverId: string, content: string) {
 
   if (error) {
     return { error: 'Pesan gagal dikirim. Pastikan kalian sudah berteman.' }
+  }
+
+  return { error: null }
+}
+
+export async function sendSticker(receiverId: string, stickerId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: sticker } = await supabase.from('stickers').select('id').eq('id', stickerId).eq('is_active', true).maybeSingle()
+  if (!sticker) return { error: 'Stiker tidak tersedia.' }
+
+  const { error } = await supabase.from('chat_messages').insert({
+    sender_id: user.id,
+    receiver_id: receiverId,
+    content: STICKER_TEXT,
+    sticker_id: sticker.id,
+  })
+
+  if (error) {
+    return { error: 'Stiker gagal dikirim. Pastikan kalian sudah berteman.' }
   }
 
   return { error: null }

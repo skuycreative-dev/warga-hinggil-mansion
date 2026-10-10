@@ -1,7 +1,8 @@
 ﻿import { displayName } from '@/lib/display-name'
 import { forumLevel } from '@/lib/forum-level'
+import { stickerPathOf, stickerUrl } from '@/lib/stickers'
 
-export type ForumComment = { id: string; content: string; created_at: string; author_id: string; author_name: string; author_level: string; author_avatar: string | null }
+export type ForumComment = { id: string; content: string; created_at: string; author_id: string; author_name: string; author_level: string; author_avatar: string | null; sticker_url: string | null }
 export type ForumPost = {
   id: string
   content: string
@@ -13,6 +14,7 @@ export type ForumPost = {
   author_level: string
   author_avatar: string | null
   images: string[]
+  sticker_url: string | null
   likeCount: number
   likedByMe: boolean
   commentCount: number
@@ -29,7 +31,7 @@ export async function loadForumPosts(
 ): Promise<ForumPost[]> {
   let q = supabase
     .from('forum_posts')
-    .select('id, content, category, image_paths, created_at, updated_at, author_id, author:profiles(full_name, nickname, forum_points, avatar_url)')
+    .select('id, content, category, image_paths, created_at, updated_at, author_id, sticker:stickers(path), author:profiles(full_name, nickname, forum_points, avatar_url)')
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
     .limit(opts.limit ?? 30)
@@ -45,7 +47,7 @@ export async function loadForumPosts(
     supabase.from('forum_likes').select('post_id, user_id').in('post_id', ids).limit(20000),
     supabase
       .from('forum_comments')
-      .select('id, post_id, content, created_at, author_id, author:profiles(full_name, nickname, forum_points, avatar_url)')
+      .select('id, post_id, content, created_at, author_id, sticker:stickers(path), author:profiles(full_name, nickname, forum_points, avatar_url)')
       .in('post_id', ids)
       .order('created_at', { ascending: true })
       .limit(opts.withComments ? 500 : 5000),
@@ -69,6 +71,7 @@ export async function loadForumPosts(
       author_level: forumLevel(author?.forum_points).name,
       author_avatar: (author?.avatar_url as string | null) ?? null,
       images: ((p.image_paths as string[] | null) ?? []).map((path) => urlMap.get(path)).filter(Boolean) as string[],
+      sticker_url: stickerPathOf(p) ? stickerUrl(stickerPathOf(p) as string) : null,
       likeCount: postLikes.length,
       likedByMe: postLikes.some((l) => l.user_id === userId),
       commentCount: postComments.length,
@@ -83,6 +86,7 @@ export async function loadForumPosts(
               author_name: displayName(a),
               author_level: forumLevel(a?.forum_points).name,
               author_avatar: (a?.avatar_url as string | null) ?? null,
+              sticker_url: stickerPathOf(c) ? stickerUrl(stickerPathOf(c) as string) : null,
             }
           })
         : [],
